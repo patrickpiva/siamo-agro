@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "../../apps/web/src/app/globals.css",
+    "baseColor": "zinc",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@agrolink/ui/components",
+    "utils": "@agrolink/ui/lib/utils",
+    "ui": "@agrolink/ui/components",
+    "lib": "@agrolink/ui/lib",
+    "hooks": "@agrolink/ui/hooks"
+  },
+  "iconLibrary": "lucide"
+}
