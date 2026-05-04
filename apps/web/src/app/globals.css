@@ -1,9 +1,209 @@
 @import 'tailwindcss';
 
-@theme {
-  --color-primary: #16a34a;
-  --color-primary-foreground: #ffffff;
-  --color-secondary: #f0fdf4;
-  --color-secondary-foreground: #14532d;
-  --font-sans: 'Inter', sans-serif;
+/* ─── Design Tokens — Light Mode ─────────────────────────────────────────────
+   Referência visual: agrolink-mockups-light.html
+   Padrão shadcn/ui: variáveis em HSL puro (sem hsl()).
+   Uso: hsl(var(--primary)) no CSS, bg-primary / text-primary no Tailwind.
+
+   Decisão de light mode (doc no mockup):
+   - Verde-limão (#C6E845) NÃO tem contraste suficiente sobre branco para texto.
+   - Verde-floresta (#1F5F3F) assume preços, labels ativos e identidade de marca.
+   - Botão primário fica INVERTIDO: fundo preto + texto verde-limão.
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Superfícies */
+  --background: 60 33% 97%; /* #FAFAF7 — off-white quente (página) */
+  --foreground: 0 0% 4%; /* #0A0A0A */
+
+  --card: 0 0% 100%; /* #FFFFFF — cards brancos sobre fundo off-white */
+  --card-foreground: 0 0% 4%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 4%;
+
+  /* Primary — verde-limão #C6E845
+     Light: reservado para CTAs, badges, borders de destaque (nunca texto sobre branco).
+     Contraste sobre preto (#0A0A0A): ~9.5:1 (WCAG AAA ✓) */
+  --primary: 74 77% 59%;
+  --primary-foreground: 0 0% 4%;
+
+  /* Primary subtle — tint claro para match cards e caixas de preço (#F0F7D9) */
+  --primary-subtle: 74 66% 91%;
+
+  /* Secondary */
+  --secondary: 74 25% 92%;
+  --secondary-foreground: 0 0% 4%;
+
+  /* Muted — bege-verde #EFEEE7 (search bar, chips inativos) */
+  --muted: 68 15% 91%;
+  --muted-foreground: 60 4% 40%; /* #6A6A62 — texto secundário com tint quente */
+
+  /* Accent — verde-floresta #1F5F3F
+     Light: assume o papel de "cor de destaque tipográfico" —
+     preços, labels [AgroLink], aba ativa, rating stars. */
+  --accent: 150 50% 25%;
+  --accent-foreground: 0 0% 97%;
+
+  /* Estados semânticos */
+  --destructive: 0 72% 51%; /* #DC2626 */
+  --destructive-foreground: 0 0% 97%;
+  --success: 142 71% 45%; /* #16A34A */
+  --success-foreground: 0 0% 97%;
+  --warning: 21 90% 48%; /* #EA580C */
+  --warning-foreground: 0 0% 97%;
+
+  /* Chrome */
+  --border: 60 9% 86%; /* #E0E0D8 — cinza quente */
+  --input: 60 9% 86%;
+  --ring: 74 77% 59%;
+
+  /* Shape */
+  --radius: 0.75rem;
+
+  /* Tipografia */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Acessibilidade — WCAG 2.5.5 Enhanced */
+  --tap-target: 48px;
+}
+
+/* ─── Design Tokens — Dark Mode ──────────────────────────────────────────────
+   Referência visual: agrolink-mockups.html (tema padrão do app)
+   - Verde-limão (#C6E845) é o acento principal: CTAs, preços, badges, ativo.
+   - Verde-floresta (#1F5F3F) é usado em avatars e badge SERVIÇO.
+   - Tema escuro reduz fadiga visual ao sol forte e economiza bateria em OLED.
+   ────────────────────────────────────────────────────────────────────────── */
+.dark {
+  --background: 0 0% 4%; /* #0A0A0A */
+  --foreground: 60 12% 96%; /* #F5F5F0 — quase branco com tint quente */
+
+  /* Card levemente mais quente que o background — #141412 */
+  --card: 60 5% 7%;
+  --card-foreground: 60 12% 96%;
+  --popover: 60 5% 7%;
+  --popover-foreground: 60 12% 96%;
+
+  /* Primary — verde-limão mantido no dark.
+     É o acento central: preços, CTAs, badges, aba ativa, estrelas de rating. */
+  --primary: 74 77% 59%;
+  --primary-foreground: 0 0% 4%;
+
+  /* Primary subtle — rgba(198,232,69,0.08) sobre #0A0A0A = ~#191C0F */
+  --primary-subtle: 74 25% 10%;
+
+  --secondary: 60 3% 10%; /* superfície sutil para chips inativos */
+  --secondary-foreground: 60 12% 96%;
+
+  /* Muted — rgba(255,255,255,0.06) sobre #0A0A0A = ~#0F0F0D */
+  --muted: 60 3% 9%;
+  --muted-foreground: 60 3% 52%; /* #8A8A82 — labels, timestamps, hints */
+
+  --accent: 150 45% 30%; /* #1F5F3F ligeiramente mais claro no dark */
+  --accent-foreground: 0 0% 97%;
+
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 97%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 97%;
+  --warning: 21 90% 48%;
+  --warning-foreground: 0 0% 97%;
+
+  /* Border — rgba(255,255,255,0.08) sobre preto = ~#141414 */
+  --border: 0 0% 11%;
+  --input: 0 0% 11%;
+  --ring: 74 77% 59%;
+}
+
+/* ─── Tailwind v4 — mapeamento de tokens ─────────────────────────────────────
+   @theme inline: cria referências CSS var em vez de valores estáticos,
+   permitindo que dark mode funcione por troca de variável (sem rebuild).
+   Gera utilitários: bg-primary, text-primary, border-primary, ring-primary…
+   ────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Cores semânticas */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-subtle: hsl(var(--primary-subtle));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  /* Escala de raios derivada de --radius (0.75rem) */
+  --radius-sm: calc(var(--radius) - 0.25rem); /* 0.5rem  */
+  --radius-md: var(--radius); /* 0.75rem */
+  --radius-lg: calc(var(--radius) + 0.25rem); /* 1rem    */
+  --radius-xl: calc(var(--radius) + 0.5rem); /* 1.25rem */
+  --radius-2xl: calc(var(--radius) + 0.75rem); /* 1.5rem  */
+  --radius-full: 9999px;
+
+  /* Tipografia */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+/* ─── Base layer ─────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Touch targets mínimos — WCAG 2.5.5 Enhanced */
+  button,
+  [role='button'],
+  [role='link'],
+  input[type='submit'],
+  input[type='button'],
+  input[type='reset'] {
+    min-height: var(--tap-target);
+    min-width: var(--tap-target);
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: var(--tap-target);
+  }
 }
