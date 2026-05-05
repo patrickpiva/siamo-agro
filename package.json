@@ -12,7 +12,14 @@
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,yaml,yml}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "db:generate": "pnpm --filter @agrolink/db db:generate",
+    "db:migrate:diff": "pnpm --filter @agrolink/db db:migrate:diff",
+    "db:migrate:diff:inc": "pnpm --filter @agrolink/db db:migrate:diff:inc",
+    "db:migrate:deploy": "pnpm --filter @agrolink/db db:migrate:deploy",
+    "db:seed": "pnpm --filter @agrolink/db db:seed",
+    "db:studio": "pnpm --filter @agrolink/db db:studio",
+    "db:reset": "pnpm --filter @agrolink/db db:reset"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
