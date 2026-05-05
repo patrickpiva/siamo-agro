@@ -160,14 +160,20 @@ updatedAt DateTime @updatedAt @map("updated_at")
 ### Migrations
 
 - **Nunca** `prisma db push` em produção ou staging.
-- Fluxo de migration:
-  1. Edite o schema em `packages/db/prisma/schema.prisma`
-  2. Rode `pnpm db:migrate:diff` para gerar o SQL delta
-  3. Revise o SQL gerado
-  4. Aplique no SQL Editor do Supabase (ambiente correto)
-  5. Commite o schema atualizado
+- Fluxo de migration — **migração inicial** (banco vazio):
+  1. `pnpm db:migrate:diff` → gera SQL completo (from-empty), imprime no stdout
+  2. Revise o SQL, copie e aplique no SQL Editor do Supabase
+  3. Aplique `migrations/manual/001_postgis.sql` logo em seguida
+  4. Commite o schema atualizado
 
-> **Atenção Supabase**: conexão direta (porta 5432 em `db.PROJECT.supabase.co`) está bloqueada na rede. Use o session pooler. O schema engine do Prisma não conecta ao pooler — aplique migrations via `migrate diff` + SQL Editor.
+- Fluxo de migration — **incrementais** (sprint a sprint):
+  1. Copie `schema.prisma` atual para `schema.baseline.prisma` (snapshot do estado aplicado)
+  2. Faça as alterações em `schema.prisma`
+  3. `pnpm db:migrate:diff:inc` → gera SQL delta entre baseline e o novo schema
+  4. Revise, copie e aplique no SQL Editor do Supabase
+  5. Atualize `schema.baseline.prisma` para o novo estado e commite ambos
+
+> **Restrição de rede**: conexão direta ao Supabase (`db.PROJECT.supabase.co:5432`) está bloqueada. O schema engine do Prisma não consegue introspectar pelo pooler. Por isso o diff compara **dois arquivos de schema** — sem necessidade de conexão ao banco.
 
 ### Relações
 
@@ -330,10 +336,12 @@ pnpm test             # Vitest em todo o monorepo
 pnpm test --watch     # Vitest em modo watch
 
 # Banco de dados
-pnpm db:generate      # prisma generate (regenera o client)
-pnpm db:migrate:diff  # Gera SQL delta do schema atual vs. banco
-pnpm db:seed          # Popula banco com dados de desenvolvimento
-pnpm db:studio        # Abre Prisma Studio (visualização local)
+pnpm db:generate       # prisma generate (regenera o client)
+pnpm db:migrate:diff      # Gera SQL completo: vazio → schema.prisma (migração inicial)
+pnpm db:migrate:diff:inc  # Gera SQL delta: schema.baseline.prisma → schema.prisma (incrementais)
+pnpm db:migrate:deploy # Aplica migrations versionadas (produção)
+pnpm db:seed           # Popula banco com dados de desenvolvimento
+pnpm db:studio         # Abre Prisma Studio (visualização local)
 
 # UI
 pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
