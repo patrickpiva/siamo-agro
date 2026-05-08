@@ -147,7 +147,7 @@ export default function DesignSystemPage() {
           ].map((t) => (
             <div key={t.label} className="flex items-baseline gap-4">
               <span className={`text-sm ${t.cls} flex-1`}>{t.sample}</span>
-              <TokenBadge>text-{t.label}</TokenBadge>
+              <TokenBadge>{`text-${t.label}`}</TokenBadge>
             </div>
           ))}
         </div>
@@ -355,7 +355,7 @@ export default function DesignSystemPage() {
             {radiusScale.map((r) => (
               <div key={r.label} className="flex flex-col items-center gap-2">
                 <div className={`bg-primary h-14 w-14 ${r.cls}`} />
-                <TokenBadge>rounded-{r.label}</TokenBadge>
+                <TokenBadge>{`rounded-${r.label}`}</TokenBadge>
                 <p className="text-muted-foreground text-[10px]">{r.value}</p>
               </div>
             ))}

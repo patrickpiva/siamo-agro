@@ -73,6 +73,7 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at")
 
   profile            Profile?
+  refreshTokens      RefreshToken[]
   buyerTransactions  Transaction[]        @relation("BuyerTransactions")
   sellerTransactions Transaction[]        @relation("SellerTransactions")
   sentMessages       TransactionMessage[] @relation("SentMessages")
@@ -240,6 +241,23 @@ model MatchScore {
   @@index([listingId])
   @@index([candidateProfileId])
   @@map("match_scores")
+}
+
+// ─── RefreshToken ─────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash") // bcrypt hash do token opaco
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
 }
 
 // ─── OtpCode ──────────────────────────────────────────────────────────────────
