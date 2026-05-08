@@ -1,80 +1,40 @@
-// Snapshot do schema aplicado na Sprint 01.
-// Usado por `pnpm db:migrate:diff:inc` para gerar apenas o delta incremental.
-// Atualize este arquivo após cada migration aplicada com sucesso.
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
+  // URL com connection pooling (PgBouncer) — usar nas queries
   url       = env("DATABASE_URL")
+  // URL direta — necessária para prisma migrate diff
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  phone     String?
-  role      UserRole @default(PRODUCER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
-  producerProfile ProducerProfile?
-  providerProfile ProviderProfile?
-
-  @@map("users")
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
 }
 
-enum UserRole {
+enum ProfileType {
   PRODUCER
   PROVIDER
-  ADMIN
 }
 
-model ProducerProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  farmName  String
-  state     String
-  city      String
-  hectares  Float?
-  cropTypes String[]
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("producer_profiles")
+enum BadgeTier {
+  NONE
+  BRONZE
+  SILVER
+  GOLD
 }
 
-model ProviderProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  companyName String
-  services    String[]
-  states      String[]
-  verified    Boolean  @default(false)
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listings Listing[]
-
-  @@map("provider_profiles")
-}
-
-model Listing {
-  id          String          @id @default(cuid())
-  providerId  String
-  title       String
-  description String
-  category    ServiceCategory
-  priceFrom   Float?
-  status      ListingStatus   @default(ACTIVE)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
-
-  @@map("listings")
+enum ListingKind {
+  OFFER
+  DEMAND
+  SERVICE
+  EQUIPMENT
 }
 
 enum ServiceCategory {
@@ -89,6 +49,229 @@ enum ServiceCategory {
 
 enum ListingStatus {
   ACTIVE
-  INACTIVE
-  SUSPENDED
+  PAUSED
+  CLOSED
+}
+
+enum TransactionStatus {
+  PROPOSED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  phone        String?    @unique @map("phone")
+  email        String?    @unique @map("email")
+  passwordHash String?    @map("password_hash")
+  status       UserStatus @default(ACTIVE) @map("status")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  profile            Profile?
+  refreshTokens      RefreshToken[]
+  buyerTransactions  Transaction[]        @relation("BuyerTransactions")
+  sellerTransactions Transaction[]        @relation("SellerTransactions")
+  sentMessages       TransactionMessage[] @relation("SentMessages")
+
+  @@map("users")
+}
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+
+model Profile {
+  id            String      @id @default(cuid())
+  userId        String      @unique @map("user_id")
+  type          ProfileType @map("type")
+  name          String      @map("name")
+  photo         String?     @map("photo")
+  bio           String?     @map("bio")
+  currentRating Float       @default(0) @map("current_rating")
+  ratingCount   Int         @default(0) @map("rating_count")
+  badge         BadgeTier   @default(NONE) @map("badge")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location     Location?
+  listings     Listing[]
+  matchScores  MatchScore[] @relation("CandidateMatchScores")
+
+  @@map("profiles")
+}
+
+// ─── Location ─────────────────────────────────────────────────────────────────
+
+model Location {
+  id        String   @id @default(cuid())
+  profileId String   @unique @map("profile_id")
+  latitude  Float    @map("latitude")
+  longitude Float    @map("longitude")
+  city      String   @map("city")
+  state     String   @map("state")
+  // ATENÇÃO: a coluna `geog geography(Point,4326)` NÃO é declarada aqui.
+  // Ela é adicionada via migration SQL manual (migrations/manual/001_postgis.sql).
+  // Um trigger mantém `geog` sincronizado automaticamente com latitude/longitude.
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("locations")
+}
+
+// ─── Listing ──────────────────────────────────────────────────────────────────
+
+model Listing {
+  id          String          @id @default(cuid())
+  profileId   String          @map("profile_id")
+  kind        ListingKind     @map("kind")
+  category    ServiceCategory @map("category")
+  title       String          @map("title")
+  description String          @map("description")
+  price       Decimal?        @map("price") @db.Decimal(12, 2)
+  status      ListingStatus   @default(ACTIVE) @map("status")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  profile      Profile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  photos       ListingPhoto[]
+  transactions Transaction[]
+  matchScores  MatchScore[]
+
+  @@index([profileId])
+  @@index([kind, status])
+  @@map("listings")
+}
+
+// ─── ListingPhoto ─────────────────────────────────────────────────────────────
+
+model ListingPhoto {
+  id        String   @id @default(cuid())
+  listingId String   @map("listing_id")
+  url       String   @map("url")
+  order     Int      @map("sort_order") // sort_order evita conflito com palavra reservada SQL
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@map("listing_photos")
+}
+
+// ─── Transaction ──────────────────────────────────────────────────────────────
+
+model Transaction {
+  id        String            @id @default(cuid())
+  listingId String            @map("listing_id")
+  buyerId   String            @map("buyer_id")
+  sellerId  String            @map("seller_id")
+  amount    Decimal           @map("amount") @db.Decimal(12, 2)
+  status    TransactionStatus @default(PROPOSED) @map("status")
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  // Restrict impede exclusão de anúncio/usuário com transações vinculadas
+  listing  Listing              @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  buyer    User                 @relation("BuyerTransactions", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller   User                 @relation("SellerTransactions", fields: [sellerId], references: [id], onDelete: Restrict)
+  messages TransactionMessage[]
+  rating   Rating?
+
+  @@index([listingId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@map("transactions")
+}
+
+// ─── TransactionMessage ───────────────────────────────────────────────────────
+
+model TransactionMessage {
+  id            String   @id @default(cuid())
+  transactionId String   @map("transaction_id")
+  senderId      String   @map("sender_id")
+  content       String   @map("content")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  sender      User        @relation("SentMessages", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([senderId])
+  @@map("transaction_messages")
+}
+
+// ─── Rating ───────────────────────────────────────────────────────────────────
+
+model Rating {
+  id            String   @id @default(cuid())
+  transactionId String   @unique @map("transaction_id") // uma avaliação por transação
+  score         Int      @map("score") // 1–5; CHECK constraint aplicado via 001_postgis.sql
+  comment       String?  @map("comment")
+  weight        Float    @default(1.0) @map("weight")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("ratings")
+}
+
+// ─── MatchScore ───────────────────────────────────────────────────────────────
+
+model MatchScore {
+  id                 String   @id @default(cuid())
+  listingId          String   @map("listing_id")
+  candidateProfileId String   @map("candidate_profile_id")
+  score              Float    @map("score")
+  distanceKm         Float?   @map("distance_km")
+  computedAt         DateTime @map("computed_at")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  listing          Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  candidateProfile Profile @relation("CandidateMatchScores", fields: [candidateProfileId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@index([candidateProfileId])
+  @@map("match_scores")
+}
+
+// ─── RefreshToken ─────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash") // bcrypt hash do token opaco
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─── OtpCode ──────────────────────────────────────────────────────────────────
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  phone     String    @map("phone")
+  code      String    @map("code")
+  expiresAt DateTime  @map("expires_at")
+  attempts  Int       @default(0) @map("attempts")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@index([phone])
+  @@map("otp_codes")
 }

@@ -5,17 +5,46 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed...')
 
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@agrolink.com.br' },
+  // Usuário de desenvolvimento para testes manuais
+  const devUser = await prisma.user.upsert({
+    where: { phone: '+5511999990001' },
     update: {},
     create: {
-      email: 'admin@agrolink.com.br',
-      name: 'Admin AgroLink',
-      role: 'ADMIN',
+      phone: '+5511999990001',
+      status: 'ACTIVE',
     },
   })
 
-  console.log('✅ Seed concluído:', { admin })
+  // Perfil de produtor associado
+  const producerProfile = await prisma.profile.upsert({
+    where: { userId: devUser.id },
+    update: {},
+    create: {
+      userId: devUser.id,
+      type: 'PRODUCER',
+      name: 'Produtor Demo',
+      bio: 'Perfil de desenvolvimento para testes manuais.',
+      badge: 'NONE',
+    },
+  })
+
+  // Localização do perfil (São Paulo - SP)
+  await prisma.location.upsert({
+    where: { profileId: producerProfile.id },
+    update: {},
+    create: {
+      profileId: producerProfile.id,
+      latitude: -23.5505,
+      longitude: -46.6333,
+      city: 'São Paulo',
+      state: 'SP',
+    },
+  })
+
+  console.log('✅ Seed concluído:', {
+    userId: devUser.id,
+    profileId: producerProfile.id,
+  })
 }
 
 main()
