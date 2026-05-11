@@ -14,7 +14,7 @@ import {
   LogoutResponseSchema,
   ErrorResponseSchema,
 } from './schema.js'
-import { createWhatsAppAdapter } from '../../adapters/whatsapp/index.js'
+import { createWhatsAppAdapter } from '../../integrations/whatsapp/index.js'
 
 const service = new AuthService(
   prisma,
@@ -22,7 +22,6 @@ const service = new AuthService(
   process.env['JWT_SECRET'] ?? 'dev-secret-change-in-production',
 )
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const authRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── POST /api/v1/auth/otp/request ──────────────────────────────────────────
   app.post('/otp/request', {
