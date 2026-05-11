@@ -60,11 +60,18 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: { project: true },
-      globals: { ...globals.browser },
+      // Next.js tem arquivos server-side (Server Actions, Route Handlers) e
+      // client-side no mesmo diretório — precisamos de ambos os globals.
+      globals: { ...globals.browser, ...globals.node },
     },
     rules: {
       ...tsPlugin.configs['recommended-type-checked'].rules,
       ...tsRulesBase,
+      // TypeScript já resolve referências indefinidas — no-undef gera falsos
+      // positivos para tipos globais como React.FormEvent, JSX, etc.
+      'no-undef': 'off',
+      // Async event handlers sem await são comuns em React (e.preventDefault + sync logic).
+      '@typescript-eslint/require-await': 'off',
     },
   },
 
