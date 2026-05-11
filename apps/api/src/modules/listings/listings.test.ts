@@ -18,6 +18,7 @@ const mockPrisma = {
   listing: {
     create: vi.fn(),
     findUnique: vi.fn(),
+    findUniqueOrThrow: vi.fn(),
     findMany: vi.fn(),
     update: vi.fn(),
   },
@@ -114,7 +115,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
           }),
       )
 
@@ -142,7 +143,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
           }),
       )
 
@@ -174,7 +175,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
           }),
       )
 
@@ -208,7 +209,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
           }),
       )
 
@@ -386,9 +387,9 @@ describe('ListingsService', () => {
       await service.list({ limit: 20, lat: -15.78, lng: -47.93, radiusKm: 50 })
 
       expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1)
-      // $queryRaw recebe tagged template — verificamos que foi chamado
-      const [firstArg] = mockPrisma.$queryRaw.mock.calls[0] as [unknown]
-      const sqlStr = JSON.stringify(firstArg)
+      // $queryRaw recebe tagged template: args[0]=TemplateStringsArray, args[1..N]=values interpolados
+      // ST_DWithin está dentro do whereClause (value interpolado), então serializar todos os args
+      const sqlStr = JSON.stringify(mockPrisma.$queryRaw.mock.calls[0])
       expect(sqlStr).toContain('ST_DWithin')
     })
 
@@ -398,8 +399,8 @@ describe('ListingsService', () => {
 
       await service.list({ limit: 20, search: 'milho' })
 
-      const [firstArg] = mockPrisma.$queryRaw.mock.calls[0] as [unknown]
-      const sqlStr = JSON.stringify(firstArg)
+      // to_tsvector está dentro do whereClause (value interpolado), então serializar todos os args
+      const sqlStr = JSON.stringify(mockPrisma.$queryRaw.mock.calls[0])
       expect(sqlStr).toContain('to_tsvector')
       expect(sqlStr).toContain('plainto_tsquery')
     })
