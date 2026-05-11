@@ -50,6 +50,22 @@ export default [
     rules: {
       ...tsPlugin.configs['recommended-type-checked'].rules,
       ...tsRulesBase,
+      // Mock adapters implementam interfaces async sem precisar de await real.
+      '@typescript-eslint/require-await': 'off',
+    },
+  },
+
+  // ── Playwright E2E tests ───────────────────────────────────────────────────
+  {
+    files: ['apps/web/tests/**/*.ts', 'apps/web/tests/**/*.spec.ts'],
+    plugins: { '@typescript-eslint': tsPlugin },
+    languageOptions: {
+      parser: tsParser,
+      globals: { ...globals.node },
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      ...tsRulesBase,
     },
   },
 
