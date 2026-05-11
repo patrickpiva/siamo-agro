@@ -9,7 +9,7 @@ export class NonRetryableError extends Error {
 
   constructor(
     message: string,
-    public readonly cause?: unknown,
+    public override readonly cause?: unknown,
   ) {
     super(message)
     this.name = 'NonRetryableError'
@@ -41,15 +41,22 @@ export async function withRetry<T>(fn: () => Promise<T>, opts: RetryOptions = {}
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      const result = await Promise.race([
-        fn(),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error(`WhatsApp request timeout after ${timeoutMs}ms`)),
-            timeoutMs,
-          ),
-        ),
-      ])
+      const result = await new Promise<T>((resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error(`WhatsApp request timeout after ${timeoutMs}ms`)),
+          timeoutMs,
+        )
+        fn().then(
+          (val) => {
+            clearTimeout(timer)
+            resolve(val)
+          },
+          (err: unknown) => {
+            clearTimeout(timer)
+            reject(err instanceof Error ? err : new Error(String(err)))
+          },
+        )
+      })
       return result
     } catch (err) {
       // 4xx e outros erros permanentes: não tentar novamente

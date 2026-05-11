@@ -1,4 +1,4 @@
-import { Prisma } from '@agrolink/db'
+import { Prisma, type $Enums } from '@agrolink/db'
 import type { PrismaClient } from '@agrolink/db'
 import { isCategoryValidForKind } from '@agrolink/shared'
 import { addComputeMatchesJob } from '../../queues/listings-queue.js'
@@ -70,7 +70,7 @@ export class ListingsService {
         data: {
           profileId: profile.id,
           kind: body.kind,
-          category: body.category,
+          category: body.category as unknown as $Enums.ServiceCategory,
           title: body.title,
           description: body.description,
           price: body.price ?? null,
@@ -212,7 +212,10 @@ export class ListingsService {
 
     // Fire-and-forget: não bloqueia a resposta
     this.prisma.listing
-      .update({ where: { id }, data: { viewCount: { increment: 1 } } })
+      .update({
+        where: { id },
+        data: { viewCount: { increment: 1 } } as unknown as Prisma.ListingUpdateInput,
+      })
       .catch((err: unknown) => console.error('[listings] Erro ao incrementar viewCount:', err))
 
     return this.mapToDetail(listing)
@@ -233,7 +236,7 @@ export class ListingsService {
         data: {
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
-          ...(body.category && { category: body.category }),
+          ...(body.category && { category: body.category as unknown as $Enums.ServiceCategory }),
           ...(body.price !== undefined && { price: body.price }),
         },
       })
@@ -320,7 +323,7 @@ export class ListingsService {
       description: listing.description,
       price: listing.price ? Number(listing.price) : null,
       status: listing.status,
-      viewCount: listing.viewCount,
+      viewCount: (listing as unknown as { viewCount?: number }).viewCount ?? 0,
       createdAt: listing.createdAt.toISOString(),
       updatedAt: listing.updatedAt.toISOString(),
       profile: {
