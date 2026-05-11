@@ -6,6 +6,7 @@ import jwtPlugin from '@fastify/jwt'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import { authenticate } from './middlewares/auth.js'
 import { authRoutes } from './modules/auth/routes.js'
+import { listingsRoutes } from './modules/listings/routes.js'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -39,6 +40,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   // ── Módulos ─────────────────────────────────────────────────────────────────
   await app.register(authRoutes, { prefix: '/api/v1/auth' })
+  await app.register(listingsRoutes, { prefix: '/api/v1/listings' })
 
   return app
 }
