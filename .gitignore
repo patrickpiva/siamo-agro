@@ -49,3 +49,6 @@ pnpm-debug.log*
 
 # Type generation
 *.d.ts.map
+
+# CLaude
+.claude/worktrees/
