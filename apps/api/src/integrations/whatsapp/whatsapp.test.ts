@@ -48,9 +48,10 @@ describe('withRetry', () => {
     const fn = vi.fn().mockRejectedValue(new Error('persistent error'))
 
     const promise = withRetry(fn, { baseDelayMs: 100 })
+    const assertion = expect(promise).rejects.toThrow('persistent error')
     await vi.runAllTimersAsync()
+    await assertion
 
-    await expect(promise).rejects.toThrow('persistent error')
     expect(fn).toHaveBeenCalledTimes(3)
   })
 
@@ -67,9 +68,9 @@ describe('withRetry', () => {
     )
 
     const promise = withRetry(fn, { maxAttempts: 1, timeoutMs: 500 })
+    const assertion = expect(promise).rejects.toThrow('timeout')
     await vi.advanceTimersByTimeAsync(600)
-
-    await expect(promise).rejects.toThrow('timeout')
+    await assertion
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
@@ -243,8 +244,11 @@ describe('TwilioAdapter', () => {
     const adapter = new TwilioAdapter()
     await adapter.sendOtp('+5511999990001', '123456')
 
-    const init = fetchSpy.mock.calls[0]?.[1] as Parameters<typeof fetch>[1]
-    const headers = init.headers as Record<string, string>
+    const init = fetchSpy.mock.calls[0]![1] as Parameters<typeof fetch>[1]
+    const headers = (init as NonNullable<Parameters<typeof fetch>[1]>).headers as Record<
+      string,
+      string
+    >
     const expectedAuth = `Basic ${Buffer.from(`${ENV.TWILIO_ACCOUNT_SID}:${ENV.TWILIO_AUTH_TOKEN}`).toString('base64')}`
 
     expect(headers['Authorization']).toBe(expectedAuth)
@@ -270,9 +274,10 @@ describe('TwilioAdapter', () => {
 
     const adapter = new TwilioAdapter()
     const promise = adapter.sendOtp('+5511999990001', '123456')
+    const assertion = expect(promise).rejects.toThrow('Twilio 500')
     await vi.runAllTimersAsync()
+    await assertion
 
-    await expect(promise).rejects.toThrow('Twilio 500')
     expect(fetchSpy).toHaveBeenCalledTimes(3)
   })
 
@@ -285,9 +290,10 @@ describe('TwilioAdapter', () => {
 
     const adapter = new TwilioAdapter()
     const promise = adapter.sendOtp('+5511999990001', '123456')
+    const assertion = expect(promise).rejects.toThrow()
     await vi.runAllTimersAsync()
+    await assertion
 
-    await expect(promise).rejects.toThrow()
     expect(mockEnqueueDlq).toHaveBeenCalledOnce()
     expect(mockEnqueueDlq).toHaveBeenCalledWith(
       expect.objectContaining({
