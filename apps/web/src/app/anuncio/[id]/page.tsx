@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchListing } from '@/lib/api'
 import { PhotoCarousel } from '@/components/photo-carousel'
-import { OwnerActions } from './owner-actions'
+import { OwnerTabs } from './owner-tabs'
 
 const KIND_LABELS: Record<string, string> = {
   OFFER: 'Oferta',
@@ -131,16 +131,8 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
               </div>
             </section>
 
-            {/* Owner actions */}
-            {isOwner && <OwnerActions listingId={id} status={listing.status} />}
-
-            {/* Similares por perto — placeholder Sprint 3 */}
-            <section className="space-y-3">
-              <h2 className="text-lg font-semibold">Similares por perto</h2>
-              <div className="border-border text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
-                Em breve — recomendações por localização (Sprint 3)
-              </div>
-            </section>
+            {/* Owner actions + matches tab */}
+            {isOwner && <OwnerTabs listingId={id} status={listing.status} />}
           </div>
         </div>
       </main>

@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import { ListingCardSkeleton } from '@agrolink/ui'
 import { FeedFilters } from '@/components/feed-filters'
 import { FeedList } from '@/components/feed-list'
+import { MatchesCarousel } from '@/components/matches-carousel'
+import { getServerSession } from '@/lib/server-auth'
+import { getUserActiveListings } from '@/lib/server-listings'
 
 export const metadata: Metadata = { title: 'Feed de anúncios' }
 
@@ -18,7 +21,8 @@ interface FeedPageProps {
 }
 
 export default async function FeedPage({ searchParams }: FeedPageProps) {
-  const filters = await searchParams
+  const [filters, session] = await Promise.all([searchParams, getServerSession()])
+  const userListings = session ? await getUserActiveListings(session.userId) : []
 
   return (
     <div className="bg-background min-h-screen">
@@ -44,13 +48,16 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
         </aside>
 
         {/* Main content */}
-        <div className="min-w-0 flex-1 space-y-4">
+        <div className="min-w-0 flex-1 space-y-6">
           {/* Mobile filter strip */}
           <div className="lg:hidden">
             <Suspense fallback={null}>
               <FeedFilters initialFilters={filters} mobile />
             </Suspense>
           </div>
+
+          {/* Matches carousel — only for authenticated users with active listings */}
+          {userListings.length > 0 && <MatchesCarousel listings={userListings} />}
 
           {/* Listings */}
           <Suspense
