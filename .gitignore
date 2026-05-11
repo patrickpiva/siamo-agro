@@ -14,6 +14,12 @@ out
 
 # Testing
 coverage
+test-results
+playwright-report
+**/.last-run.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
 
 # Environment
 .env

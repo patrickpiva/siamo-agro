@@ -159,6 +159,25 @@
   --font-mono: var(--font-mono);
 }
 
+/* ─── Badge Ouro — animação de shimmer ───────────────────────────────────────
+   CSS puro, sem Framer Motion. Aplicado via classe .badge-gold em ProfileBadge.
+   ────────────────────────────────────────────────────────────────────────── */
+@keyframes badge-gold-shimmer {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 2px rgba(234, 179, 8, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(234, 179, 8, 0.7);
+  }
+}
+
+@layer components {
+  .badge-gold {
+    animation: badge-gold-shimmer 2s ease-in-out infinite;
+  }
+}
+
 /* ─── Base layer ─────────────────────────────────────────────────────────── */
 @layer base {
   *,
