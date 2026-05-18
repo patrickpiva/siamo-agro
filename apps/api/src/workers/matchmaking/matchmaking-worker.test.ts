@@ -46,9 +46,9 @@ vi.mock('./queue.js', () => ({
   getMatchmakingQueue: vi.fn(() => null),
 }))
 
-// Import AFTER mocks are set up
-const { processComputeMatchesJob, processNotifyMatchJob } = await import('./processor.js')
-const { computeMatchScore } = await import('../../modules/matchmaking/algorithm.js')
+// Vitest hoists vi.mock() calls above static imports, so these resolve with mocks in place
+import { processComputeMatchesJob, processNotifyMatchJob } from './processor.js'
+import { computeMatchScore } from '../../modules/matchmaking/algorithm.js'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 

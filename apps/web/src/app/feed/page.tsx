@@ -32,7 +32,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
           <span className="text-lg font-bold">AgroLink</span>
           <Link
             href="/anuncio/novo"
-            className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium"
+            className="bg-primary text-primary-foreground hidden rounded-lg px-4 py-2 text-sm font-medium lg:block"
           >
             + Anunciar
           </Link>

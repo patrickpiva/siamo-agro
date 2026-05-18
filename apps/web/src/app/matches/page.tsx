@@ -1,32 +1,25 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import type { Route } from 'next'
 import { getServerSession } from '@/lib/server-auth'
 import { getUserActiveListings } from '@/lib/server-listings'
+import { MobileNavBar } from '@/components/mobile-nav-bar'
 import { MatchesPageClient } from './matches-page-client'
 
 export const metadata: Metadata = { title: 'Meus Matches — AgroLink' }
 
 export default async function MatchesPage() {
   const session = await getServerSession()
-  if (!session) redirect('/auth/login' as Route)
+  if (!session) redirect('/entrar')
 
   const listings = await getUserActiveListings(session.userId)
 
   if (listings.length === 0) {
     return (
       <div className="bg-background min-h-screen">
-        <header className="bg-background/95 border-border sticky top-0 z-20 border-b px-4 py-3 backdrop-blur">
-          <div className="mx-auto flex max-w-2xl items-center gap-3">
-            <Link href="/feed" className="text-muted-foreground hover:text-foreground text-sm">
-              ← Feed
-            </Link>
-            <span className="font-semibold">Meus Matches</span>
-          </div>
-        </header>
+        <MobileNavBar title="Meus Matches" />
         <div className="flex flex-col items-center gap-4 py-24 text-center">
-          <span className="text-6xl">🌾</span>
+          <span className="text-5xl">🌾</span>
           <p className="text-xl font-semibold">Nenhum anúncio ativo</p>
           <p className="text-muted-foreground max-w-xs text-sm">
             Crie um anúncio para começar a receber matches com outros produtores.
@@ -44,15 +37,7 @@ export default async function MatchesPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      <header className="bg-background/95 border-border sticky top-0 z-20 border-b px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center gap-3">
-          <Link href="/feed" className="text-muted-foreground hover:text-foreground text-sm">
-            ← Feed
-          </Link>
-          <span className="font-semibold">Meus Matches</span>
-        </div>
-      </header>
-
+      <MobileNavBar title="Meus Matches" />
       <div className="mx-auto max-w-2xl px-4 py-6">
         <MatchesPageClient listings={listings} />
       </div>

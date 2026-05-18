@@ -39,7 +39,8 @@ export function startMatchmakingWorker(): Worker {
         level: 'error',
         module: 'matchmaking-worker',
         event: 'worker_error',
-        error: err.message,
+        error: err.message || String(err),
+        code: (err as Error & { code?: string }).code,
       }),
     )
   })

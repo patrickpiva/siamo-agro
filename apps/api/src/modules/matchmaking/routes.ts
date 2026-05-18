@@ -39,7 +39,7 @@ export const matchmakingRoutes: FastifyPluginAsyncZod = async (app) => {
       } catch (err) {
         if (err instanceof AppError) {
           return reply
-            .code(err.statusCode)
+            .code(err.statusCode as 200 | 202 | 403 | 404)
             .send({ data: null, error: { code: err.code, message: err.message } })
         }
         throw err

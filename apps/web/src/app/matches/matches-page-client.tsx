@@ -14,24 +14,26 @@ export function MatchesPageClient({ listings }: MatchesPageClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Listing selector */}
+      {/* Listing selector — underline tabs */}
       {listings.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {listings.map((l) => (
-            <button
-              key={l.id}
-              type="button"
-              onClick={() => setSelectedId(l.id)}
-              className={[
-                'shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                selectedId === l.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'border-border bg-muted text-foreground border',
-              ].join(' ')}
-            >
-              {l.title}
-            </button>
-          ))}
+        <div className="border-border -mx-4 border-b [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex overflow-x-auto px-4">
+            {listings.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => setSelectedId(l.id)}
+                className={[
+                  'shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors',
+                  selectedId === l.id
+                    ? 'border-primary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground border-transparent',
+                ].join(' ')}
+              >
+                {l.title}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

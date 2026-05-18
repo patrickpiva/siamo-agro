@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { prisma } from '@agrolink/db'
 import { ProfilePageClient } from '@/components/profile/ProfilePageClient'
 import { ProfilePageSkeleton } from '@/components/profile/ProfilePageSkeleton'
+import { MobileNavBar } from '@/components/mobile-nav-bar'
 import type { ProfileData } from '@/lib/profile-mock'
 
 interface ProfilePageProps {
@@ -13,7 +14,14 @@ interface ProfilePageProps {
 async function getProfile(id: string) {
   return prisma.profile.findUnique({
     where: { id },
-    include: { location: true },
+    include: {
+      location: true,
+      listings: {
+        where: { status: 'ACTIVE' },
+        include: { photos: { orderBy: { order: 'asc' }, take: 1 } },
+        orderBy: { createdAt: 'desc' },
+      },
+    },
   })
 }
 
@@ -39,7 +47,18 @@ async function ProfileContent({ id }: { id: string }) {
     state: profile.location?.state ?? '',
     memberSince: profile.createdAt.toISOString().split('T')[0]!,
     rating: { score: profile.currentRating, count: profile.ratingCount },
-    listings: [],
+    listings: profile.listings.map((l) => ({
+      id: l.id,
+      title: l.title,
+      description: l.description,
+      price:
+        l.price != null
+          ? `R$ ${Number(l.price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+          : undefined,
+      city: profile.location?.city ?? '',
+      state: profile.location?.state ?? '',
+      createdAt: l.createdAt.toISOString().split('T')[0]!,
+    })),
     reviews: [],
     completedTransactions: 0,
   }
@@ -50,8 +69,11 @@ async function ProfileContent({ id }: { id: string }) {
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { id } = await params
   return (
-    <Suspense fallback={<ProfilePageSkeleton />}>
-      <ProfileContent id={id} />
-    </Suspense>
+    <>
+      <MobileNavBar />
+      <Suspense fallback={<ProfilePageSkeleton />}>
+        <ProfileContent id={id} />
+      </Suspense>
+    </>
   )
 }

@@ -6,6 +6,7 @@ import { getServerSession } from '@/lib/server-auth'
 import { fetchListing } from '@/lib/api'
 import { PhotoCarousel } from '@/components/photo-carousel'
 import { OwnerTabs } from './owner-tabs'
+import { MobileNavBar } from '@/components/mobile-nav-bar'
 
 const KIND_LABELS: Record<string, string> = {
   OFFER: 'Oferta',
@@ -46,6 +47,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
 
   return (
     <>
+      <MobileNavBar title={listing.title} />
       <main className="bg-background min-h-screen pb-24">
         <div className="mx-auto max-w-2xl">
           {/* Photo carousel */}
