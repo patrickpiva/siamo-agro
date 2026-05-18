@@ -36,6 +36,12 @@ export class MockAdapter implements WhatsAppAdapter {
       renderedBody,
       timestamp: new Date(),
     })
+    if (process.env['NODE_ENV'] !== 'production') {
+      console.log(`\n🔑 DEV OTP ──────────────────────────`)
+      console.log(`   phone : ${phone}`)
+      console.log(`   code  : ${code}`)
+      console.log(`────────────────────────────────────\n`)
+    }
     console.info(
       JSON.stringify({
         level: 'info',
