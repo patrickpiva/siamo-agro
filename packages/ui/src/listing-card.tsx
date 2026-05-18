@@ -56,7 +56,7 @@ function formatBRL(value: number): string {
 // ─── ListingCard ──────────────────────────────────────────────────────────────
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
-  const photo = listing.photos.sort((a, b) => a.order - b.order)[0]
+  const photo = (listing.photos ?? []).sort((a, b) => a.order - b.order)[0]
   const badgeClass = KIND_BADGE_CLASS[listing.kind] ?? 'bg-gray-100 text-gray-800'
   const kindLabel = KIND_LABELS[listing.kind] ?? listing.kind
 

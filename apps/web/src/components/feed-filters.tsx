@@ -2,15 +2,17 @@
 
 import { useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { LayoutGrid, Package, Search, Wrench, Tractor } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { CATEGORIES } from '@agrolink/shared'
 import type { ListingKindKey } from '@agrolink/shared'
 
-const KINDS: { key: string; label: string }[] = [
-  { key: '', label: 'Todos' },
-  { key: 'OFFER', label: 'Oferta' },
-  { key: 'DEMAND', label: 'Demanda' },
-  { key: 'SERVICE', label: 'Serviço' },
-  { key: 'EQUIPMENT', label: 'Equipamento' },
+const KINDS: { key: string; label: string; Icon: LucideIcon }[] = [
+  { key: '', label: 'Todos', Icon: LayoutGrid },
+  { key: 'OFFER', label: 'Oferta', Icon: Package },
+  { key: 'DEMAND', label: 'Demanda', Icon: Search },
+  { key: 'SERVICE', label: 'Serviço', Icon: Wrench },
+  { key: 'EQUIPMENT', label: 'Equipamento', Icon: Tractor },
 ]
 
 interface FeedFiltersProps {
@@ -49,22 +51,30 @@ export function FeedFilters({ initialFilters, mobile }: FeedFiltersProps) {
 
   if (mobile) {
     return (
-      <div className="scrollbar-none flex gap-2 overflow-x-auto pb-1">
-        {KINDS.map((k) => (
-          <button
-            key={k.key}
-            type="button"
-            onClick={() => update('kind', k.key)}
-            className={[
-              'shrink-0 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-              kind === k.key
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border hover:bg-muted',
-            ].join(' ')}
-          >
-            {k.label}
-          </button>
-        ))}
+      <div className="relative">
+        {/* Fade hint on the right edge */}
+        <div className="from-background pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l to-transparent" />
+
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {KINDS.map(({ key, label, Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => update('kind', key)}
+              className={[
+                'flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all',
+                kind === key
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted text-foreground/70 hover:text-foreground',
+              ].join(' ')}
+            >
+              <Icon size={14} strokeWidth={2} aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+          {/* Extra right padding so last chip clears the fade */}
+          <span className="w-4 shrink-0" aria-hidden />
+        </div>
       </div>
     )
   }
@@ -74,17 +84,18 @@ export function FeedFilters({ initialFilters, mobile }: FeedFiltersProps) {
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">Tipo</p>
         <div className="flex flex-col gap-1">
-          {KINDS.map((k) => (
+          {KINDS.map(({ key, label, Icon }) => (
             <button
-              key={k.key}
+              key={key}
               type="button"
-              onClick={() => update('kind', k.key)}
+              onClick={() => update('kind', key)}
               className={[
-                'rounded-lg px-3 py-2 text-left text-sm transition-colors',
-                kind === k.key ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted',
+                'flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors',
+                kind === key ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted',
               ].join(' ')}
             >
-              {k.label}
+              <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
+              {label}
             </button>
           ))}
         </div>
