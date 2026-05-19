@@ -9,6 +9,8 @@ import { authRoutes } from './modules/auth/routes.js'
 import { listingsRoutes } from './modules/listings/routes.js'
 import { uploadsRoutes } from './modules/uploads/routes.js'
 import { matchmakingRoutes } from './modules/matchmaking/routes.js'
+import { profilesRoutes } from './modules/profiles/routes.js'
+import { privacyRoutes } from './modules/privacy/routes.js'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -45,6 +47,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(listingsRoutes, { prefix: '/api/v1/listings' })
   await app.register(uploadsRoutes, { prefix: '/api/v1/uploads' })
   await app.register(matchmakingRoutes, { prefix: '/api/v1/listings' })
+  await app.register(profilesRoutes, { prefix: '/api/v1/profiles' })
+  await app.register(privacyRoutes, { prefix: '/api/v1/privacy' })
 
   return app
 }

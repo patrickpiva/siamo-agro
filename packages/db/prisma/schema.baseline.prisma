@@ -88,11 +88,18 @@ model Profile {
   userId        String      @unique @map("user_id")
   type          ProfileType @map("type")
   name          String      @map("name")
+  propertyName  String?     @map("property_name")
   photo         String?     @map("photo")
   bio           String?     @map("bio")
   currentRating Float       @default(0) @map("current_rating")
   ratingCount   Int         @default(0) @map("rating_count")
   badge         BadgeTier   @default(NONE) @map("badge")
+
+  // LGPD — momento em que o usuário aceitou cada documento
+  termsAcceptedAt        DateTime? @map("terms_accepted_at")
+  privacyAcceptedAt      DateTime? @map("privacy_accepted_at")
+  marketingWhatsappOptInAt DateTime? @map("marketing_whatsapp_opt_in_at")
+
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 

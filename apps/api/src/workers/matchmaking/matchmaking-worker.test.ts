@@ -4,17 +4,31 @@ import type { ComputeMatchesJobData, NotifyMatchJobData } from './types.js'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-const mockMatchScoreCreate = vi.fn()
-const mockMatchScoreDeleteMany = vi.fn()
-const mockMatchScoreFindFirst = vi.fn()
-const mockMatchScoreFindUnique = vi.fn()
-const mockListingFindUnique = vi.fn()
-const mockListingFindMany = vi.fn()
-const mockProfileFindUnique = vi.fn()
-const mockQueryRaw = vi.fn()
-const mockTransaction = vi.fn()
-const mockSendNotification = vi.fn()
-const mockAddNotifyMatchJob = vi.fn()
+const {
+  mockMatchScoreCreate,
+  mockMatchScoreDeleteMany,
+  mockMatchScoreFindFirst,
+  mockMatchScoreFindUnique,
+  mockListingFindUnique,
+  mockListingFindMany,
+  mockProfileFindUnique,
+  mockQueryRaw,
+  mockTransaction,
+  mockSendNotification,
+  mockAddNotifyMatchJob,
+} = vi.hoisted(() => ({
+  mockMatchScoreCreate: vi.fn(),
+  mockMatchScoreDeleteMany: vi.fn(),
+  mockMatchScoreFindFirst: vi.fn(),
+  mockMatchScoreFindUnique: vi.fn(),
+  mockListingFindUnique: vi.fn(),
+  mockListingFindMany: vi.fn(),
+  mockProfileFindUnique: vi.fn(),
+  mockQueryRaw: vi.fn(),
+  mockTransaction: vi.fn(),
+  mockSendNotification: vi.fn(),
+  mockAddNotifyMatchJob: vi.fn(),
+}))
 
 vi.mock('@agrolink/db', () => ({
   prisma: {
