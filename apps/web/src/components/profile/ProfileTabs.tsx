@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+import type { Route } from 'next'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { ProfileRating } from './ProfileRating'
@@ -45,14 +47,16 @@ export function ProfileTabs({ profile, isOwn }: ProfileTabsProps) {
         ) : (
           <ul className="flex flex-col gap-3">
             {profile.listings.map((listing) => (
-              <li
-                key={listing.id}
-                className="bg-card hover:bg-card/80 rounded-xl border p-4 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
+              <li key={listing.id}>
+                <Link
+                  href={`/anuncio/${listing.id}` as Route}
+                  className="bg-card hover:bg-muted flex items-start justify-between gap-2 rounded-xl border p-4 transition-colors"
+                >
+                  <div className="min-w-0">
                     <p className="font-medium">{listing.title}</p>
-                    <p className="text-muted-foreground mt-1 text-sm">{listing.description}</p>
+                    <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
+                      {listing.description}
+                    </p>
                     <p className="text-muted-foreground mt-2 text-xs">
                       {listing.city}, {listing.state}
                     </p>
@@ -62,7 +66,7 @@ export function ProfileTabs({ profile, isOwn }: ProfileTabsProps) {
                       {listing.price}
                     </span>
                   )}
-                </div>
+                </Link>
               </li>
             ))}
           </ul>

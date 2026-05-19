@@ -18,7 +18,6 @@ import {
 
 const service = new ListingsService(prisma)
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── POST /api/v1/listings ──────────────────────────────────────────────────
   app.post('/', {

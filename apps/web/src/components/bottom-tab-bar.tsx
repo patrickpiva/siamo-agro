@@ -17,6 +17,7 @@ export function BottomTabBar() {
 
   // Hide on auth/onboarding pages, listing wizard, and edit routes
   const isHidden =
+    pathname === '/' ||
     pathname.startsWith('/entrar') ||
     pathname.startsWith('/cadastro') ||
     pathname === '/anuncio/novo' ||

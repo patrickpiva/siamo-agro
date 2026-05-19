@@ -3,3 +3,13 @@ export * from './components/card'
 export * from './lib/utils'
 export * from './listing-card'
 export * from './match-score-badge'
+
+// Lote 1 — Auth e Onboarding
+export * from './section-label'
+export * from './progress-indicator'
+export * from './bottom-cta'
+export * from './select-card'
+export * from './phone-input'
+export * from './otp-input'
+export * from './avatar-upload'
+export * from './consent-checkbox'

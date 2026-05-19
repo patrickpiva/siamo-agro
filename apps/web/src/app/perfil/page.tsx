@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { prisma } from '@agrolink/db'
-import { getUserIdFromCookie } from '@/lib/session'
+import { getServerSession } from '@/lib/server-auth'
 import { ProfilePageClient } from '@/components/profile/ProfilePageClient'
 import { ProfilePageSkeleton } from '@/components/profile/ProfilePageSkeleton'
 import type { ProfileData } from '@/lib/profile-mock'
@@ -12,11 +12,11 @@ export const metadata: Metadata = {
 }
 
 async function OwnProfileContent() {
-  const userId = await getUserIdFromCookie()
-  if (!userId) redirect('/entrar')
+  const session = await getServerSession()
+  if (!session) redirect('/entrar')
 
   const profile = await prisma.profile.findUnique({
-    where: { userId },
+    where: { userId: session.userId },
     include: { location: true },
   })
 

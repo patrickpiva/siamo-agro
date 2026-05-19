@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import type { Route } from 'next'
 import { useAllMatches } from '@/hooks/use-all-matches'
 import { MatchCard } from './match-card'
 import type { ActiveListing } from '@/hooks/use-all-matches'
@@ -19,10 +18,7 @@ export function MatchesCarousel({ listings }: MatchesCarouselProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Matches para você</h2>
-        <Link
-          href={'/matches' as Route}
-          className="text-primary text-sm font-medium hover:underline"
-        >
+        <Link href="/matches" className="text-primary text-sm font-medium hover:underline">
           Ver todos
         </Link>
       </div>

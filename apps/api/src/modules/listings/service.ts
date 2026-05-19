@@ -214,7 +214,7 @@ export class ListingsService {
     this.prisma.listing
       .update({
         where: { id },
-        data: { viewCount: { increment: 1 } } as unknown as Prisma.ListingUpdateInput,
+        data: { viewCount: { increment: 1 } },
       })
       .catch((err: unknown) => console.error('[listings] Erro ao incrementar viewCount:', err))
 
