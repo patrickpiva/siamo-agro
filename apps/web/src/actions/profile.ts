@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@agrolink/db'
+import { getServerSession } from '@/lib/server-auth'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,18 @@ export interface CreateProfileInput {
 }
 
 export type ActionResult<T> = { ok: true; data: T } | { ok: false; code: string; message: string }
+
+// ─── getUserLocation ─────────────────────────────────────────────────────────
+
+export async function getUserLocation(): Promise<{ city: string; state: string } | null> {
+  const session = await getServerSession()
+  if (!session) return null
+  const profile = await prisma.profile.findUnique({
+    where: { userId: session.userId },
+    select: { location: { select: { city: true, state: true } } },
+  })
+  return profile?.location ?? null
+}
 
 // ─── createProfileAction ─────────────────────────────────────────────────────
 

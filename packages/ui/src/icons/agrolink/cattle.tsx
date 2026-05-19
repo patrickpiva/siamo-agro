@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * Cattle — cara de vaca estilizada
- * Uso: categorias LIVESTOCK, DAIRY, VETERINARY.
- */
 export const Cattle = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,10 +17,12 @@ export const Cattle = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <path d="M5 8c0-2 1-3 3-3l1.5 2.5L12 6l2.5 1.5L16 5c2 0 3 1 3 3v3c0 4-3 7-7 7s-7-3-7-7V8z" />
-      <circle cx="9.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="14.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
-      <path d="M10.5 15.5c.4.6 1 1 1.5 1s1.1-.4 1.5-1" />
+      <path d="M17.8 15.1a10 10 0 0 0 .9-7.1h.3c1.7 0 3-1.3 3-3V3h-3c-1.3 0-2.4.8-2.8 1.9a10 10 0 0 0-8.4 0C7.4 3.8 6.3 3 5 3H2v2c0 1.7 1.3 3 3 3h.3a10 10 0 0 0 .9 7.1" />
+      <path d="M9 9.5v.5" />
+      <path d="M15 9.5v.5" />
+      <path d="M15 22a4 4 0 1 0-3-6.6A4 4 0 1 0 9 22Z" />
+      <path d="M9 18h.01" />
+      <path d="M15 18h.01" />
     </svg>
   ),
 )

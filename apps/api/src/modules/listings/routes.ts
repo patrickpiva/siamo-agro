@@ -8,6 +8,8 @@ import {
   CreateListingResponseSchema,
   ListListingsQuerySchema,
   ListListingsResponseSchema,
+  ListMyListingsQuerySchema,
+  ListMyListingsResponseSchema,
   GetListingParamsSchema,
   GetListingResponseSchema,
   UpdateListingBodySchema,
@@ -47,6 +49,23 @@ export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     handler: async (request, reply) => {
       const result = await service.list(request.query)
+      return reply.send({ ...result, error: null })
+    },
+  })
+
+  // ── GET /api/v1/listings/mine ─────────────────────────────────────────────
+  app.get('/mine', {
+    schema: {
+      querystring: ListMyListingsQuerySchema,
+      response: {
+        200: ListMyListingsResponseSchema,
+        401: ErrorResponseSchema,
+        403: ErrorResponseSchema,
+      },
+    },
+    onRequest: [app.authenticate],
+    handler: async (request, reply) => {
+      const result = await service.listMine(request.user.id, request.query)
       return reply.send({ ...result, error: null })
     },
   })
@@ -151,9 +170,13 @@ export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
       })
     }
     app.log.error(error)
+    const detail =
+      process.env['NODE_ENV'] !== 'production' && error instanceof Error
+        ? error.message
+        : 'Erro interno do servidor'
     return reply.code(500).send({
       data: null,
-      error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor' },
+      error: { code: 'INTERNAL_ERROR', message: detail },
     })
   })
 }

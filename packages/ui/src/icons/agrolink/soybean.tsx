@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * Soybean — vagem de soja com sementes visíveis
- * Uso: categorias SOY, GRAINS.
- */
 export const Soybean = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,13 +17,8 @@ export const Soybean = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <ellipse cx="12" cy="13.5" rx="5.5" ry="7" />
-      <path d="M12 2v4.5" />
-      <path d="M8.5 7c-1.5-1-3.5-.5-4 1" />
-      <path d="M15.5 7c1.5-1 3.5-.5 4 1" />
-      <circle cx="10" cy="12" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="14" cy="12" r="1.2" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="16" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M10.165 6.598C9.954 7.478 9.64 8.36 9 9c-.64.64-1.521.954-2.402 1.165A6 6 0 0 0 8 22c7.732 0 14-6.268 14-14a6 6 0 0 0-11.835-1.402Z" />
+      <path d="M5.341 10.62a4 4 0 1 0 5.279-5.28" />
     </svg>
   ),
 )

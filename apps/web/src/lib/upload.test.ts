@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { validateFile, uploadImages } from './upload'
+import { requestPresignedUrls, confirmUpload } from '@/actions/upload'
+
+// Auth and API calls are encapsulated in Server Actions — mock at module level
+vi.mock('@/actions/upload', () => ({
+  requestPresignedUrls: vi.fn(),
+  confirmUpload: vi.fn(),
+}))
 
 // ─── validateFile ──────────────────────────────────────────────────────────────
 
@@ -49,6 +56,22 @@ describe('uploadImages', () => {
       default: vi.fn().mockImplementation((file: File) => Promise.resolve(file)),
     }))
 
+    // Default happy-path Server Action responses
+    vi.mocked(requestPresignedUrls).mockResolvedValue({
+      ok: true,
+      slots: [
+        {
+          uploadUrl: 'https://storage.example.com/upload/file1',
+          publicUrl: 'https://storage.example.com/public/file1.jpg',
+          key: 'listings/user1/file1.jpg',
+        },
+      ],
+    })
+    vi.mocked(confirmUpload).mockResolvedValue({
+      ok: true,
+      urls: ['https://storage.example.com/public/file1.jpg'],
+    })
+
     const xhrMock = {
       open: vi.fn(),
       send: vi.fn().mockImplementation(function (this: { load: EventListener }) {
@@ -72,81 +95,41 @@ describe('uploadImages', () => {
       'XMLHttpRequest',
       vi.fn(() => xhrMock),
     )
-
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockImplementation((url: string) => {
-        if (String(url).includes('/presigned')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: {
-                  uploads: [
-                    {
-                      uploadUrl: 'https://storage.example.com/upload/file1',
-                      publicUrl: 'https://storage.example.com/public/file1.jpg',
-                      key: 'listings/user1/file1.jpg',
-                    },
-                  ],
-                },
-              }),
-          })
-        }
-        if (String(url).includes('/confirm')) {
-          return Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: { urls: ['https://storage.example.com/public/file1.jpg'] },
-              }),
-          })
-        }
-        return Promise.reject(new Error('URL inesperada'))
-      }),
-    )
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
+    vi.clearAllMocks()
   })
 
   it('rejeita arquivo com tipo inválido antes de fazer requisição', async () => {
     const file = new File(['x'], 'doc.pdf', { type: 'application/pdf' })
-    await expect(uploadImages([file], 'listing', 'token')).rejects.toThrow('tipo inválido')
-    expect(fetch).not.toHaveBeenCalled()
+    await expect(uploadImages([file], 'listing')).rejects.toThrow('tipo inválido')
+    expect(requestPresignedUrls).not.toHaveBeenCalled()
   })
 
   it('rejeita arquivo acima de 5MB antes de fazer requisição', async () => {
     const bigData = new Uint8Array(5 * 1024 * 1024 + 1)
     const file = new File([bigData], 'grande.jpg', { type: 'image/jpeg' })
-    await expect(uploadImages([file], 'listing', 'token')).rejects.toThrow('5MB')
-    expect(fetch).not.toHaveBeenCalled()
+    await expect(uploadImages([file], 'listing')).rejects.toThrow('5MB')
+    expect(requestPresignedUrls).not.toHaveBeenCalled()
   })
 
   it('solicita presigned URL com kind e count corretos', async () => {
     const file = new File(['x'], 'foto.jpg', { type: 'image/jpeg' })
-    await uploadImages([file], 'listing', 'my-token').catch(() => {})
+    await uploadImages([file], 'listing')
 
-    const presignedCall = (fetch as ReturnType<typeof vi.fn>).mock.calls.find((args) =>
-      String(args[0]).includes('/presigned'),
-    )
-    expect(presignedCall).toBeDefined()
-    const init = presignedCall![1] as { body: string }
-    const body = JSON.parse(init.body) as { kind: string; count: number }
-    expect(body.kind).toBe('listing')
-    expect(body.count).toBe(1)
+    expect(requestPresignedUrls).toHaveBeenCalledOnce()
+    expect(requestPresignedUrls).toHaveBeenCalledWith('listing', 1)
   })
 
-  it('envia Authorization header nas requisições', async () => {
+  it('confirma upload com as keys retornadas pelo presigned', async () => {
     const file = new File(['x'], 'foto.jpg', { type: 'image/jpeg' })
-    await uploadImages([file], 'listing', 'bearer-xyz').catch(() => {})
+    const urls = await uploadImages([file], 'listing')
 
-    const presignedCall = (fetch as ReturnType<typeof vi.fn>).mock.calls.find((args) =>
-      String(args[0]).includes('/presigned'),
-    )
-    const init = presignedCall![1] as { headers: Record<string, string> }
-    expect(init.headers['Authorization']).toBe('Bearer bearer-xyz')
+    expect(confirmUpload).toHaveBeenCalledOnce()
+    expect(confirmUpload).toHaveBeenCalledWith(['listings/user1/file1.jpg'])
+    expect(urls).toEqual(['https://storage.example.com/public/file1.jpg'])
   })
 })
