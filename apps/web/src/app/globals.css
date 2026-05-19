@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@source "../../packages/ui/src";
+@variant dark (&:is(.dark *));
 
 /* ─── Design Tokens — Light Mode ─────────────────────────────────────────────
    Referência visual: agrolink-mockups-light.html
@@ -65,6 +67,13 @@
 
   /* Acessibilidade — WCAG 2.5.5 Enhanced */
   --tap-target: 48px;
+
+  /* Foreground secundário — entre foreground e muted-foreground */
+  --fg-secondary: 60 3% 17%; /* #2C2C2A */
+
+  /* CTA invertido: light = preto bg + lime text */
+  --cta-bg: 0 0% 4%; /* #0A0A0A */
+  --cta-fg: 74 77% 59%; /* #C6E845 */
 }
 
 /* ─── Design Tokens — Dark Mode ──────────────────────────────────────────────
@@ -112,6 +121,12 @@
   --border: 0 0% 11%;
   --input: 0 0% 11%;
   --ring: 74 77% 59%;
+
+  --fg-secondary: 60 5% 68%; /* #B5B5A8 */
+
+  /* CTA invertido: dark = lime bg + preto text */
+  --cta-bg: 74 77% 59%; /* #C6E845 */
+  --cta-fg: 0 0% 4%; /* #0A0A0A */
 }
 
 /* ─── Tailwind v4 — mapeamento de tokens ─────────────────────────────────────
@@ -146,6 +161,18 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
+  /* Tokens da Lote 1 */
+  --color-fg-secondary: hsl(var(--fg-secondary));
+  --color-cta-bg: hsl(var(--cta-bg));
+  --color-cta-fg: hsl(var(--cta-fg));
+
+  /* Aliases semânticos (spec Lote 1) — mapeiam tokens existentes */
+  --color-accent-lime: hsl(var(--primary));
+  --color-accent-forest: hsl(var(--accent));
+  --color-fg-muted: hsl(var(--muted-foreground));
+  --color-bg-surface: hsl(var(--card));
+  --color-bg-elevated: hsl(var(--muted));
+
   /* Escala de raios derivada de --radius (0.75rem) */
   --radius-sm: calc(var(--radius) - 0.25rem); /* 0.5rem  */
   --radius-md: var(--radius); /* 0.75rem */
@@ -153,6 +180,7 @@
   --radius-xl: calc(var(--radius) + 0.5rem); /* 1.25rem */
   --radius-2xl: calc(var(--radius) + 0.75rem); /* 1.5rem  */
   --radius-full: 9999px;
+  --radius-card: 0.875rem; /* 14px — SelectCard, NextStepCard */
 
   /* Tipografia */
   --font-sans: var(--font-sans);
@@ -175,6 +203,138 @@
 @layer components {
   .badge-gold {
     animation: badge-gold-shimmer 2s ease-in-out infinite;
+  }
+}
+
+/* ─── Utilities para classes de packages/ui não captadas pelo scanner ────────
+   O @source não captura todos os .tsx de packages/ui em todas as configs.
+   Estas classes são usadas em button.tsx, avatar-upload.tsx, progress-indicator.tsx,
+   consent-checkbox.tsx, select-card.tsx e otp-input.tsx.
+   ────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* ---- Color utilities from packages/ui (not reliably captured by @source) ---- */
+  .bg-accent-forest {
+    background-color: hsl(var(--accent));
+  }
+  .bg-cta-bg {
+    background-color: hsl(var(--cta-bg));
+  }
+  .text-cta-fg {
+    color: hsl(var(--cta-fg));
+  }
+
+  /* ---- Border widths ---- */
+  .border-\[1\.5px\] {
+    border-width: 1.5px;
+  }
+  .border-\[3px\] {
+    border-width: 3px;
+  }
+
+  /* ---- Dimensions ---- */
+  .w-\[46px\] {
+    width: 46px;
+  }
+  .w-\[52px\] {
+    width: 52px;
+  }
+  .h-\[3px\] {
+    height: 3px;
+  }
+  .size-\[120px\] {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* ---- Positioning ---- */
+  .bottom-\[-2px\] {
+    bottom: -2px;
+  }
+  .right-\[-2px\] {
+    right: -2px;
+  }
+
+  /* ---- Padding (spacing scale — pb and pt classes missing from packages/ui @source scan) ---- */
+  .pb-5 {
+    padding-bottom: 1.25rem;
+  }
+  .pb-6 {
+    padding-bottom: 1.5rem;
+  }
+  .pb-8 {
+    padding-bottom: 2rem;
+  }
+  .pb-10 {
+    padding-bottom: 2.5rem;
+  }
+  .pt-3 {
+    padding-top: 0.75rem;
+  }
+  .pt-6 {
+    padding-top: 1.5rem;
+  }
+  .py-5 {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+  }
+  .py-\[14px\] {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  .py-\[15px\] {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+  .p-\[18px\] {
+    padding: 18px;
+  }
+
+  /* ---- Typography ---- */
+  .text-\[11px\] {
+    font-size: 11px;
+  }
+  .text-\[13px\] {
+    font-size: 13px;
+  }
+  .text-\[15px\] {
+    font-size: 15px;
+  }
+  .text-\[22px\] {
+    font-size: 22px;
+  }
+  .text-\[40px\] {
+    font-size: 40px;
+  }
+  .leading-\[1\.55\] {
+    line-height: 1.55;
+  }
+  .tracking-\[0\.2px\] {
+    letter-spacing: 0.2px;
+  }
+  .tracking-\[0\.3px\] {
+    letter-spacing: 0.3px;
+  }
+
+  /* ---- Border radius ---- */
+  .rounded-\[6px\] {
+    border-radius: 6px;
+  }
+  .rounded-\[8px\] {
+    border-radius: 8px;
+  }
+  .rounded-\[10px\] {
+    border-radius: 10px;
+  }
+  .rounded-\[12px\] {
+    border-radius: 12px;
+  }
+
+  /* ---- Opacity variants for accent-lime (packages/ui) ---- */
+  .bg-accent-lime\/\[0\.04\] {
+    background-color: color-mix(in srgb, hsl(var(--primary)) 4%, transparent);
+  }
+  .bg-accent-lime\/\[0\.06\] {
+    background-color: color-mix(in srgb, hsl(var(--primary)) 6%, transparent);
   }
 }
 
