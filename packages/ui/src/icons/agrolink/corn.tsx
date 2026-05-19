@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * Corn — espiga de milho com fileiras de grãos
- * Uso: categorias CORN, VEGETABLES.
- */
 export const Corn = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,13 +17,8 @@ export const Corn = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <path d="M12 3v2" />
-      <rect x="8" y="5" width="8" height="13" rx="4" />
-      <line x1="8.5" y1="9.5" x2="15.5" y2="9.5" />
-      <line x1="8.5" y1="13.5" x2="15.5" y2="13.5" />
-      <path d="M9 5c-1.5 0-2.5.5-3 1.5" />
-      <path d="M15 5c1.5 0 2.5.5 3 1.5" />
-      <path d="M10 18c.5 1 1 1.5 2 1.5s1.5-.5 2-1.5" />
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
     </svg>
   ),
 )

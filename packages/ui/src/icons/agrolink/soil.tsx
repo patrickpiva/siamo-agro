@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * Soil — camadas de solo com broto
- * Uso: categoria SOIL.
- */
 export const Soil = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,10 +17,13 @@ export const Soil = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <path d="M3 16h18" />
-      <path d="M3 20h18" />
-      <path d="M12 16v-6" />
-      <path d="M9 13c0-2 1.5-3.5 3-3.5s3 1.5 3 3.5" />
+      <path d="M4 3 2 5v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" />
+      <path d="M6 8h4" />
+      <path d="M6 18h4" />
+      <path d="m12 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" />
+      <path d="M14 8h4" />
+      <path d="M14 18h4" />
+      <path d="m20 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" />
     </svg>
   ),
 )

@@ -1,20 +1,24 @@
 export const CATEGORIES = {
   OFFER: {
+    COFFEE: 'Café',
+    SOY: 'Soja',
+    CORN: 'Milho',
     GRAINS: 'Grãos e Cereais',
     LIVESTOCK: 'Pecuária',
     DAIRY: 'Laticínios',
     FRUITS: 'Frutas',
     VEGETABLES: 'Hortaliças e Legumes',
-    COFFEE: 'Café',
     OTHER: 'Outros',
   },
   DEMAND: {
+    COFFEE: 'Café',
+    SOY: 'Soja',
+    CORN: 'Milho',
     GRAINS: 'Grãos e Cereais',
     LIVESTOCK: 'Pecuária',
     DAIRY: 'Laticínios',
     FRUITS: 'Frutas',
     VEGETABLES: 'Hortaliças e Legumes',
-    COFFEE: 'Café',
     OTHER: 'Outros',
   },
   SERVICE: {

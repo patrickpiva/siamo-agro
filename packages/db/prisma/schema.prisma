@@ -141,6 +141,7 @@ model Listing {
   title       String        @map("title")
   description String        @map("description")
   price       Decimal?      @map("price") @db.Decimal(12, 2)
+  negotiable  Boolean       @default(false) @map("negotiable")
   status      ListingStatus @default(ACTIVE) @map("status")
   viewCount   Int           @default(0) @map("view_count")
   createdAt   DateTime      @default(now()) @map("created_at")

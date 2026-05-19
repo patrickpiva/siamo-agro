@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * CoffeeBean — grão de café arábica
- * Uso: categoria COFFEE em listings, hero illustration de A1.
- */
 export const CoffeeBean = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,8 +17,8 @@ export const CoffeeBean = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <ellipse cx="12" cy="12" rx="5" ry="8.5" />
-      <path d="M12 4c-1.2 3-1.2 13 0 16" />
+      <path d="M4.05 19.95a11.24 8.585 135 0 0 15.9-15.9 11.24 8.585 135 0 0-15.9 15.9" />
+      <path d="M19.8 4.2C20 14 4 10 4.2 19.8" />
     </svg>
   ),
 )

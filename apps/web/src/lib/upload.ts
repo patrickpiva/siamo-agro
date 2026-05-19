@@ -1,12 +1,8 @@
+import { requestPresignedUrls, confirmUpload } from '@/actions/upload'
+export type { UploadSlot } from '@/actions/upload'
+
 const MAX_SIZE_BYTES = 5 * 1024 * 1024
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
-
-export interface UploadSlot {
-  uploadUrl: string
-  publicUrl: string
-  key: string
-}
 
 export interface UploadProgressCallback {
   (index: number, progress: number): void
@@ -37,39 +33,7 @@ async function compressImage(file: File): Promise<File> {
   })
 }
 
-// ─── API ──────────────────────────────────────────────────────────────────────
-
-async function requestPresignedUrls(
-  kind: 'listing' | 'profile',
-  count: number,
-  token: string,
-): Promise<UploadSlot[]> {
-  const res = await fetch(`${API_URL}/api/v1/uploads/presigned`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ kind, count }),
-  })
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } }
-    throw new Error(body.error?.message ?? 'Falha ao obter URLs de upload')
-  }
-  const { data } = (await res.json()) as { data: { uploads: UploadSlot[] } }
-  return data.uploads
-}
-
-async function confirmUpload(keys: string[], token: string): Promise<string[]> {
-  const res = await fetch(`${API_URL}/api/v1/uploads/confirm`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ keys }),
-  })
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } }
-    throw new Error(body.error?.message ?? 'Falha ao confirmar uploads')
-  }
-  const { data } = (await res.json()) as { data: { urls: string[] } }
-  return data.urls
-}
+// ─── Storage upload (direct to S3/Supabase, no auth needed) ──────────────────
 
 function uploadToStorage(
   uploadUrl: string,
@@ -99,7 +63,6 @@ function uploadToStorage(
 export async function uploadImages(
   files: File[],
   kind: 'listing' | 'profile',
-  token: string,
   onProgress?: UploadProgressCallback,
 ): Promise<string[]> {
   // 1. Validar
@@ -109,8 +72,10 @@ export async function uploadImages(
   // 2. Comprimir
   const compressed = await Promise.all(files.map(compressImage))
 
-  // 3. Obter presigned URLs
-  const slots = await requestPresignedUrls(kind, compressed.length, token)
+  // 3. Obter presigned URLs (via Server Action — lê cookie httpOnly)
+  const presignedResult = await requestPresignedUrls(kind, compressed.length)
+  if (!presignedResult.ok) throw new Error(presignedResult.error)
+  const slots = presignedResult.slots
 
   // 4. Upload paralelo com progresso
   await Promise.all(
@@ -120,8 +85,7 @@ export async function uploadImages(
   )
 
   // 5. Confirmar e retornar URLs definitivas
-  return confirmUpload(
-    slots.map((s) => s.key),
-    token,
-  )
+  const confirmResult = await confirmUpload(slots.map((s) => s.key))
+  if (!confirmResult.ok) throw new Error(confirmResult.error)
+  return confirmResult.urls
 }

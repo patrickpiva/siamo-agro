@@ -1,12 +1,8 @@
 import * as React from 'react'
 import type { IconProps } from '../index'
 
-/**
- * Agronomist — pessoa segurando uma folha/planta (agrônomo)
- * Uso: categorias AGRONOMY, CONSULTING. Ícone de "perfil prestador".
- */
 export const Agronomist = React.forwardRef<SVGSVGElement, IconProps>(
-  ({ size = 24, strokeWidth = 1.8, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}
@@ -21,10 +17,9 @@ export const Agronomist = React.forwardRef<SVGSVGElement, IconProps>(
       aria-hidden="true"
       {...props}
     >
-      <circle cx="10" cy="6" r="3" />
-      <path d="M4 21v-2c0-2.5 2.5-5 6-5s6 2.5 6 5v2" />
-      <path d="M16 11c2-1 3-3 4-3-.5 2-1 4-3 5" />
-      <path d="M18 9.5c-1 .5-2 1.5-2 3" />
+      <path d="M11.5 15H7a4 4 0 0 0-4 4v2" />
+      <path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+      <circle cx="10" cy="7" r="4" />
     </svg>
   ),
 )

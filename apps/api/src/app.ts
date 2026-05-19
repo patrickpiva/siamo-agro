@@ -1,5 +1,6 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyError } from 'fastify'
 import Fastify from 'fastify'
+import { AppError } from '@agrolink/shared'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwtPlugin from '@fastify/jwt'
@@ -40,6 +41,27 @@ export async function buildApp(): Promise<FastifyInstance> {
   // ── Health check ────────────────────────────────────────────────────────────
   app.get('/health', () => {
     return { status: 'ok', timestamp: new Date().toISOString() }
+  })
+
+  // ── Error handler global ────────────────────────────────────────────────────
+  app.setErrorHandler((error: FastifyError, _request, reply) => {
+    if (error instanceof AppError) {
+      return reply.code(error.statusCode).send({
+        data: null,
+        error: { code: error.code, message: error.message },
+      })
+    }
+    if (error.validation) {
+      return reply.code(422).send({
+        data: null,
+        error: { code: 'VALIDATION_ERROR', message: error.message },
+      })
+    }
+    app.log.error(error)
+    return reply.code(500).send({
+      data: null,
+      error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor' },
+    })
   })
 
   // ── Módulos ─────────────────────────────────────────────────────────────────

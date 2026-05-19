@@ -20,18 +20,24 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const token = await getToken()
   if (!token) return NextResponse.json({ error: { message: 'Não autenticado' } }, { status: 401 })
 
-  const body: unknown = await request.json()
-  const res = await fetch(`${API_URL}/api/v1/listings/${id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(body),
-  })
+  try {
+    const body: unknown = await request.json()
+    const res = await fetch(`${API_URL}/api/v1/listings/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    })
 
-  const json: unknown = await res.json()
-  return NextResponse.json(json, { status: res.status })
+    const json: unknown = await res.json()
+    return NextResponse.json(json, { status: res.status })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erro de conexão com o servidor.'
+    console.error(`[PATCH /api/listings/${id}]`, message)
+    return NextResponse.json({ error: { code: 'GATEWAY_ERROR', message } }, { status: 502 })
+  }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {

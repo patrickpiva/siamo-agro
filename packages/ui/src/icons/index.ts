@@ -41,6 +41,8 @@ export {
   Check,
   Edit,
   Edit2,
+  Pen,
+  Pencil,
   Trash,
   Trash2,
   Save,
@@ -130,6 +132,11 @@ export {
   Package,
   Truck,
 
+  // Agro — categorias adicionais
+  Wheat,
+  Milk,
+  LeafyGreen,
+
   // Conexão
   Wifi,
   WifiOff,
@@ -150,6 +157,7 @@ export { Harvester } from './agrolink/harvester'
 export { Irrigation } from './agrolink/irrigation'
 export { Soil } from './agrolink/soil'
 export { Farm } from './agrolink/farm'
+export { Citrus } from './agrolink/citrus'
 
 // ============================================================
 // KINDS — tipos de anúncio
@@ -193,19 +201,21 @@ import { Harvester } from './agrolink/harvester'
 import { Irrigation } from './agrolink/irrigation'
 import { Soil } from './agrolink/soil'
 import { Farm } from './agrolink/farm'
+import { Citrus } from './agrolink/citrus'
+import { Wheat, Milk, LeafyGreen } from 'lucide-react'
 
 export const CATEGORY_ICONS = {
   // Grãos e produção vegetal
   COFFEE: CoffeeBean,
   SOY: Soybean,
   CORN: Corn,
-  GRAINS: Soybean,
-  FRUITS: CoffeeBean,
-  VEGETABLES: Corn,
+  GRAINS: Wheat,
+  FRUITS: Citrus,
+  VEGETABLES: LeafyGreen,
 
   // Pecuária
   LIVESTOCK: Cattle,
-  DAIRY: Cattle,
+  DAIRY: Milk,
 
   // Equipamentos
   TRACTOR: Tractor,

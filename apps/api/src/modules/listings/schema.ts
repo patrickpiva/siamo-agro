@@ -24,6 +24,13 @@ export const ListingProfileSchema = z.object({
   badge: z.enum(['NONE', 'BRONZE', 'SILVER', 'GOLD']),
 })
 
+export const ListingDetailProfileSchema = ListingProfileSchema.extend({
+  id: z.string(),
+  userId: z.string(),
+  city: z.string().nullable(),
+  state: z.string().nullable(),
+})
+
 export const ListingSchema = z.object({
   id: z.string(),
   profileId: z.string(),
@@ -32,6 +39,7 @@ export const ListingSchema = z.object({
   title: z.string(),
   description: z.string(),
   price: z.number().nullable(),
+  negotiable: z.boolean(),
   status: z.enum(['ACTIVE', 'PAUSED', 'CLOSED']),
   viewCount: z.number().int(),
   createdAt: z.string().datetime(),
@@ -43,7 +51,7 @@ export const ListingWithProfileSchema = ListingSchema.extend({
 })
 
 export const ListingDetailSchema = ListingSchema.extend({
-  profile: ListingProfileSchema,
+  profile: ListingDetailProfileSchema,
   photos: z.array(ListingPhotoSchema),
 })
 
@@ -67,6 +75,7 @@ export const CreateListingBodySchema = z
       .min(30, 'Descrição deve ter pelo menos 30 caracteres')
       .max(2000, 'Descrição deve ter no máximo 2000 caracteres'),
     price: z.number().positive('Preço deve ser positivo').optional(),
+    negotiable: z.boolean().default(false),
     photoUrls: z
       .array(z.string().url('URL de foto inválida'))
       .max(8, 'Máximo de 8 fotos')
@@ -133,6 +142,7 @@ export const UpdateListingBodySchema = z
       .max(2000, 'Descrição deve ter no máximo 2000 caracteres')
       .optional(),
     price: z.number().positive('Preço deve ser positivo').nullable().optional(),
+    negotiable: z.boolean().optional(),
     photoUrls: z
       .array(z.string().url('URL de foto inválida'))
       .max(8, 'Máximo de 8 fotos')
@@ -147,6 +157,23 @@ export const UpdateListingResponseSchema = z.object({
   error: z.null(),
 })
 
+// ─── GET /listings/mine ───────────────────────────────────────────────────────
+
+export const ListMyListingsQuerySchema = z.object({
+  status: z.enum(['ACTIVE', 'PAUSED', 'CLOSED']).optional(),
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+})
+
+export const ListMyListingsResponseSchema = z.object({
+  data: z.array(ListingDetailSchema),
+  error: z.null(),
+  meta: z.object({
+    nextCursor: z.string().nullable(),
+    limit: z.number(),
+  }),
+})
+
 // ─── DELETE / pause / resume ──────────────────────────────────────────────────
 
 export const StatusUpdateResponseSchema = z.object({
@@ -159,5 +186,6 @@ export const StatusUpdateResponseSchema = z.object({
 export type CreateListingBody = z.infer<typeof CreateListingBodySchema>
 export type UpdateListingBody = z.infer<typeof UpdateListingBodySchema>
 export type ListListingsQuery = z.infer<typeof ListListingsQuerySchema>
+export type ListMyListingsQuery = z.infer<typeof ListMyListingsQuerySchema>
 export type ListingDetail = z.infer<typeof ListingDetailSchema>
 export type ListingWithProfile = z.infer<typeof ListingWithProfileSchema>

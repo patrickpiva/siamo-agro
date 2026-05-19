@@ -2,25 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Sparkles, CirclePlus, User } from 'lucide-react'
+import { Home, Sparkles, CirclePlus, LayoutList, User } from 'lucide-react'
 import { cn } from '@agrolink/ui'
 
 const TABS = [
   { href: '/feed', label: 'Início', Icon: Home, cta: false },
   { href: '/matches', label: 'Matches', Icon: Sparkles, cta: false },
   { href: '/anuncio/novo', label: 'Anunciar', Icon: CirclePlus, cta: true },
+  { href: '/anuncio/meus', label: 'Meus', Icon: LayoutList, cta: false },
   { href: '/meu-perfil', label: 'Perfil', Icon: User, cta: false },
 ] as const
 
 export function BottomTabBar() {
   const pathname = usePathname()
 
-  // Hide on auth/onboarding pages, listing wizard, and edit routes
+  // Hide on auth/onboarding pages, listing wizard (all steps + success), and edit routes
   const isHidden =
     pathname === '/' ||
     pathname.startsWith('/entrar') ||
     pathname.startsWith('/cadastro') ||
-    pathname === '/anuncio/novo' ||
+    pathname.startsWith('/anuncio/novo') ||
     pathname.includes('/editar')
 
   if (isHidden) return null

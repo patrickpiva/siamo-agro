@@ -13,6 +13,7 @@ import type {
   CreateListingBody,
   UpdateListingBody,
   ListListingsQuery,
+  ListMyListingsQuery,
   ListingDetail,
   ListingWithProfile,
 } from './schema.js'
@@ -21,7 +22,7 @@ import type {
 
 type ListingWithIncludes = Prisma.ListingGetPayload<{
   include: {
-    profile: true
+    profile: { include: { location: true } }
     photos: { orderBy: { order: 'asc' } }
   }
 }>
@@ -34,6 +35,7 @@ interface RawListingRow {
   title: string
   description: string
   price: string | null
+  negotiable: boolean
   status: string
   viewCount: number
   createdAt: Date
@@ -46,6 +48,11 @@ interface RawListingRow {
 
 export interface ListListingsResult {
   data: ListingWithProfile[]
+  meta: { nextCursor: string | null; limit: number }
+}
+
+export interface ListMyListingsResult {
+  data: ListingDetail[]
   meta: { nextCursor: string | null; limit: number }
 }
 
@@ -74,6 +81,7 @@ export class ListingsService {
           title: body.title,
           description: body.description,
           price: body.price ?? null,
+          negotiable: body.negotiable ?? false,
         },
       })
 
@@ -90,7 +98,7 @@ export class ListingsService {
       return tx.listing.findUniqueOrThrow({
         where: { id: created.id },
         include: {
-          profile: true,
+          profile: { include: { location: true } },
           photos: { orderBy: { order: 'asc' } },
         },
       })
@@ -170,6 +178,7 @@ export class ListingsService {
         lst.title,
         lst.description,
         lst.price::text        AS price,
+        lst.negotiable,
         lst.status,
         lst.view_count         AS "viewCount",
         lst.created_at         AS "createdAt",
@@ -198,13 +207,49 @@ export class ListingsService {
     }
   }
 
+  // ── List Mine ────────────────────────────────────────────────────────────────
+
+  async listMine(userId: string, query: ListMyListingsQuery): Promise<ListMyListingsResult> {
+    const profile = await this.prisma.profile.findUnique({ where: { userId } })
+    if (!profile) throw new ListingProfileNotFoundError()
+
+    const { status, cursor, limit } = query
+
+    const where: Prisma.ListingWhereInput = {
+      profileId: profile.id,
+      ...(status && { status }),
+    }
+
+    const listings = await this.prisma.listing.findMany({
+      where,
+      include: {
+        profile: { include: { location: true } },
+        photos: { orderBy: { order: 'asc' } },
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+    })
+
+    const hasMore = listings.length > limit
+    const data = hasMore ? listings.slice(0, limit) : listings
+
+    return {
+      data: data.map((l) => this.mapToDetail(l)),
+      meta: {
+        nextCursor: hasMore ? (data.at(-1)?.id ?? null) : null,
+        limit,
+      },
+    }
+  }
+
   // ── Find by ID ───────────────────────────────────────────────────────────────
 
   async findById(id: string): Promise<ListingDetail> {
     const listing = await this.prisma.listing.findUnique({
       where: { id },
       include: {
-        profile: true,
+        profile: { include: { location: true } },
         photos: { orderBy: { order: 'asc' } },
       },
     })
@@ -238,6 +283,7 @@ export class ListingsService {
           ...(body.description && { description: body.description }),
           ...(body.category && { category: body.category as unknown as $Enums.ServiceCategory }),
           ...(body.price !== undefined && { price: body.price }),
+          ...(body.negotiable !== undefined && { negotiable: body.negotiable }),
         },
       })
 
@@ -253,7 +299,7 @@ export class ListingsService {
       return tx.listing.findUniqueOrThrow({
         where: { id: listingId },
         include: {
-          profile: true,
+          profile: { include: { location: true } },
           photos: { orderBy: { order: 'asc' } },
         },
       })
@@ -322,15 +368,20 @@ export class ListingsService {
       title: listing.title,
       description: listing.description,
       price: listing.price ? Number(listing.price) : null,
+      negotiable: listing.negotiable,
       status: listing.status,
       viewCount: (listing as unknown as { viewCount?: number }).viewCount ?? 0,
       createdAt: listing.createdAt.toISOString(),
       updatedAt: listing.updatedAt.toISOString(),
       profile: {
+        id: listing.profile.id,
+        userId: listing.profile.userId,
         name: listing.profile.name,
         photo: listing.profile.photo ?? null,
         rating: listing.profile.currentRating,
         badge: listing.profile.badge,
+        city: listing.profile.location?.city ?? null,
+        state: listing.profile.location?.state ?? null,
       },
       photos: listing.photos.map((p) => ({
         id: p.id,
@@ -349,6 +400,7 @@ export class ListingsService {
       title: row.title,
       description: row.description,
       price: row.price !== null ? parseFloat(row.price) : null,
+      negotiable: row.negotiable,
       status: row.status as ListingDetail['status'],
       viewCount: Number(row.viewCount),
       createdAt:
