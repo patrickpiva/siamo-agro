@@ -3,8 +3,9 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { ListingCard, ListingCardSkeleton } from '@agrolink/ui'
-import type { ListingCardData } from '@agrolink/ui'
+import { ListingCardSkeleton } from '@agrolink/ui'
+import { FeedCard } from '@/components/feed/feed-card'
+import type { FeedCardListing } from '@/components/feed/feed-card'
 import type { FetchListingsQuery, Listing } from '@/lib/api'
 
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
@@ -27,16 +28,23 @@ async function fetchPage(
   return res.json() as Promise<FeedListResponse>
 }
 
-function toCardData(listing: Listing): ListingCardData {
+function toFeedCardData(listing: Listing): FeedCardListing {
   return {
     id: listing.id,
     kind: listing.kind,
     category: listing.category,
     title: listing.title,
     price: listing.price,
-    photos: listing.photos,
-    profile: listing.profile,
-    createdAt: listing.createdAt,
+    thumbnail: listing.photos?.[0]?.url ?? null,
+    location: { city: listing.profile.city ?? null, state: listing.profile.state ?? null },
+    distanceKm: null,
+    publishedAt: new Date(listing.createdAt),
+    owner: {
+      name: listing.profile.name,
+      reputationScore: listing.profile.rating,
+      reputationSeal: listing.profile.badge ?? null,
+    },
+    matchScore: undefined,
   }
 }
 
@@ -73,8 +81,8 @@ export function FeedList({ filters }: FeedListProps) {
 
   if (status === 'pending') {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="flex flex-col">
+        {Array.from({ length: 4 }).map((_, i) => (
           <ListingCardSkeleton key={i} />
         ))}
       </div>
@@ -111,15 +119,15 @@ export function FeedList({ filters }: FeedListProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="flex flex-col">
         {listings.map((listing) => (
-          <ListingCard key={listing.id} listing={toCardData(listing)} />
+          <FeedCard key={listing.id} listing={toFeedCardData(listing)} />
         ))}
       </div>
 
       {isFetchingNextPage && (
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="flex flex-col">
+          {Array.from({ length: 2 }).map((_, i) => (
             <ListingCardSkeleton key={i} />
           ))}
         </div>

@@ -1,17 +1,19 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ListingCardSkeleton } from '@agrolink/ui'
-import { FeedFilters } from '@/components/feed-filters'
-import { FeedList } from '@/components/feed-list'
-import { MatchesCarousel } from '@/components/matches-carousel'
+import { Bell, Search } from '@agrolink/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
-import { getUserActiveListings } from '@/lib/server-listings'
+import { FeedTabs } from '@/components/feed/feed-tabs'
+import { FeedList } from '@/components/feed-list'
+import { ListingCardSkeleton } from '@agrolink/ui'
 
-export const metadata: Metadata = { title: 'Feed de anúncios' }
+export const metadata: Metadata = { title: 'Feed — AgroLink' }
+
+type FeedTab = 'matches' | 'recent' | 'region' | 'saved'
 
 interface FeedPageProps {
   searchParams: Promise<{
+    tab?: string
     kind?: string
     category?: string
     minPrice?: string
@@ -20,59 +22,86 @@ interface FeedPageProps {
   }>
 }
 
+function getDayGreeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return 'Bom dia'
+  if (h < 18) return 'Boa tarde'
+  return 'Boa noite'
+}
+
+function formatDate(): string {
+  return new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
+}
+
 export default async function FeedPage({ searchParams }: FeedPageProps) {
-  const [filters, session] = await Promise.all([searchParams, getServerSession()])
-  const userListings = session ? await getUserActiveListings(session.userId) : []
+  const [params, session] = await Promise.all([searchParams, getServerSession()])
+
+  const activeTab = (params.tab ?? 'matches') as FeedTab
+  const filters = {
+    kind: params.kind,
+    category: params.category,
+    minPrice: params.minPrice,
+    maxPrice: params.maxPrice,
+    search: params.search,
+  }
+
+  const greeting = getDayGreeting()
+  const firstName = session ? 'João' : 'Visitante' // TODO: fetch from profile
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <header className="bg-background/95 border-border sticky top-0 z-20 border-b px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
-          <span className="text-lg font-bold">AgroLink</span>
-          <Link
-            href="/anuncio/novo"
-            className="bg-primary text-primary-foreground hidden rounded-lg px-4 py-2 text-sm font-medium lg:block"
-          >
-            + Anunciar
-          </Link>
+      <header className="px-5 pb-0 pt-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-muted-foreground font-mono text-[11px]">
+              [SEU FEED · {formatDate()}]
+            </p>
+            <p className="text-[22px] font-medium">
+              {greeting}, {firstName}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {/* Bell with notification dot */}
+            <button
+              type="button"
+              aria-label="Notificações"
+              className="bg-muted relative flex size-12 items-center justify-center rounded-full"
+            >
+              <Bell size={18} strokeWidth={1.8} />
+              <span className="border-background absolute right-[9px] top-[9px] size-2 rounded-full border-2 bg-red-500" />
+            </button>
+            {/* Search shortcut */}
+            <Link
+              href="/busca"
+              aria-label="Buscar"
+              className="bg-muted flex size-12 items-center justify-center rounded-full"
+            >
+              <Search size={18} strokeWidth={1.8} />
+            </Link>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-6xl gap-6 px-4 py-6">
-        {/* Sidebar filters — desktop */}
-        <aside className="hidden w-56 shrink-0 lg:block">
-          <Suspense fallback={<div className="bg-muted h-64 animate-pulse rounded-xl" />}>
-            <FeedFilters initialFilters={filters} />
-          </Suspense>
-        </aside>
+      {/* Tabs */}
+      <Suspense fallback={null}>
+        <FeedTabs activeTab={activeTab} />
+      </Suspense>
 
-        {/* Main content */}
-        <div className="min-w-0 flex-1 space-y-6">
-          {/* Mobile filter strip */}
-          <div className="lg:hidden">
-            <Suspense fallback={null}>
-              <FeedFilters initialFilters={filters} mobile />
-            </Suspense>
-          </div>
-
-          {/* Matches carousel — only for authenticated users with active listings */}
-          {userListings.length > 0 && <MatchesCarousel listings={userListings} />}
-
-          {/* Listings */}
-          <Suspense
-            fallback={
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <ListingCardSkeleton key={i} />
-                ))}
-              </div>
-            }
-          >
-            <FeedList filters={filters} />
-          </Suspense>
-        </div>
-      </div>
+      {/* Feed list */}
+      <main className="flex-1 pt-1">
+        <Suspense
+          fallback={
+            <div className="space-y-3 px-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ListingCardSkeleton key={i} />
+              ))}
+            </div>
+          }
+        >
+          <FeedList filters={filters} />
+        </Suspense>
+      </main>
     </div>
   )
 }

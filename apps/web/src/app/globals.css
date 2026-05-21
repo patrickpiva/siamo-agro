@@ -553,6 +553,199 @@
   .dark .dark\:shadow-\[0_8px_20px_rgba\(198\,232\,69\,0\.3\)\] {
     box-shadow: 0 8px 20px rgba(198, 232, 69, 0.3);
   }
+
+  /* ---- Lote 4 — Match Score Badge tiers ---- */
+  .match-badge-high {
+    background: rgba(31, 95, 63, 0.12);
+    border: 0.5px solid rgba(31, 95, 63, 0.3);
+    color: #1f5f3f;
+  }
+  .dark .match-badge-high {
+    background: rgba(198, 232, 69, 0.18);
+    border: 0.5px solid rgba(198, 232, 69, 0.5);
+    color: #c6e845;
+  }
+  .match-badge-medium {
+    background: rgba(180, 83, 9, 0.1);
+    border: 0.5px solid rgba(180, 83, 9, 0.25);
+    color: #b45309;
+  }
+  .dark .match-badge-medium {
+    background: rgba(234, 179, 8, 0.12);
+    border: 0.5px solid rgba(234, 179, 8, 0.3);
+    color: #eab308;
+  }
+  .match-badge-low {
+    background: hsl(var(--muted));
+    border: 0.5px solid hsl(var(--border));
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* ---- Lote 4 — Breakdown bar fill colors ---- */
+  .bar-fill-distance {
+    background: #1f5f3f;
+  }
+  .dark .bar-fill-distance {
+    background: #c6e845;
+  }
+  .bar-fill-reputation {
+    background: rgba(31, 95, 63, 0.7);
+  }
+  .dark .bar-fill-reputation {
+    background: rgba(198, 232, 69, 0.7);
+  }
+  .bar-fill-compatibility {
+    background: rgba(31, 95, 63, 0.5);
+  }
+  .dark .bar-fill-compatibility {
+    background: rgba(198, 232, 69, 0.5);
+  }
+  .bar-fill-responsiveness {
+    background: rgba(31, 95, 63, 0.35);
+  }
+  .dark .bar-fill-responsiveness {
+    background: rgba(198, 232, 69, 0.35);
+  }
+
+  /* ---- Lote 4 — Feed tab active (CTA-inverted pattern) ---- */
+  .feed-tab-active {
+    background: hsl(var(--cta-bg));
+    color: hsl(var(--cta-fg));
+  }
+
+  /* ---- Lote 4 — Additional size utilities ---- */
+  .h-\[64px\] {
+    height: 64px;
+  }
+  .h-\[8px\] {
+    height: 8px;
+  }
+  .h-\[6px\] {
+    height: 6px;
+  }
+  .w-\[22px\] {
+    width: 22px;
+  }
+  .h-\[22px\] {
+    height: 22px;
+  }
+  .size-\[64px\] {
+    width: 64px;
+    height: 64px;
+  }
+  .size-\[72px\] {
+    width: 72px;
+    height: 72px;
+  }
+  .text-\[32px\] {
+    font-size: 32px;
+  }
+  .min-h-\[720px\] {
+    min-height: 720px;
+  }
+
+  /* ---- Lote 3 — State banners ---- */
+  .state-proposed {
+    background: rgba(59, 130, 246, 0.08);
+    color: #2563eb;
+    border-bottom: 0.5px solid rgba(59, 130, 246, 0.15);
+  }
+  .dark .state-proposed {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border-bottom: 0.5px solid rgba(59, 130, 246, 0.2);
+  }
+  .state-accepted {
+    background: #f0f7d9;
+    color: #1f5f3f;
+    border-bottom: 0.5px solid #c6e845;
+  }
+  .dark .state-accepted {
+    background: rgba(198, 232, 69, 0.08);
+    color: #c6e845;
+    border-bottom: 0.5px solid rgba(198, 232, 69, 0.2);
+  }
+  .state-in-progress {
+    background: rgba(234, 179, 8, 0.08);
+    color: #b45309;
+    border-bottom: 0.5px solid rgba(234, 179, 8, 0.2);
+  }
+  .dark .state-in-progress {
+    background: rgba(234, 179, 8, 0.08);
+    color: #eab308;
+    border-bottom: 0.5px solid rgba(234, 179, 8, 0.2);
+  }
+  .state-completed {
+    background: rgba(34, 197, 94, 0.08);
+    color: #15803d;
+    border-bottom: 0.5px solid rgba(34, 197, 94, 0.2);
+  }
+  .dark .state-completed {
+    background: rgba(34, 197, 94, 0.08);
+    color: #22c55e;
+    border-bottom: 0.5px solid rgba(34, 197, 94, 0.2);
+  }
+
+  /* ---- Lote 3 — State dots ---- */
+  .dot-proposed {
+    background: #3b82f6;
+  }
+  .dark .dot-proposed {
+    background: #60a5fa;
+  }
+  .dot-accepted {
+    background: #1f5f3f;
+  }
+  .dark .dot-accepted {
+    background: #c6e845;
+  }
+  .dot-in-progress {
+    background: #eab308;
+  }
+  .dot-completed {
+    background: #22c55e;
+  }
+
+  /* ---- Lote 3 — Chat bubbles ---- */
+  .bubble-mine {
+    background: #f0f7d9;
+    border: 0.5px solid #c6e845;
+    color: #0a0a0a;
+    border-bottom-right-radius: 4px;
+  }
+  .dark .bubble-mine {
+    background: rgba(198, 232, 69, 0.14);
+    border: 0.5px solid rgba(198, 232, 69, 0.22);
+    color: #f5f5f0;
+  }
+  .bubble-theirs {
+    background: #ffffff;
+    border: 0.5px solid #e0e0d8;
+    color: #0a0a0a;
+    border-bottom-left-radius: 4px;
+  }
+  .dark .bubble-theirs {
+    background: #1e1e1a;
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    color: #f5f5f0;
+  }
+  .bubble-system {
+    background: #efeee7;
+    color: #6a6a62;
+    align-self: center;
+  }
+  .dark .bubble-system {
+    background: rgba(255, 255, 255, 0.04);
+    color: #6a6a62;
+  }
+
+  /* ---- Lote 3 — Reputation breakdown bar track ---- */
+  .rep-bar-track {
+    background: #e0e0d8;
+  }
+  .dark .rep-bar-track {
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 /* ─── Base layer ─────────────────────────────────────────────────────────── */

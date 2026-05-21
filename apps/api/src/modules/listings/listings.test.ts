@@ -125,6 +125,7 @@ describe('ListingsService', () => {
         title: 'Venda de milho safra 2024',
         description: 'Milho de alta qualidade, colheita recente, disponível para venda imediata.',
         photoUrls: [],
+        negotiable: false,
       })
 
       expect(result.kind).toBe('OFFER')
@@ -153,6 +154,7 @@ describe('ListingsService', () => {
         title: 'Preciso de gado nelore para engorda',
         description: 'Busco pelo menos 100 cabeças de gado nelore para engorda na minha fazenda.',
         photoUrls: [],
+        negotiable: false,
       })
 
       expect(result.kind).toBe('DEMAND')
@@ -187,6 +189,7 @@ describe('ListingsService', () => {
           'Ofereço consultoria agrônoma com 10 anos de experiência em culturas tropicais.',
         price: 300,
         photoUrls: [],
+        negotiable: false,
       })
 
       expect(result.kind).toBe('SERVICE')
@@ -220,6 +223,7 @@ describe('ListingsService', () => {
         description: 'Trator 110cv em ótimo estado para locação por diária ou semana.',
         price: 5000,
         photoUrls: [],
+        negotiable: false,
       })
 
       expect(result.kind).toBe('EQUIPMENT')
@@ -236,6 +240,7 @@ describe('ListingsService', () => {
           title: 'Venda de milho safra 2024',
           description: 'Milho de alta qualidade, colheita recente, disponível para venda.',
           photoUrls: [],
+          negotiable: false,
         }),
       ).rejects.toBeInstanceOf(ListingProfileNotFoundError)
     })
@@ -252,6 +257,7 @@ describe('ListingsService', () => {
           photoUrls: [
             'https://example.supabase.co/storage/v1/object/public/listings/outro_user/foto.jpg',
           ],
+          negotiable: false,
         }),
       ).rejects.toBeInstanceOf(ListingPhotoOwnershipError)
     })

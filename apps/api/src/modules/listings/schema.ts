@@ -48,6 +48,7 @@ export const ListingSchema = z.object({
 
 export const ListingWithProfileSchema = ListingSchema.extend({
   profile: ListingProfileSchema,
+  photos: z.array(ListingPhotoSchema),
 })
 
 export const ListingDetailSchema = ListingSchema.extend({

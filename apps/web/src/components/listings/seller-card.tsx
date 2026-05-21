@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Star } from '@agrolink/ui/icons'
+import { getInitials } from '@agrolink/ui'
 import type { ListingProfile } from '@/lib/api'
 
 const BADGE_LABELS: Record<string, string> = {
@@ -19,12 +20,7 @@ interface SellerCardProps {
 }
 
 export function SellerCard({ profile }: SellerCardProps) {
-  const initials = profile.name
-    .split(' ')
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join('')
-    .toUpperCase()
+  const initials = getInitials(profile.name)
 
   return (
     <Link href={profile.id ? `/perfil/${profile.id}` : '#'} className="block">

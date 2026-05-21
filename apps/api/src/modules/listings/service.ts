@@ -198,8 +198,32 @@ export class ListingsService {
     const hasMore = rows.length > limit
     const data = hasMore ? rows.slice(0, limit) : rows
 
+    // Batch-fetch the first photo for each listing in a single Prisma query
+    const listingIds = data.map((r) => r.id)
+    const allPhotos =
+      listingIds.length > 0
+        ? await this.prisma.listingPhoto.findMany({
+            where: { listingId: { in: listingIds } },
+          })
+        : []
+
+    // Sort by order asc in JS to avoid SQL reserved-word issues with the `order` column name
+    allPhotos.sort((a, b) => a.order - b.order)
+
+    // Keep only the first photo per listing (lowest order value)
+    const firstPhotoByListing = new Map<string, { id: string; url: string; order: number }>()
+    for (const photo of allPhotos) {
+      if (!firstPhotoByListing.has(photo.listingId)) {
+        firstPhotoByListing.set(photo.listingId, {
+          id: photo.id,
+          url: photo.url,
+          order: photo.order,
+        })
+      }
+    }
+
     return {
-      data: data.map((row) => this.mapRawToListItem(row)),
+      data: data.map((row) => this.mapRawToListItem(row, firstPhotoByListing)),
       meta: {
         nextCursor: hasMore ? (data.at(-1)?.id ?? null) : null,
         limit,
@@ -391,7 +415,11 @@ export class ListingsService {
     }
   }
 
-  private mapRawToListItem(row: RawListingRow): ListingWithProfile {
+  private mapRawToListItem(
+    row: RawListingRow,
+    firstPhotoByListing: Map<string, { id: string; url: string; order: number }>,
+  ): ListingWithProfile {
+    const photo = firstPhotoByListing.get(row.id)
     return {
       id: row.id,
       profileId: row.profileId,
@@ -413,6 +441,7 @@ export class ListingsService {
         rating: Number(row.profileRating),
         badge: row.profileBadge as ListingDetail['profile']['badge'],
       },
+      photos: photo ? [photo] : [],
     }
   }
 }

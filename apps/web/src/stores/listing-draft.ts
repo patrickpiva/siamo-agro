@@ -117,7 +117,7 @@ export const useListingDraftStore = create<ListingDraftState & ListingDraftActio
         set((s) => {
           const photos = [...s.photos]
           const [removed] = photos.splice(fromIndex, 1)
-          photos.splice(toIndex, 0, removed)
+          if (removed) photos.splice(toIndex, 0, removed)
           return { photos, lastTouchedAt: Date.now() }
         }),
 

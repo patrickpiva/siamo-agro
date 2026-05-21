@@ -1,4 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { getInitials } from '@agrolink/ui'
 import { ProfileBadge } from './ProfileBadge'
 import { ProfileRating } from './ProfileRating'
 import type { ProfileData } from '@/lib/profile-mock'
@@ -15,11 +16,7 @@ const PROFILE_TYPE_LABEL: Record<string, string> = {
 }
 
 export function ProfileHeader({ profile, isOwn, onEditClick }: ProfileHeaderProps) {
-  const initials = profile.name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase() ?? '')
-    .join('')
+  const initials = getInitials(profile.name)
 
   const memberSince = new Date(profile.memberSince).toLocaleDateString('pt-BR', {
     month: 'long',
