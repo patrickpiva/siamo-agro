@@ -218,13 +218,13 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
           <div className="flex gap-2">
             <button
               type="button"
-              className="bg-card border-border flex-1 rounded-[12px] border py-[13px] text-[13px] font-medium"
+              className="bg-card border-border min-w-0 flex-[1] rounded-[12px] border py-[13px] text-[13px] font-medium"
             >
               Pausar
             </button>
             <Link
-              href={`/anuncio/${id}/propostas`}
-              className="bg-cta-bg text-cta-fg flex flex-1 items-center justify-center rounded-[12px] py-[13px] text-[15px] font-medium"
+              href={`/anuncio/${id}/propostas` as never}
+              className="bg-cta-bg text-cta-fg flex min-w-0 flex-[2] items-center justify-center rounded-[12px] py-[13px] text-[15px] font-medium"
             >
               Ver todas as propostas
             </Link>

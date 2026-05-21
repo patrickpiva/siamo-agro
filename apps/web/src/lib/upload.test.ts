@@ -8,6 +8,12 @@ vi.mock('@/actions/upload', () => ({
   confirmUpload: vi.fn(),
 }))
 
+// browser-image-compression must be mocked at module level so Vitest can hoist
+// it — calling vi.mock() inside beforeEach does NOT work with dynamic imports.
+vi.mock('browser-image-compression', () => ({
+  default: vi.fn().mockImplementation((file: File) => Promise.resolve(file)),
+}))
+
 // ─── validateFile ──────────────────────────────────────────────────────────────
 
 describe('validateFile', () => {
@@ -52,10 +58,6 @@ describe('validateFile', () => {
 
 describe('uploadImages', () => {
   beforeEach(() => {
-    vi.mock('browser-image-compression', () => ({
-      default: vi.fn().mockImplementation((file: File) => Promise.resolve(file)),
-    }))
-
     // Default happy-path Server Action responses
     vi.mocked(requestPresignedUrls).mockResolvedValue({
       ok: true,
@@ -98,7 +100,11 @@ describe('uploadImages', () => {
   })
 
   afterEach(() => {
-    vi.restoreAllMocks()
+    // vi.restoreAllMocks() must NOT be used here: on plain vi.fn() instances
+    // (like the browser-image-compression mock) it delegates to mockReset(),
+    // which wipes the implementation — breaking subsequent tests in the suite.
+    // XHR is cleaned up by unstubAllGlobals; server-action mocks are
+    // re-established in beforeEach via mockResolvedValue.
     vi.unstubAllGlobals()
     vi.clearAllMocks()
   })

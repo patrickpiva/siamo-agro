@@ -30,7 +30,7 @@ export function StepMedia() {
         .map((i) => i.url!)
 
       if (pendingFiles.length > 0) {
-        const uploaded = await uploadImages(pendingFiles, 'listing', '')
+        const uploaded = await uploadImages(pendingFiles, 'listing')
         photoUrls = [...photoUrls, ...uploaded]
       }
 

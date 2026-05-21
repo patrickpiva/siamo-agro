@@ -43,6 +43,7 @@ export default function CadastroFotoPage() {
       type PresignedUpload = { uploadUrl: string; key: string; publicUrl: string }
       const { data } = (await presignedRes.json()) as { data: { uploads: PresignedUpload[] } }
       const upload = data.uploads[0]
+      if (!upload) throw new Error('Resposta de upload inválida')
 
       await fetch(upload.uploadUrl, { method: 'PUT', body: file })
 

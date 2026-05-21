@@ -143,7 +143,7 @@ export async function updateProfileAction(
         }),
       },
     })
-    revalidatePath('/perfil')
+    revalidatePath(`/perfil/${profileId}`)
     return { ok: true, data: { ok: true } }
   } catch (err) {
     console.error('[updateProfileAction]', err)

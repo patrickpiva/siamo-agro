@@ -56,7 +56,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
           </div>
         </div>
 
-        <MatchScoreBadge score={score} size="sm" />
+        <MatchScoreBadge score={score * 100} size="sm" />
       </div>
 
       {/* Best listing */}

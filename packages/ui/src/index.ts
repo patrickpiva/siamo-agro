@@ -24,3 +24,23 @@ export * from './price-input'
 export * from './summary-badge'
 export * from './review-card'
 export * from './price-block'
+
+// Lote 3 — Transações e Reputação
+export * from './state-banner'
+export * from './reputation-seal'
+export * from './listing-context-strip'
+export * from './proposal-block'
+export * from './price-proposal-input'
+export * from './quantity-stepper'
+export * from './chat-bubble'
+export * from './chat-input'
+export * from './star-rating'
+export * from './mini-star-rating'
+export * from './rating-category-row'
+
+// Lote 4 — Matchmaking e Descoberta
+export * from './search-bar'
+export * from './suggestion-chip'
+export * from './range-slider'
+export * from './filter-chip-group'
+export * from './collective-progress-bar'

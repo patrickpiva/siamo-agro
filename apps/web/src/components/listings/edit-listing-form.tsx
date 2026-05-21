@@ -135,7 +135,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
       setPhotos((prev) => [...prev, { id: tempId, previewUrl, remoteUrl: '', uploading: true }])
 
       try {
-        const urls = await uploadImages([file], 'listing', '')
+        const urls = await uploadImages([file], 'listing')
         const remoteUrl = urls[0]
         if (remoteUrl) {
           setPhotos((prev) =>
