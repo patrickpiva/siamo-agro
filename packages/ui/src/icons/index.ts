@@ -111,6 +111,11 @@ export {
   Calendar,
   CalendarDays,
 
+  // Tema
+  Moon,
+  Sun,
+  Monitor,
+
   // Visual
   Home,
   Grid,

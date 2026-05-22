@@ -44,3 +44,13 @@ export * from './suggestion-chip'
 export * from './range-slider'
 export * from './filter-chip-group'
 export * from './collective-progress-bar'
+
+// Lote 5 — Perfil, Notificações e Configurações
+export * from './listing-mini-card'
+export * from './notification-icon'
+export * from './settings-row'
+export * from './settings-group'
+export * from './consent-row'
+export * from './privacy-action-card'
+export * from './theme-selector'
+export * from './font-size-slider'

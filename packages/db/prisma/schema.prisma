@@ -61,6 +61,17 @@ enum TransactionStatus {
   CANCELLED
 }
 
+enum NotificationType {
+  PROPOSAL_RECEIVED
+  PROPOSAL_ACCEPTED
+  PROPOSAL_REFUSED
+  TRANSACTION_COMPLETED
+  RATING_RECEIVED
+  MATCH_FOUND
+  COLLECTIVE_UPDATE
+  SYSTEM
+}
+
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 model User {
@@ -77,6 +88,7 @@ model User {
   buyerTransactions  Transaction[]        @relation("BuyerTransactions")
   sellerTransactions Transaction[]        @relation("SellerTransactions")
   sentMessages       TransactionMessage[] @relation("SentMessages")
+  notifications      Notification[]
 
   @@map("users")
 }
@@ -103,10 +115,11 @@ model Profile {
   createdAt     DateTime    @default(now()) @map("created_at")
   updatedAt     DateTime    @updatedAt @map("updated_at")
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  location     Location?
-  listings     Listing[]
-  matchScores  MatchScore[] @relation("CandidateMatchScores")
+  user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location                Location?
+  listings                Listing[]
+  matchScores             MatchScore[]            @relation("CandidateMatchScores")
+  notificationPreference  NotificationPreference?
 
   @@map("profiles")
 }
@@ -283,4 +296,43 @@ model OtpCode {
 
   @@index([phone])
   @@map("otp_codes")
+}
+
+// ─── Notification ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType @map("type")
+  read      Boolean          @default(false) @map("read")
+  data      Json             @default("{}") @map("data")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// ─── NotificationPreference ───────────────────────────────────────────────────
+
+model NotificationPreference {
+  id               String  @id @default(cuid())
+  profileId        String  @unique @map("profile_id")
+  whatsapp         Boolean @default(true) @map("whatsapp")
+  push             Boolean @default(true) @map("push")
+  proposalReceived Boolean @default(true) @map("proposal_received")
+  transactionUpdate Boolean @default(true) @map("transaction_update")
+  matchFound       Boolean @default(true) @map("match_found")
+  ratingReceived   Boolean @default(true) @map("rating_received")
+  collectiveUpdate Boolean @default(true) @map("collective_update")
+  weeklyTips       Boolean @default(false) @map("weekly_tips")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
