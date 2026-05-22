@@ -57,11 +57,11 @@ export default [
 
   // ── Playwright E2E tests ───────────────────────────────────────────────────
   {
-    files: ['apps/web/tests/**/*.ts', 'apps/web/tests/**/*.spec.ts'],
+    files: ['apps/web/tests/**/*.ts', 'apps/web/tests/**/*.spec.ts', 'apps/web/e2e/**/*.ts'],
     plugins: { '@typescript-eslint': tsPlugin },
     languageOptions: {
       parser: tsParser,
-      globals: { ...globals.node },
+      globals: { ...globals.node, ...globals.browser },
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
@@ -101,6 +101,7 @@ export default [
       '**/.turbo/**',
       '**/coverage/**',
       '**/next-env.d.ts',
+      'apps/web/public/**',
     ],
   },
 ]

@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { Suspense, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, TrendingUp, Clock, Filter, Map } from '@agrolink/ui/icons'
+import { ArrowLeft, TrendingUp, Clock, Filter, Map, Search } from '@agrolink/ui/icons'
 import { CATEGORY_ICONS } from '@agrolink/ui/icons'
-import { SearchBar, SuggestionChip } from '@agrolink/ui'
+import { SearchBar, SuggestionChip, EmptyState } from '@agrolink/ui'
 import { FilterSheet } from '@/components/search/filter-sheet'
 import { ResultItem } from '@/components/search/result-item'
 import type { ResultItemData } from '@/components/search/result-item'
@@ -74,7 +74,7 @@ const CATEGORY_CHIPS: { key: keyof typeof CATEGORY_ICONS; label: string }[] = [
   { key: 'AGRONOMY', label: 'Agronomia' },
 ]
 
-export default function BuscaPage() {
+function BuscaPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -148,11 +148,29 @@ export default function BuscaPage() {
           </div>
         </div>
 
-        {/* Results list */}
-        <div className="flex-1 space-y-[10px] px-4">
-          {MOCK_RESULTS.map((item) => (
-            <ResultItem key={item.id} item={item} />
-          ))}
+        {/* Results list or empty state */}
+        <div className="flex-1 px-4">
+          {MOCK_RESULTS.length === 0 ? (
+            <EmptyState
+              icon={<Search size={30} strokeWidth={1.3} />}
+              iconVariant="muted"
+              title={`Sem resultados para "${queryParam}"`}
+              description="Tente palavras diferentes ou aumente o raio de busca nos filtros."
+              hints={[
+                {
+                  label: 'Ampliar para 100 km',
+                  onClick: () => setActiveFilters((f) => ({ ...f, radiusKm: 100 })),
+                },
+                { label: 'Limpar filtros', onClick: () => setActiveFilters({}) },
+              ]}
+            />
+          ) : (
+            <div className="space-y-[10px]">
+              {MOCK_RESULTS.map((item) => (
+                <ResultItem key={item.id} item={item} />
+              ))}
+            </div>
+          )}
         </div>
 
         <FilterSheet
@@ -296,5 +314,13 @@ export default function BuscaPage() {
         onApply={setActiveFilters}
       />
     </div>
+  )
+}
+
+export default function BuscaPage() {
+  return (
+    <Suspense>
+      <BuscaPageInner />
+    </Suspense>
   )
 }

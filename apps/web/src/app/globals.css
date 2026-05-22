@@ -785,6 +785,175 @@
     width: 88px;
     height: 88px;
   }
+
+  /* ---- Lote 6 — Offline banner ---- */
+  .offline-banner-amber {
+    background: rgba(217, 119, 6, 0.1);
+    border-bottom: 0.5px solid rgba(217, 119, 6, 0.2);
+  }
+  .dark .offline-banner-amber {
+    background: rgba(234, 179, 8, 0.12);
+    border-bottom: 0.5px solid rgba(234, 179, 8, 0.25);
+  }
+  .offline-banner-reconnecting {
+    background: rgba(37, 99, 235, 0.08);
+    border-bottom: 0.5px solid rgba(37, 99, 235, 0.18);
+  }
+  .dark .offline-banner-reconnecting {
+    background: rgba(59, 130, 246, 0.1);
+    border-bottom: 0.5px solid rgba(59, 130, 246, 0.2);
+  }
+  .offline-dot-amber {
+    background: #d97706;
+  }
+  .dark .offline-dot-amber {
+    background: #eab308;
+  }
+  .offline-text-amber {
+    color: #92400e;
+  }
+  .dark .offline-text-amber {
+    color: #eab308;
+  }
+  .offline-reconnect-btn {
+    color: #1f5f3f;
+  }
+  .dark .offline-reconnect-btn {
+    color: #c6e845;
+  }
+  @keyframes offline-dot-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .offline-dot-pulse {
+    background: #2563eb;
+    animation: offline-dot-pulse 1.5s ease-in-out infinite;
+  }
+  .dark .offline-dot-pulse {
+    background: #60a5fa;
+  }
+
+  /* ---- Lote 6 — Error icon wrappers ---- */
+  .error-icon-red {
+    background: rgba(220, 38, 38, 0.08);
+    color: #dc2626;
+  }
+  .dark .error-icon-red {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+  }
+  .error-icon-amber {
+    background: rgba(180, 83, 9, 0.08);
+    color: #b45309;
+  }
+  .dark .error-icon-amber {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+  }
+  .error-icon-blue {
+    background: rgba(37, 99, 235, 0.08);
+    color: #2563eb;
+  }
+  .dark .error-icon-blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+  }
+  .error-retry-amber {
+    background: rgba(180, 83, 9, 0.08);
+    border: 0.5px solid rgba(180, 83, 9, 0.2);
+    color: #b45309;
+  }
+  .dark .error-retry-amber {
+    background: rgba(234, 179, 8, 0.15);
+    border: 0.5px solid rgba(234, 179, 8, 0.3);
+    color: #eab308;
+  }
+  .error-cache-btn {
+    background: #efeee7;
+    border: 0.5px solid #e0e0d8;
+    color: #0a0a0a;
+  }
+  .dark .error-cache-btn {
+    background: rgba(59, 130, 246, 0.12);
+    border: 0.5px solid rgba(59, 130, 246, 0.25);
+    color: #60a5fa;
+  }
+
+  /* ---- Lote 6 — Empty state icon variants ---- */
+  .empty-icon-lime {
+    background: #f0f7d9;
+    color: rgba(31, 95, 63, 0.4);
+  }
+  .dark .empty-icon-lime {
+    background: rgba(198, 232, 69, 0.08);
+    color: rgba(198, 232, 69, 0.4);
+  }
+  .empty-icon-muted {
+    background: #efeee7;
+    color: #c0c0b8;
+  }
+  .dark .empty-icon-muted {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* ---- Lote 6 — Cached listing card ---- */
+  .listing-card-cached {
+    opacity: 0.75;
+  }
+  .cache-badge {
+    background: rgba(217, 119, 6, 0.12);
+    color: #92400e;
+  }
+  .dark .cache-badge {
+    background: rgba(234, 179, 8, 0.18);
+    color: #eab308;
+  }
+
+  /* ---- Lote 6 — Offline queue notice (chat) ---- */
+  .offline-queue-notice {
+    background: rgba(217, 119, 6, 0.06);
+    border-bottom: 0.5px solid rgba(217, 119, 6, 0.15);
+    color: #92400e;
+  }
+  .dark .offline-queue-notice {
+    background: rgba(234, 179, 8, 0.06);
+    border-bottom: 0.5px solid rgba(234, 179, 8, 0.15);
+    color: #eab308;
+  }
+
+  /* ---- Lote 6 — PWA install sheet ---- */
+  .pwa-benefit-icon {
+    background: #f0f7d9;
+    color: #1f5f3f;
+  }
+  .dark .pwa-benefit-icon {
+    background: rgba(255, 255, 255, 0.06);
+    color: #c6e845;
+  }
+
+  /* ---- Lote 6 — Push permission ring ---- */
+  .push-icon-ring {
+    background: #f0f7d9;
+    border: 2px solid #c6e845;
+    color: #1f5f3f;
+  }
+  .dark .push-icon-ring {
+    background: rgba(198, 232, 69, 0.08);
+    border: 2px solid rgba(198, 232, 69, 0.2);
+    color: #c6e845;
+  }
+  .push-examples-bg {
+    background: #efeee7;
+  }
+  .dark .push-examples-bg {
+    background: rgba(255, 255, 255, 0.04);
+  }
 }
 
 /* ─── Base layer ─────────────────────────────────────────────────────────── */

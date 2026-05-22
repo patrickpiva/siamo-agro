@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import Link from 'next/link'
-import { ListingCardSkeleton } from '@agrolink/ui'
+import { ListingCardSkeleton, EmptyState } from '@agrolink/ui'
+import { CoffeeBean } from '@agrolink/ui/icons'
 import { FeedCard } from '@/components/feed/feed-card'
 import type { FeedCardListing } from '@/components/feed/feed-card'
 import type { FetchListingsQuery, Listing } from '@/lib/api'
@@ -101,19 +101,16 @@ export function FeedList({ filters }: FeedListProps) {
 
   if (listings.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <span className="text-6xl">🌾</span>
-        <p className="text-lg font-semibold">Nenhum anúncio encontrado</p>
-        <p className="text-muted-foreground max-w-xs text-sm">
-          Seja o primeiro a anunciar nessa categoria ou ajuste os filtros.
-        </p>
-        <Link
-          href="/anuncio/novo"
-          className="bg-primary text-primary-foreground rounded-lg px-5 py-2.5 text-sm font-medium"
-        >
-          Criar primeiro anúncio
-        </Link>
-      </div>
+      <EmptyState
+        icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+        iconVariant="lime"
+        title="Seu feed está vazio"
+        description="Publique seu primeiro anúncio ou complete seu perfil para começar a receber matches."
+        actions={[
+          { label: 'Publicar anúncio', variant: 'primary', href: '/anuncio/novo' },
+          { label: 'Completar perfil', variant: 'secondary', href: '/perfil' },
+        ]}
+      />
     )
   }
 

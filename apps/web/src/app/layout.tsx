@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Providers } from './providers'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
+import { OfflineBanner } from '@/components/offline-banner'
 import './globals.css'
 
 const inter = Inter({
@@ -24,6 +25,12 @@ export const metadata: Metadata = {
     template: '%s | AgroLink',
   },
   description: 'Conectando produtores rurais e prestadores de serviço no agronegócio brasileiro',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'AgroLink',
+  },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -39,6 +46,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
         <Providers>
+          {/* Offline banner sits above all page content, below status bar */}
+          <OfflineBanner />
           {/* Bottom padding on mobile so content clears the fixed tab bar */}
           <div className="lg:contents [&>*]:pb-20 lg:[&>*]:pb-0">{children}</div>
           <BottomTabBar />
