@@ -28,7 +28,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
+      <head>
+        {/* Apply saved theme before first paint to prevent FOUC */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';var r=t==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):t;document.documentElement.classList.toggle('dark',r==='dark');document.documentElement.classList.toggle('light',r==='light');var f=localStorage.getItem('font-size');if(f==='small')document.documentElement.style.fontSize='14px';else if(f==='large')document.documentElement.style.fontSize='18px';if(localStorage.getItem('reduce-motion')==='true')document.documentElement.classList.add('reduce-motion');if(localStorage.getItem('high-contrast')==='true')document.documentElement.classList.add('high-contrast');}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
         <Providers>
           {/* Bottom padding on mobile so content clears the fixed tab bar */}

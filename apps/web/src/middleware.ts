@@ -21,7 +21,7 @@ function needsRefresh(token: string | undefined): boolean {
   return Date.now() / 1000 > exp - 30
 }
 
-// ─── Cookie defaults (must match apps/web/src/app/api/auth/otp/verify) ────────
+// ─── Cookie defaults (must match apps/web/src/actions/auth.ts) ───────────────
 
 const COOKIE_BASE = {
   httpOnly: true,
@@ -32,15 +32,27 @@ const COOKIE_BASE = {
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  const isProxyRequest = request.nextUrl.pathname.startsWith('/api/proxy/')
   const accessToken = request.cookies.get('access_token')?.value
   const refreshToken = request.cookies.get('refresh_token')?.value
 
-  // Access token is still valid — nothing to do
-  if (!needsRefresh(accessToken)) {
+  // Build a NextResponse that injects Authorization for proxy requests.
+  // Cookie mutations (.cookies.set / .delete) can be chained on the returned response.
+  function makeResponse(token: string | undefined): NextResponse {
+    if (isProxyRequest && token) {
+      const headers = new Headers(request.headers)
+      headers.set('Authorization', `Bearer ${token}`)
+      return NextResponse.next({ request: { headers } })
+    }
     return NextResponse.next()
   }
 
-  // No refresh token available — let page-level guards handle redirect to /entrar
+  // Access token is still valid — inject it for proxy requests, pass through otherwise
+  if (!needsRefresh(accessToken)) {
+    return makeResponse(accessToken)
+  }
+
+  // No refresh token — let page-level guards handle redirect to /entrar
   if (!refreshToken) {
     return NextResponse.next()
   }
@@ -67,9 +79,11 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     }
 
     const isProduction = process.env.NODE_ENV === 'production'
-    const response = NextResponse.next()
+    const newToken = json.data.accessToken
 
-    response.cookies.set('access_token', json.data.accessToken, {
+    const response = makeResponse(newToken)
+
+    response.cookies.set('access_token', newToken, {
       ...COOKIE_BASE,
       secure: isProduction,
       maxAge: 60 * 15, // 15 min — matches ACCESS_TOKEN_TTL
@@ -88,9 +102,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 // ─── Route matcher ────────────────────────────────────────────────────────────
-// Skip Next.js internals, static assets, and the auth API routes themselves
-// (to avoid an infinite loop where the refresh call triggers the middleware again)
+// Runs on all routes except Next.js internals and static assets.
+// The token-refresh fetch goes directly to localhost:3001, so no infinite loop risk.
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico).*)'],
 }

@@ -62,15 +62,15 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             </p>
           </div>
           <div className="flex gap-2">
-            {/* Bell with notification dot */}
-            <button
-              type="button"
+            {/* Bell with notification dot — links to notification center */}
+            <Link
+              href="/notificacoes"
               aria-label="Notificações"
               className="bg-muted relative flex size-12 items-center justify-center rounded-full"
             >
               <Bell size={18} strokeWidth={1.8} />
               <span className="border-background absolute right-[9px] top-[9px] size-2 rounded-full border-2 bg-red-500" />
-            </button>
+            </Link>
             {/* Search shortcut */}
             <Link
               href="/busca"
