@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="40" fill="#0A0A0A"/>
+  <!-- Globe motif — matches app logo in mockups -->
+  <g transform="translate(96,96)" stroke="#C6E845" stroke-width="6" stroke-linecap="round" fill="none">
+    <ellipse rx="38" ry="64"/>
+    <ellipse rx="64" ry="64"/>
+    <path d="M-64,0 h128"/>
+    <path d="M0,-64 C-18,-42 -18,42 0,64"/>
+    <path d="M0,-64 C18,-42 18,42 0,64"/>
+  </g>
+</svg>
+<!-- PLACEHOLDER: Replace icon-192.png and icon-512.png with rasterised versions of this SVG.
+     Generate with: npx sharp-cli -i public/icons/icon.svg -o public/icons/icon-192.png resize 192 192
+                    npx sharp-cli -i public/icons/icon.svg -o public/icons/icon-512.png resize 512 512 -->

@@ -20,7 +20,7 @@ const NEXT_STEPS = [
     icon: <User size={22} strokeWidth={1.8} />,
     title: 'Completar meu perfil',
     description: 'Aumente sua reputação adicionando mais detalhes',
-    href: '/meu-perfil' as const,
+    href: '/perfil' as const,
   },
 ]
 

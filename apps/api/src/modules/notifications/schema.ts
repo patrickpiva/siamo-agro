@@ -61,3 +61,21 @@ export const ErrorResponseSchema = z.object({
 })
 
 export type ListNotificationsQuery = z.infer<typeof ListNotificationsQuerySchema>
+
+// ─── POST /notifications/push ─────────────────────────────────────────────────
+
+export const PushSubscriptionBodySchema = z.object({
+  endpoint: z.string().url(),
+  expirationTime: z.number().nullable().optional(),
+  keys: z.object({
+    p256dh: z.string(),
+    auth: z.string(),
+  }),
+})
+
+export const RegisterPushResponseSchema = z.object({
+  data: z.object({ ok: z.literal(true) }),
+  error: z.null(),
+})
+
+export type PushSubscriptionBody = z.infer<typeof PushSubscriptionBodySchema>

@@ -45,6 +45,10 @@ export * from './range-slider'
 export * from './filter-chip-group'
 export * from './collective-progress-bar'
 
+// Lote 6 — Estados Especiais
+export * from './error-screen'
+export * from './empty-state'
+
 // Lote 5 — Perfil, Notificações e Configurações
 export * from './listing-mini-card'
 export * from './notification-icon'

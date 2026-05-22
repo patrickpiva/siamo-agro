@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import type { Route } from 'next'
 import { ArrowLeft } from '@agrolink/ui/icons'
 import { cn } from '@agrolink/ui'
 
@@ -21,7 +22,7 @@ export function BackButton({ fallbackHref = '/feed', className }: BackButtonProp
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push(fallbackHref)
+      router.push(fallbackHref as Route<string>)
     }
   }
 

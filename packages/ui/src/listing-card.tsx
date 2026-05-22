@@ -21,6 +21,8 @@ export interface ListingCardData {
   }
   createdAt: string
   distance?: number | null
+  /** When true: renders with CACHE badge and muted styling to indicate offline data */
+  isCached?: boolean
 }
 
 // ─── Kind badge ───────────────────────────────────────────────────────────────
@@ -59,11 +61,18 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   const photo = (listing.photos ?? []).sort((a, b) => a.order - b.order)[0]
   const badgeClass = KIND_BADGE_CLASS[listing.kind] ?? 'bg-gray-100 text-gray-800'
   const kindLabel = KIND_LABELS[listing.kind] ?? listing.kind
+  const { isCached } = listing
 
   return (
     <Link
       href={`/anuncio/${listing.id}`}
-      className="border-border bg-card group flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md"
+      aria-label={
+        isCached ? `${listing.title} — dados do cache, pode estar desatualizado` : listing.title
+      }
+      className={cn(
+        'border-border bg-card group flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md',
+        isCached && 'listing-card-cached',
+      )}
     >
       {/* Photo */}
       <div className="bg-muted relative aspect-[4/3] overflow-hidden">
@@ -88,6 +97,11 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
         >
           {kindLabel}
         </span>
+        {isCached && (
+          <span className="cache-badge absolute right-2 top-2 rounded-[4px] px-[6px] py-[2px] font-mono text-[8px] font-medium">
+            CACHE
+          </span>
+        )}
       </div>
 
       {/* Content */}
@@ -95,9 +109,16 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
         {/* Title */}
         <p className="line-clamp-2 text-sm font-medium leading-snug">{listing.title}</p>
 
-        {/* Price */}
+        {/* Price — muted when cached to signal potentially stale data */}
         {listing.price != null && (
-          <p className="text-primary text-base font-bold">{formatBRL(listing.price)}</p>
+          <p
+            className={cn(
+              'text-base font-bold',
+              isCached ? 'text-muted-foreground' : 'text-primary',
+            )}
+          >
+            {formatBRL(listing.price)}
+          </p>
         )}
 
         {/* Profile row */}
