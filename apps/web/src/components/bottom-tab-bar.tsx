@@ -10,7 +10,7 @@ const TABS = [
   { href: '/busca', label: 'BUSCA', Icon: Search },
   { href: '/anuncio/novo', label: 'PUBLICAR', Icon: Plus, cta: true },
   { href: '/transacoes', label: 'NEGÓCIOS', Icon: MessageCircle },
-  { href: '/meu-perfil', label: 'PERFIL', Icon: User },
+  { href: '/perfil', label: 'PERFIL', Icon: User },
 ] as const
 
 export function BottomTabBar() {
@@ -42,8 +42,8 @@ export function BottomTabBar() {
           const isActive =
             href === '/feed'
               ? pathname === '/feed'
-              : href === '/meu-perfil'
-                ? pathname.startsWith('/meu-perfil') || pathname.startsWith('/perfil')
+              : href === '/perfil'
+                ? pathname.startsWith('/perfil')
                 : href === '/busca'
                   ? pathname.startsWith('/busca')
                   : pathname.startsWith(href)

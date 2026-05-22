@@ -1,15 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import {
-  ArrowLeft,
-  Bookmark,
-  Share2,
-  Pencil,
-  MoreVertical,
-  MapPin,
-  MessageCircle,
-} from '@agrolink/ui/icons'
+import { Bookmark, Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@agrolink/ui/icons'
+import { BackButton } from '@/components/layout/back-button'
 import { PriceBlock } from '@agrolink/ui'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchListing, fetchListingProposals } from '@/lib/api'
@@ -91,13 +84,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
     <div className="bg-background flex min-h-screen flex-col pb-24">
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/feed"
-          aria-label="Voltar"
-          className="bg-muted flex size-[48px] items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
+        <BackButton fallbackHref="/feed" />
 
         <div className="flex gap-2">
           {isOwner ? (

@@ -746,6 +746,45 @@
   .dark .rep-bar-track {
     background: rgba(255, 255, 255, 0.08);
   }
+
+  /* ---- Lote 5 — Notification unread item ---- */
+  .notif-unread {
+    background: #f6faf0;
+  }
+  .dark .notif-unread {
+    background: rgba(198, 232, 69, 0.03);
+  }
+
+  /* ---- Lote 5 — Accessibility: reduce-motion ---- */
+  .reduce-motion *,
+  .reduce-motion *::before,
+  .reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* ---- Lote 5 — Accessibility: high-contrast ---- */
+  .high-contrast .text-muted-foreground {
+    color: hsl(var(--foreground) / 0.7);
+  }
+  .high-contrast .dark .text-muted-foreground {
+    color: hsl(var(--foreground) / 0.8);
+  }
+
+  /* ---- Lote 5 — Theme selector preview ---- */
+  .theme-system-preview {
+    background: linear-gradient(135deg, #0a0a0a 50%, #fafaf7 50%);
+  }
+
+  /* ---- Lote 5 — Additional size utilities ---- */
+  .size-\[40px\] {
+    width: 40px;
+    height: 40px;
+  }
+  .size-\[88px\] {
+    width: 88px;
+    height: 88px;
+  }
 }
 
 /* ─── Base layer ─────────────────────────────────────────────────────────── */
