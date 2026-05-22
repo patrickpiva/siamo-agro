@@ -41,10 +41,17 @@ function formatTime(iso: string): string {
   const diffMs = now.getTime() - date.getTime()
   const diffMin = Math.floor(diffMs / 60000)
   if (diffMin < 1) return 'Agora'
-  if (diffMin < 60) return `${diffMin}min`
+  if (diffMin < 60) return `${diffMin} min atrás`
   const diffH = Math.floor(diffMin / 60)
-  if (diffH < 24) return `${diffH}h`
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  if (diffH < 24) return `${diffH}h atrás`
+  return date
+    .toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    .replace(',', ' ·')
 }
 
 function str(d: Record<string, unknown>, key: string, fallback: string): string {
@@ -90,28 +97,35 @@ function formatText(notification: NotificationData): React.ReactNode {
           <strong className="font-medium">{str(d, 'listingTitle', 'o anúncio')}</strong>
         </>
       )
-    case 'TRANSACTION_COMPLETED':
+    case 'TRANSACTION_COMPLETED': {
+      const txnId = str(d, 'transactionId', '')
       return (
         <>
-          {'Transação com '}
-          <strong className="font-medium">{str(d, 'otherPartyName', 'parceiro')}</strong>
-          {' concluída com sucesso!'}
+          <strong className="font-medium">{str(d, 'otherPartyName', 'Parceiro')}</strong>
+          {' confirmou a conclusão da transação '}
+          {txnId && <strong className="font-medium">#{txnId}</strong>}
+          {'. Avalie sua experiência!'}
         </>
       )
-    case 'RATING_RECEIVED':
+    }
+    case 'RATING_RECEIVED': {
+      const score = Math.round(Number(str(d, 'score', '5')))
+      const stars = '★'.repeat(Math.max(0, Math.min(5, score)))
       return (
         <>
           <strong className="font-medium">{str(d, 'raterName', 'Alguém')}</strong>
-          {' avaliou você com '}
-          <strong className="font-medium">{str(d, 'score', '5')} estrelas</strong>
+          {' deixou uma avaliação '}
+          <span className="text-amber-500">{stars}</span>
+          {' para você'}
         </>
       )
+    }
     case 'MATCH_FOUND':
       return (
         <>
-          <span className="text-muted-foreground">Novo match! </span>
+          {'Novo match! '}
           <strong className="font-medium">{str(d, 'count', '')} anúncios</strong>
-          <span className="text-muted-foreground"> encontrados na categoria </span>
+          {' foram encontrados próximos a você na categoria '}
           <strong className="font-medium">{str(d, 'category', '')}</strong>
         </>
       )
@@ -180,37 +194,24 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
 
         {/* Action buttons */}
         {notification.actions && notification.actions.length > 0 && (
-          <div className="mt-[10px] flex gap-2">
-            {notification.actions.map((action, i) =>
-              action.href ? (
-                <a
-                  key={i}
-                  href={action.href}
-                  className={cn(
-                    'rounded-[8px] px-3 py-[6px] text-[12px] font-medium',
-                    action.variant === 'primary'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground',
-                  )}
-                >
+          <div className="mt-3 flex gap-2">
+            {notification.actions.map((action, i) => {
+              const cls = cn(
+                'rounded-[10px] px-4 py-[9px] text-[13px] font-medium transition-opacity active:opacity-70',
+                action.variant === 'primary'
+                  ? 'bg-cta-bg text-cta-fg'
+                  : 'border border-border bg-transparent text-foreground',
+              )
+              return action.href ? (
+                <a key={i} href={action.href} className={cls}>
                   {action.label}
                 </a>
               ) : (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={action.onClick}
-                  className={cn(
-                    'rounded-[8px] px-3 py-[6px] text-[12px] font-medium',
-                    action.variant === 'primary'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-foreground',
-                  )}
-                >
+                <button key={i} type="button" onClick={action.onClick} className={cls}>
                   {action.label}
                 </button>
-              ),
-            )}
+              )
+            })}
           </div>
         )}
       </div>

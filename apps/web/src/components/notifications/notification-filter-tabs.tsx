@@ -42,10 +42,10 @@ export function NotificationFilterTabs() {
           aria-selected={active === tab.value}
           onClick={() => handleChange(tab.value)}
           className={cn(
-            'flex-shrink-0 rounded-full px-[14px] py-[7px] text-[12px] transition-colors',
+            'min-h-0 min-w-0 shrink-0 whitespace-nowrap rounded-full px-[14px] py-[7px] text-[12px] transition-colors',
             active === tab.value
-              ? 'bg-cta-bg text-cta-fg font-medium'
-              : 'bg-muted text-fg-secondary',
+              ? 'feed-tab-active font-medium'
+              : 'bg-muted text-fg-secondary hover:text-foreground',
           )}
         >
           {tab.label}

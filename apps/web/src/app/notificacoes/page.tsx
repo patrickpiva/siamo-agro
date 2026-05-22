@@ -3,8 +3,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { ArrowLeft, CheckCircle } from '@agrolink/ui/icons'
+import { cn, EmptyState } from '@agrolink/ui'
 import {
   NotificationItem,
   type NotificationData,
@@ -32,7 +32,7 @@ function groupByDay(
     if (d.toDateString() === today.toDateString()) {
       label = `HOJE · ${today.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()}`
     } else if (d.toDateString() === yesterday.toDateString()) {
-      label = 'ONTEM'
+      label = `ONTEM · ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()}`
     } else {
       label = d
         .toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -123,7 +123,7 @@ function NotificationsContent() {
         <Link
           href="/feed"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
@@ -154,12 +154,12 @@ function NotificationsContent() {
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-8 pt-16 text-center">
-            <p className="text-muted-foreground text-[15px]">Nenhuma notificação por aqui.</p>
-            <p className="text-muted-foreground mt-1 text-[13px]">
-              Quando acontecer algo importante, você verá aqui.
-            </p>
-          </div>
+          <EmptyState
+            icon={<CheckCircle size={28} strokeWidth={1.3} />}
+            iconVariant="lime"
+            title="Você está em dia"
+            description="Nenhuma notificação pendente. Novas atividades aparecerão aqui."
+          />
         ) : (
           <div className="bg-card border-border mx-4 overflow-hidden rounded-[14px] border">
             {groups.map(({ label, items }) => (

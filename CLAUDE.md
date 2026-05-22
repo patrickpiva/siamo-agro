@@ -403,3 +403,130 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | PRs grandes com múltiplos propósitos                 | Um PR = um propósito; quebre se necessário            |
 | Editar arquivos gerados de `packages/ui` diretamente | Customize via `className` e CSS variables             |
 | Commitar diretamente em `main`                       | Sempre via feature branch + PR                        |
+
+---
+
+## 11. ESTADO IMPLEMENTADO
+
+> Atualizado: 2026-05-22. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
+
+### Branches
+
+| Branch                  | Status             | Conteúdo                                 |
+| ----------------------- | ------------------ | ---------------------------------------- |
+| `main`                  | produção           | Sprints 0–3 + Design Hardening mergeados |
+| `feat/design-hardening` | em desenvolvimento | Lote 5 + Lote 6 (estados especiais)      |
+
+---
+
+### Rotas web implementadas (`apps/web/src/app/`)
+
+| Rota                              | Status | Observação                                            |
+| --------------------------------- | ------ | ----------------------------------------------------- |
+| `/`                               | ✅     | Landing page                                          |
+| `/entrar`                         | ✅     | Auth — input WhatsApp                                 |
+| `/entrar/codigo`                  | ✅     | Auth — OTP                                            |
+| `/cadastro/perfil`                | ✅     | Onboarding — tipo (produtor/prestador)                |
+| `/cadastro/dados`                 | ✅     | Onboarding — nome/propriedade/bio                     |
+| `/cadastro/localizacao`           | ✅     | Onboarding — GPS + Nominatim/ViaCEP                   |
+| `/cadastro/foto`                  | ✅     | Onboarding — upload avatar presigned                  |
+| `/cadastro/consentimento`         | ✅     | Onboarding — LGPD consent + cria perfil               |
+| `/cadastro/pronto`                | ✅     | Onboarding — success                                  |
+| `/feed`                           | ✅     | Feed com filter tabs (matches/recentes/região/salvos) |
+| `/busca`                          | ✅     | Busca com FilterSheet + ResultItem + EmptyState       |
+| `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)   |
+| `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                 |
+| `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                     |
+| `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia        |
+| `/transacoes`                     | ✅     | Transações com EmptyState                             |
+| `/perfil`                         | ✅     | Perfil próprio                                        |
+| `/perfil/[id]`                    | ✅     | Perfil público                                        |
+| `/negocios`                       | ✅     | Negócios                                              |
+| `/configuracoes`                  | ✅     | Configurações                                         |
+| `/ajuda`                          | ✅     | Ajuda                                                 |
+| `/termos` `/privacidade` `/sobre` | ✅     | Stubs legais                                          |
+| `error.tsx`                       | ✅     | Erro 500 (ErrorScreen amber)                          |
+| `not-found.tsx`                   | ✅     | 404 (ErrorScreen red)                                 |
+
+---
+
+### API endpoints (`apps/api` — prefixo `/api/v1`)
+
+| Método | Rota                         | Auth | Status                     |
+| ------ | ---------------------------- | ---- | -------------------------- |
+| POST   | `/auth/otp/request`          | ❌   | ✅                         |
+| POST   | `/auth/otp/verify`           | ❌   | ✅                         |
+| POST   | `/auth/refresh`              | ❌   | ✅                         |
+| POST   | `/auth/logout`               | ✅   | ✅                         |
+| POST   | `/profiles`                  | ✅   | ✅                         |
+| GET    | `/profiles/:id`              | ❌   | ✅                         |
+| PATCH  | `/profiles/:id`              | ✅   | ✅                         |
+| POST   | `/privacy/consent`           | ✅   | ✅ idempotente             |
+| POST   | `/listings`                  | ✅   | ✅                         |
+| GET    | `/listings`                  | ❌   | ✅ cursor-based, PostGIS   |
+| GET    | `/listings/:id`              | ❌   | ✅                         |
+| PATCH  | `/listings/:id`              | ✅   | ✅                         |
+| DELETE | `/listings/:id`              | ✅   | ✅ soft delete             |
+| POST   | `/listings/:id/pause`        | ✅   | ✅                         |
+| POST   | `/listings/:id/resume`       | ✅   | ✅                         |
+| GET    | `/listings/:id/matches`      | ✅   | ✅                         |
+| POST   | `/uploads/presigned`         | ✅   | ✅                         |
+| GET    | `/notifications`             | ✅   | ✅ cursor-based            |
+| PATCH  | `/notifications/:id/read`    | ✅   | ✅                         |
+| POST   | `/notifications/read-all`    | ✅   | ✅                         |
+| POST   | `/notifications/push`        | ✅   | ⚠️ stub — sem persistência |
+| GET    | `/transactions`              | ✅   | ✅                         |
+| GET    | `/transactions/:id`          | ✅   | ✅                         |
+| POST   | `/transactions/:id/messages` | ✅   | ✅                         |
+
+Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Authorization: Bearer` a partir do cookie `access_token`.
+
+---
+
+### `packages/ui` — componentes exportados
+
+**Base:** Button (variantes: cta, cta-disabled, ghost-muted), Input, Label, Textarea, Badge, Avatar, Separator, Progress, Skeleton, Card, Sheet, Tabs, RadioGroup, Select, Checkbox, Dialog, Drawer, DropdownMenu, Switch, Tooltip
+
+**AgroLink:** SearchBar, SuggestionChip, ListingCard (`isCached?: boolean`), ListingCardSkeleton, NotificationIcon, BottomCTA, BottomTabBar, SectionLabel, ProgressIndicator, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, ChatInput (`isOffline?: boolean`)
+
+**Estados especiais:** EmptyState (`iconVariant: 'lime' | 'muted'`), ErrorScreen (`compact?: boolean`, `iconVariant: 'red' | 'amber' | 'blue'`)
+
+**Icons (`@agrolink/ui/icons`):** Re-exports Lucide + SVG custom: CoffeeBean, Agronomist, Tractor, Soybean, Corn, Cattle, Harvester, Irrigation, Soil, Farm, Offer, Demand, Service, Equipment, WhatsAppLogo. Map `CATEGORY_ICONS`.
+
+---
+
+### Features especiais — Lote 6 (`feat/design-hardening`)
+
+| Feature                   | Arquivo                                                                 | Notas                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Offline banner            | `components/offline-banner.tsx`                                         | Amber (offline) / azul pulsante (reconectando). Mount guard para evitar hydration mismatch.                                                         |
+| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agrolink:offline-queue`, max 3 retries, flush no reconnect                                                                            |
+| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agrolink:reconnected` custom event ao reconectar                                                                                           |
+| Service Worker            | `src/sw.ts`                                                             | Serwist v9. Desabilitado em dev. Handlers: StaleWhileRevalidate (listings/profiles), NetworkFirst (pages/notifications), NetworkOnly (transactions) |
+| PWA manifest              | `public/manifest.json`                                                  | Ícones SVG placeholder em `public/icons/` — PNGs ainda não gerados                                                                                  |
+| PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                  |
+| Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                         |
+| 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                   |
+
+---
+
+### Padrões de UI consolidados (não alterar sem decisão explícita)
+
+| Elemento            | Classes                                                            |
+| ------------------- | ------------------------------------------------------------------ |
+| Pills/tabs ativo    | `feed-tab-active font-medium min-h-0 min-w-0`                      |
+| Pills/tabs inativo  | `bg-muted text-fg-secondary hover:text-foreground min-h-0 min-w-0` |
+| Botão voltar        | `bg-muted flex size-12 items-center justify-center rounded-full`   |
+| Ação primária (CTA) | `bg-cta-bg text-cta-fg`                                            |
+| Seção label         | `font-mono text-[10px] tracking-[0.4px]` uppercase                 |
+| Card de anúncio     | `ListingCard` de `@agrolink/ui`                                    |
+
+---
+
+### TODOs pendentes (não implementado ainda)
+
+- [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
+- [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
+- [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
+- [ ] Integrar `matches-calculating.tsx` com status real de job
+- [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
