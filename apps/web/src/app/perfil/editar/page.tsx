@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft, Save } from '@agrolink/ui/icons'
+import { ArrowLeft } from '@agrolink/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { prisma } from '@agrolink/db'
 import { ProfileEditForm } from '@/components/profile/profile-edit-form'
@@ -26,20 +26,12 @@ export default async function EditarPerfilPage() {
         <Link
           href="/perfil"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
         <p className="text-[15px] font-medium">Editar perfil</p>
-        {/* Save icon button — triggers form submit via JS */}
-        <button
-          type="button"
-          id="header-save-btn"
-          aria-label="Salvar"
-          className="flex size-[36px] items-center justify-center rounded-full"
-        >
-          <Save size={18} strokeWidth={1.8} className="text-primary" />
-        </button>
+        <div className="w-12" />
       </header>
 
       <ProfileEditForm

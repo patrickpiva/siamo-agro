@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft } from '@agrolink/ui/icons'
+import { ArrowLeft, Zap, Eye } from '@agrolink/ui/icons'
 import { ThemeSelector, FontSizeSlider, SettingsGroup, SettingsRow } from '@agrolink/ui'
 import { useTheme, type Theme, type FontSize } from '@/lib/theme'
 
@@ -19,15 +19,16 @@ export default function AparenciaPage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center gap-3 px-4 py-3">
+      <header className="flex items-center justify-between px-4 py-3">
         <Link
           href="/configuracoes"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
         <p className="text-[15px] font-medium">Aparência</p>
+        <div className="w-12" />
       </header>
 
       {/* Theme selector */}
@@ -53,7 +54,7 @@ export default function AparenciaPage() {
       {/* Accessibility */}
       <SettingsGroup label="ACESSIBILIDADE">
         <SettingsRow
-          icon={<span className="text-muted-foreground text-[12px] font-medium">✦</span>}
+          icon={<Zap size={18} strokeWidth={1.8} className="text-muted-foreground" />}
           title="Reduzir animações"
           subtitle="Desativa transições e efeitos de movimento"
           rightElement={
@@ -78,7 +79,7 @@ export default function AparenciaPage() {
           }
         />
         <SettingsRow
-          icon={<span className="text-muted-foreground text-[14px] font-bold">A</span>}
+          icon={<Eye size={18} strokeWidth={1.8} className="text-muted-foreground" />}
           title="Alto contraste"
           subtitle="Aumenta o contraste de textos secundários"
           rightElement={

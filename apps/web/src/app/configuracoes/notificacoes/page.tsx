@@ -61,14 +61,15 @@ export default function NotificacoesPrefsPage() {
   if (isLoading) {
     return (
       <div className="bg-background flex min-h-screen flex-col">
-        <header className="flex items-center gap-3 px-4 py-3">
+        <header className="flex items-center justify-between px-4 py-3">
           <Link
             href="/configuracoes"
-            className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+            className="bg-muted flex size-12 items-center justify-center rounded-full"
           >
             <ArrowLeft size={18} strokeWidth={1.8} />
           </Link>
           <p className="text-[15px] font-medium">Notificações</p>
+          <div className="w-12" />
         </header>
         <div className="space-y-2 px-4 pt-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -81,15 +82,16 @@ export default function NotificacoesPrefsPage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center gap-3 px-4 py-3">
+      <header className="flex items-center justify-between px-4 py-3">
         <Link
           href="/configuracoes"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
         <p className="text-[15px] font-medium">Notificações</p>
+        <div className="w-12" />
       </header>
 
       {/* Canais */}

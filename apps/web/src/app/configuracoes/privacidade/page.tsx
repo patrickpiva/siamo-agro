@@ -62,15 +62,16 @@ export default function PrivacidadePage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center gap-3 px-4 py-3">
+      <header className="flex items-center justify-between px-4 py-3">
         <Link
           href="/configuracoes"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
         <p className="text-[15px] font-medium">Privacidade e LGPD</p>
+        <div className="w-12" />
       </header>
 
       {/* Consents */}

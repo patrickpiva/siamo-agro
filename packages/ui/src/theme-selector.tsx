@@ -9,8 +9,10 @@ interface ThemeOptionConfig {
   value: ThemeOption
   label: string
   Icon: typeof Moon
-  previewClass: string
-  labelClass: string
+  previewBg: string
+  iconColor: string
+  labelBg: string
+  labelColor?: string
 }
 
 const OPTIONS: ThemeOptionConfig[] = [
@@ -18,22 +20,27 @@ const OPTIONS: ThemeOptionConfig[] = [
     value: 'dark',
     label: 'Escuro',
     Icon: Moon,
-    previewClass: 'bg-[#0A0A0A]',
-    labelClass: 'bg-[#141412] text-[#F5F5F0]',
+    previewBg: '#0A0A0A',
+    iconColor: '#F5F5F0',
+    labelBg: '#141412',
+    labelColor: '#F5F5F0',
   },
   {
     value: 'light',
     label: 'Claro',
     Icon: Sun,
-    previewClass: 'bg-[#FAFAF7]',
-    labelClass: 'bg-[#F5F5F0] text-[#0A0A0A]',
+    previewBg: '#FAFAF7',
+    iconColor: '#0A0A0A',
+    labelBg: '#F5F5F0',
+    labelColor: '#0A0A0A',
   },
   {
     value: 'system',
     label: 'Sistema',
     Icon: Monitor,
-    previewClass: 'bg-gradient-to-br from-[#0A0A0A] to-[#FAFAF7]',
-    labelClass: 'bg-muted text-foreground',
+    previewBg: 'linear-gradient(135deg, #0A0A0A 50%, #FAFAF7 50%)',
+    iconColor: '#8A8A82',
+    labelBg: 'transparent',
   },
 ]
 
@@ -52,6 +59,8 @@ export function ThemeSelector({ value, onChange, className }: ThemeSelectorProps
     >
       {OPTIONS.map((opt) => {
         const isSelected = value === opt.value
+        const isSystem = opt.value === 'system'
+
         return (
           <button
             key={opt.value}
@@ -59,27 +68,27 @@ export function ThemeSelector({ value, onChange, className }: ThemeSelectorProps
             aria-checked={isSelected}
             type="button"
             onClick={() => onChange(opt.value)}
+            style={{ height: '96px' }}
             className={cn(
-              'overflow-hidden rounded-[14px] border-[1.5px] transition-colors',
+              'flex flex-col overflow-hidden rounded-[14px] border-[1.5px] transition-colors',
               isSelected ? 'border-primary' : 'border-border',
             )}
           >
-            {/* Preview */}
-            <div className={cn('flex h-[80px] items-center justify-center', opt.previewClass)}>
-              <opt.Icon
-                size={28}
-                strokeWidth={1.5}
-                className={
-                  opt.value === 'dark'
-                    ? 'text-[#F5F5F0]'
-                    : opt.value === 'light'
-                      ? 'text-[#0A0A0A]'
-                      : 'text-[#8A8A82]'
-                }
-              />
+            {/* Preview — inline style ensures colors render regardless of current theme */}
+            <div
+              className="flex flex-1 items-center justify-center"
+              style={isSystem ? { background: opt.previewBg } : { backgroundColor: opt.previewBg }}
+            >
+              <opt.Icon size={28} strokeWidth={1.5} color={opt.iconColor} />
             </div>
             {/* Label */}
-            <div className={cn('py-2 text-center text-[12px] font-medium', opt.labelClass)}>
+            <div
+              className="py-2 text-center text-[12px] font-medium"
+              style={{
+                backgroundColor: isSystem ? undefined : opt.labelBg,
+                color: opt.labelColor,
+              }}
+            >
               {opt.label}
             </div>
           </button>
