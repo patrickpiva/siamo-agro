@@ -38,19 +38,20 @@ export default async function ConfiguracoesPage() {
   return (
     <div className="bg-background min-h-screen pb-[80px]">
       {/* Header */}
-      <header className="flex items-center gap-3 px-4 py-3">
+      <header className="flex items-center justify-between px-4 py-3">
         <Link
           href="/feed"
           aria-label="Voltar"
-          className="bg-muted flex size-[36px] items-center justify-center rounded-full"
+          className="bg-muted flex size-12 items-center justify-center rounded-full"
         >
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
         <p className="text-[15px] font-medium">Configurações</p>
+        <div className="w-12" />
       </header>
 
       {/* Profile strip */}
-      <Link href="/meu-perfil" className="mx-4 mb-4 block">
+      <Link href="/perfil" className="mx-4 mb-4 block">
         <div className="bg-card border-border flex items-center gap-3 rounded-[14px] border p-4">
           <div className="bg-accent flex size-[48px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full">
             {profile.photo ? (

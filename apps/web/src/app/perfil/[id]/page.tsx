@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ListingMiniCard } from '@agrolink/ui'
-import { Share2, Edit2 } from '@agrolink/ui/icons'
+import { Share2, Settings } from '@agrolink/ui/icons'
 import { BackButton } from '@/components/layout/back-button'
 import { prisma } from '@agrolink/db'
 import { getServerSession } from '@/lib/server-auth'
@@ -90,21 +90,21 @@ async function ProfileContent({ id }: { id: string }) {
         <BackButton fallbackHref="/feed" />
 
         {isOwn ? (
-          // Own profile: back left, actions right — no center title needed
+          // Own profile: back left, actions right — edit is the bottom CTA
           <div className="flex gap-2">
             <button
               type="button"
               aria-label="Compartilhar perfil"
               className="bg-muted flex size-12 items-center justify-center rounded-full"
             >
-              <Share2 size={16} strokeWidth={1.8} />
+              <Share2 size={18} strokeWidth={1.8} />
             </button>
             <Link
-              href="/perfil/editar"
-              aria-label="Editar perfil"
-              className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full"
+              href="/configuracoes"
+              aria-label="Configurações"
+              className="bg-muted flex size-12 items-center justify-center rounded-full"
             >
-              <Edit2 size={18} strokeWidth={1.8} />
+              <Settings size={18} strokeWidth={1.8} />
             </Link>
           </div>
         ) : (

@@ -111,10 +111,12 @@ export {
   Calendar,
   CalendarDays,
 
-  // Tema
+  // Tema e acessibilidade
   Moon,
   Sun,
   Monitor,
+  Zap,
+  Contrast,
 
   // Visual
   Home,
