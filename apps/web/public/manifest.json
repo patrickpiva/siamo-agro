@@ -1,6 +1,6 @@
 {
-  "name": "AgroLink",
-  "short_name": "AgroLink",
+  "name": "AgraIA",
+  "short_name": "AgraIA",
   "description": "Marketplace inteligente para o agronegócio brasileiro",
   "start_url": "/feed",
   "display": "standalone",

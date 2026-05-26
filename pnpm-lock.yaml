@@ -44,10 +44,10 @@ importers:
 
   apps/api:
     dependencies:
-      '@agrolink/db':
+      '@agraia/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@agrolink/shared':
+      '@agraia/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@fastify/cors':
@@ -108,13 +108,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@agrolink/db':
+      '@agraia/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@agrolink/shared':
+      '@agraia/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@agrolink/ui':
+      '@agraia/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@dnd-kit/core':

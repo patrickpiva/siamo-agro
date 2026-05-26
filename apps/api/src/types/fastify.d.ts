@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import '@fastify/jwt'
 
-// Extende o payload do JWT para incluir os campos do usuário AgroLink
+// Extende o payload do JWT para incluir os campos do usuário AgraIA
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: { id: string; phone: string }

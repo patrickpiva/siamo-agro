@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@agrolink/db'
+import type { PrismaClient } from '@agraia/db'
 import type { ListSavedQuery } from './schema.js'
 import { ListingNotFoundError } from './errors.js'
 

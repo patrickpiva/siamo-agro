@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
-import { CATEGORIES } from '@agrolink/shared'
+import { CATEGORIES } from '@agraia/shared'
 import { useWizardStore } from './use-wizard-store'
-import type { ListingKindKey } from '@agrolink/shared'
+import type { ListingKindKey } from '@agraia/shared'
 
 const KIND_LABELS: Record<string, string> = {
   OFFER: 'Oferta',

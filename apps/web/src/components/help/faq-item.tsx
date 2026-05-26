@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, ChevronUp } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { ChevronRight, ChevronUp } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 interface FaqItemProps {
   id: string

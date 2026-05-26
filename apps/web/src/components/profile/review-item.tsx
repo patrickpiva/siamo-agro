@@ -1,4 +1,4 @@
-import { MiniStarRating, formatBRL } from '@agrolink/ui'
+import { MiniStarRating, formatBRL } from '@agraia/ui'
 
 interface ReviewItemProps {
   score: number

@@ -1,6 +1,6 @@
-import { Clock, Check } from '@agrolink/ui/icons'
-import { CollectiveProgressBar } from '@agrolink/ui'
-import { cn } from '@agrolink/ui'
+import { Clock, Check } from '@agraia/ui/icons'
+import { CollectiveProgressBar } from '@agraia/ui'
+import { cn } from '@agraia/ui'
 
 export interface CollectiveCampaign {
   id: string

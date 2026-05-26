@@ -21,15 +21,15 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AgroLink',
-    template: '%s | AgroLink',
+    default: 'AgraIA',
+    template: '%s | AgraIA',
   },
   description: 'Conectando produtores rurais e prestadores de serviço no agronegócio brasileiro',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AgroLink',
+    title: 'AgraIA',
   },
 }
 

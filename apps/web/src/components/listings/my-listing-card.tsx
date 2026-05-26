@@ -1,5 +1,5 @@
-import { MoreVertical, Eye, MessageCircle, Star } from '@agrolink/ui/icons'
-import { KindBadge, StatusBadge } from '@agrolink/ui'
+import { MoreVertical, Eye, MessageCircle, Star } from '@agraia/ui/icons'
+import { KindBadge, StatusBadge } from '@agraia/ui'
 import type { Listing } from '@/lib/api'
 
 interface MyListingCardProps {

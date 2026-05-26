@@ -11,10 +11,10 @@ import {
   Shield,
   HelpCircle,
   Info,
-} from '@agrolink/ui/icons'
-import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@agrolink/ui'
+} from '@agraia/ui/icons'
+import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@agraia/ui'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { LogoutButton } from './logout-button'
 
 export const metadata: Metadata = { title: 'Configurações' }
@@ -136,7 +136,7 @@ export default async function ConfiguracoesPage() {
         />
         <SettingsRow
           icon={<Info size={18} strokeWidth={1.8} />}
-          title="Sobre o AgroLink"
+          title="Sobre o AgraIA"
           rightElement={<span className="text-muted-foreground font-mono text-[12px]">v1.0.0</span>}
         />
       </SettingsGroup>

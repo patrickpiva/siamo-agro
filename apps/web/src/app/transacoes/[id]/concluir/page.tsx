@@ -1,9 +1,9 @@
 import { notFound, redirect } from 'next/navigation'
 import { requireSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ListingContextStrip } from '@agrolink/ui'
-import { Clock } from '@agrolink/ui/icons'
+import { ListingContextStrip } from '@agraia/ui'
+import { Clock } from '@agraia/ui/icons'
 import { TransactionActionButton } from '@/components/transactions/transaction-actions'
 
 interface PageProps {

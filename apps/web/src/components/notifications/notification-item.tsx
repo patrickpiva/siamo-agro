@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { NotificationIcon } from '@agrolink/ui'
-import { cn } from '@agrolink/ui'
+import { NotificationIcon } from '@agraia/ui'
+import { cn } from '@agraia/ui'
 
 export type NotificationType =
   | 'PROPOSAL_RECEIVED'

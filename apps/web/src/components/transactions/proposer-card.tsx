@@ -1,6 +1,6 @@
-import { Star } from '@agrolink/ui/icons'
-import { ReputationSeal } from '@agrolink/ui'
-import { cn } from '@agrolink/ui'
+import { Star } from '@agraia/ui/icons'
+import { ReputationSeal } from '@agraia/ui'
+import { cn } from '@agraia/ui'
 
 interface ProposerCardProps {
   name: string
@@ -66,7 +66,7 @@ export function ProposerCard({
           <p className="font-mono text-[14px] font-medium">
             {memberYears} {memberYears === 1 ? 'ano' : 'anos'}
           </p>
-          <p className="text-muted-foreground text-[10px] leading-[1.3]">no AgroLink</p>
+          <p className="text-muted-foreground text-[10px] leading-[1.3]">no AgraIA</p>
         </div>
       </div>
     </div>

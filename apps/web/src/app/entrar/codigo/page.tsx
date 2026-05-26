@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, OTPInput } from '@agrolink/ui'
-import { Info } from '@agrolink/ui/icons'
+import { Button, BottomCTA, OTPInput } from '@agraia/ui'
+import { Info } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'

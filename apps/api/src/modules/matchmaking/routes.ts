@@ -1,6 +1,6 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '@agrolink/db'
-import { AppError } from '@agrolink/shared'
+import { prisma } from '@agraia/db'
+import { AppError } from '@agraia/shared'
 import { MatchmakingService } from './service.js'
 import {
   ListMatchesQuerySchema,

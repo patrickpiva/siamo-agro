@@ -1,5 +1,5 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { NotificationsService } from './service.js'
 import {
   ListNotificationsQuerySchema,

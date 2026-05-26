@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@agrolink/ui'
+import { Button } from '@agraia/ui'
 
 interface TransactionActionsProps {
   transactionId: string

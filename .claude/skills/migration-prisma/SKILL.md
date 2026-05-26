@@ -113,7 +113,7 @@ Commitar ambos juntos no mesmo commit.
 
 ```bash
 pnpm db:generate
-# Regenera @agrolink/db com os novos tipos
+# Regenera @agraia/db com os novos tipos
 ```
 
 Verificar que o TypeScript compila após a geração:

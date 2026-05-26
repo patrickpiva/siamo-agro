@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock } from '@agrolink/ui/icons'
-import { StateBanner, ListingContextStrip, BottomCTA, Button } from '@agrolink/ui'
+import { Clock } from '@agraia/ui/icons'
+import { StateBanner, ListingContextStrip, BottomCTA, Button } from '@agraia/ui'
 import { CompletionConfirmSplit } from '@/components/transactions/completion-confirm-split'
 import { ScreenHeader } from '@/components/layout/screen-header'
 

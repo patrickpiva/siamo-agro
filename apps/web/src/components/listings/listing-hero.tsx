@@ -1,8 +1,8 @@
 'use client'
 
 import useEmblaCarousel from 'embla-carousel-react'
-import { KindBadge } from '@agrolink/ui'
-import { cn } from '@agrolink/ui'
+import { KindBadge } from '@agraia/ui'
+import { cn } from '@agraia/ui'
 
 interface ListingHeroProps {
   photos: { url: string; alt?: string }[]

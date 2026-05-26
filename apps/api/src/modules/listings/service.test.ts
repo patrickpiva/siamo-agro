@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import type { PrismaClient } from '@agrolink/db'
+import type { PrismaClient } from '@agraia/db'
 import { ListingsService } from './service.js'
 import { ListingNotFoundError, ListingForbiddenError } from './errors.js'
 

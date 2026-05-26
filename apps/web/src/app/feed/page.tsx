@@ -1,14 +1,14 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Bell, Search } from '@agrolink/ui/icons'
+import { Bell, Search } from '@agraia/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { FeedTabs } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
-import { ListingCardSkeleton } from '@agrolink/ui'
+import { ListingCardSkeleton } from '@agraia/ui'
 
-export const metadata: Metadata = { title: 'Feed — AgroLink' }
+export const metadata: Metadata = { title: 'Feed — AgraIA' }
 
 type FeedTab = 'matches' | 'recent' | 'region' | 'saved'
 

@@ -2,7 +2,7 @@
 
 import { IMaskInput } from 'react-imask'
 import { Label } from '@/components/ui/label'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface PhoneInputProps {
   value: string

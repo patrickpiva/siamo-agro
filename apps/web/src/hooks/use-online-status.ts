@@ -27,7 +27,7 @@ export function useOnlineStatus(): OnlineStatus {
       // Drain queued messages and invalidate stale query cache
       await flushOfflineQueue()
       // Dispatch custom event so QueryClient can invalidate feed queries
-      window.dispatchEvent(new CustomEvent('agrolink:reconnected'))
+      window.dispatchEvent(new CustomEvent('agraia:reconnected'))
     }
 
     window.addEventListener('offline', handleOffline)

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { ListingCardSkeleton, EmptyState } from '@agrolink/ui'
-import { CoffeeBean } from '@agrolink/ui/icons'
+import { ListingCardSkeleton, EmptyState } from '@agraia/ui'
+import { CoffeeBean } from '@agraia/ui/icons'
 import { FeedCard } from '@/components/feed/feed-card'
 import type { FeedCardListing } from '@/components/feed/feed-card'
 import type { FetchListingsQuery, Listing } from '@/lib/api'
@@ -121,8 +121,8 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
   useEffect(() => {
     if (!isSaved) return
     const handler = () => void refetch()
-    window.addEventListener('agrolink:bookmark-toggled', handler)
-    return () => window.removeEventListener('agrolink:bookmark-toggled', handler)
+    window.addEventListener('agraia:bookmark-toggled', handler)
+    return () => window.removeEventListener('agraia:bookmark-toggled', handler)
   }, [isSaved, refetch])
 
   const loadMore = useCallback(() => {

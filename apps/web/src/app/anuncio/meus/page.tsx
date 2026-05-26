@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@agrolink/ui/icons'
+import { ArrowLeft } from '@agraia/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchMyListings } from '@/lib/api'
 import { MyListingsView } from '@/components/listings/my-listings-view'
 
-export const metadata: Metadata = { title: 'Meus anúncios · AgroLink' }
+export const metadata: Metadata = { title: 'Meus anúncios · AgraIA' }
 
 const STATUS_MAP: Record<string, string | undefined> = {
   active: 'ACTIVE',

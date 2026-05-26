@@ -30,7 +30,7 @@ const {
   mockAddNotifyMatchJob: vi.fn(),
 }))
 
-vi.mock('@agrolink/db', () => ({
+vi.mock('@agraia/db', () => ({
   prisma: {
     listing: { findUnique: mockListingFindUnique, findMany: mockListingFindMany },
     matchScore: {

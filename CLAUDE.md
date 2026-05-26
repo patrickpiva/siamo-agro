@@ -1,13 +1,13 @@
-# CLAUDE.md — AgroLink
+# CLAUDE.md — AgraIA
 
-Guia de desenvolvimento do AgroLink. Lido automaticamente em toda sessão.
+Guia de desenvolvimento do AgraIA. Lido automaticamente em toda sessão.
 Não apague seções; atualize-as quando houver mudanças de decisão.
 
 ---
 
 ## 1. VISÃO DO PRODUTO
 
-AgroLink é uma plataforma digital de marketplace B2B para o agronegócio brasileiro que conecta produtores rurais a prestadores de serviço (consultores agronômicos, operadores de máquinas, fornecedores de insumos). O diferencial está na reputação verificada dos prestadores, no sistema de matchmaking por localização/especialidade e na UX pensada para usuários com conectividade limitada no campo.
+AgraIA é uma plataforma digital de marketplace B2B para o agronegócio brasileiro que conecta produtores rurais a prestadores de serviço (consultores agronômicos, operadores de máquinas, fornecedores de insumos). O diferencial está na reputação verificada dos prestadores, no sistema de matchmaking por localização/especialidade e na UX pensada para usuários com conectividade limitada no campo.
 
 ---
 
@@ -28,7 +28,7 @@ AgroLink é uma plataforma digital de marketplace B2B para o agronegócio brasil
 **Estrutura de pastas**
 
 ```
-agrolink/
+agraia/
 ├── apps/
 │   ├── web/          → Next.js 15 (porta 3000)
 │   │   ├── app/      → App Router (Server Components por padrão)
@@ -66,10 +66,10 @@ agrolink/
 
 - Paths absolutos sempre via alias — nunca `../../`:
   - `@/` → raiz de `apps/web/` e `apps/api/`
-  - `@agrolink/db` → `packages/db`
-  - `@agrolink/shared` → `packages/shared`
-  - `@agrolink/ui` → `packages/ui`
-- Ordem de imports: node built-ins → third-party → internal (`@agrolink/*`) → local (`@/`)
+  - `@agraia/db` → `packages/db`
+  - `@agraia/shared` → `packages/shared`
+  - `@agraia/ui` → `packages/ui`
+- Ordem de imports: node built-ins → third-party → internal (`@agraia/*`) → local (`@/`)
 
 ### Validação
 
@@ -399,7 +399,7 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | `prisma db push` em produção                         | `migrate diff` → SQL Editor do Supabase               |
 | Hex direto em componentes (`#fff`, `#333`)           | CSS variables do tema (`hsl(var(--background))`)      |
 | `"use client"` desnecessário em Server Components    | Mantenha no servidor; desça só o que precisa          |
-| Imports relativos longos (`../../../lib/utils`)      | Aliases `@/lib/utils` ou `@agrolink/shared`           |
+| Imports relativos longos (`../../../lib/utils`)      | Aliases `@/lib/utils` ou `@agraia/shared`             |
 | PRs grandes com múltiplos propósitos                 | Um PR = um propósito; quebre se necessário            |
 | Editar arquivos gerados de `packages/ui` diretamente | Customize via `className` e CSS variables             |
 | Commitar diretamente em `main`                       | Sempre via feature branch + PR                        |
@@ -499,11 +499,11 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 **Base:** Button (variantes: cta, cta-disabled, ghost-muted), Input, Label, Textarea, Badge, Avatar, Separator, Progress, Skeleton, Card, Sheet, Tabs, RadioGroup, Select, Checkbox, Dialog, Drawer, DropdownMenu, Switch, Tooltip
 
-**AgroLink:** SearchBar, SuggestionChip, ListingCard (`isCached?: boolean`), ListingCardSkeleton, NotificationIcon, BottomCTA, BottomTabBar, SectionLabel, ProgressIndicator, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, ChatInput (`isOffline?: boolean`)
+**AgraIA:** SearchBar, SuggestionChip, ListingCard (`isCached?: boolean`), ListingCardSkeleton, NotificationIcon, BottomCTA, BottomTabBar, SectionLabel, ProgressIndicator, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, ChatInput (`isOffline?: boolean`)
 
 **Estados especiais:** EmptyState (`iconVariant: 'lime' | 'muted'`), ErrorScreen (`compact?: boolean`, `iconVariant: 'red' | 'amber' | 'blue'`)
 
-**Icons (`@agrolink/ui/icons`):** Re-exports Lucide + SVG custom: CoffeeBean, Agronomist, Tractor, Soybean, Corn, Cattle, Harvester, Irrigation, Soil, Farm, Offer, Demand, Service, Equipment, WhatsAppLogo. Map `CATEGORY_ICONS`.
+**Icons (`@agraia/ui/icons`):** Re-exports Lucide + SVG custom: CoffeeBean, Agronomist, Tractor, Soybean, Corn, Cattle, Harvester, Irrigation, Soil, Farm, Offer, Demand, Service, Equipment, WhatsAppLogo. Map `CATEGORY_ICONS`.
 
 ---
 
@@ -512,15 +512,15 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | Feature                   | Arquivo                                                                 | Notas                                                                                                                                               |
 | ------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Offline banner            | `components/offline-banner.tsx`                                         | Amber (offline) / azul pulsante (reconectando). Mount guard para evitar hydration mismatch.                                                         |
-| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agrolink:offline-queue`, max 3 retries, flush no reconnect                                                                            |
-| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agrolink:reconnected` custom event ao reconectar                                                                                           |
+| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agraia:offline-queue`, max 3 retries, flush no reconnect                                                                              |
+| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agraia:reconnected` custom event ao reconectar                                                                                             |
 | Service Worker            | `src/sw.ts`                                                             | Serwist v9. Desabilitado em dev. Handlers: StaleWhileRevalidate (listings/profiles), NetworkFirst (pages/notifications), NetworkOnly (transactions) |
 | PWA manifest              | `public/manifest.json`                                                  | Ícones SVG placeholder em `public/icons/` — PNGs ainda não gerados                                                                                  |
 | PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                  |
 | Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                         |
 | 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                   |
-| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agrolink:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                             |
-| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agrolink:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                    |
+| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agraia:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                               |
+| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agraia:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                      |
 | Feed tab "Matches"        | `components/feed-list.tsx` + `GET /me/feed/matches`                     | `computing: true` exibe spinner; `matchScore` 0–1 convertido p/ 0–100 no `FeedCard`; `distanceKm` repassado ao card                                 |
 | Bell unread count         | `app/feed/page.tsx`                                                     | Query paralela no servidor (`Promise.all`); ponto vermelho renderizado somente quando `unreadCount > 0`                                             |
 
@@ -535,7 +535,7 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | Botão voltar        | `bg-muted flex size-12 items-center justify-center rounded-full`   |
 | Ação primária (CTA) | `bg-cta-bg text-cta-fg`                                            |
 | Seção label         | `font-mono text-[10px] tracking-[0.4px]` uppercase                 |
-| Card de anúncio     | `ListingCard` de `@agrolink/ui`                                    |
+| Card de anúncio     | `ListingCard` de `@agraia/ui`                                      |
 
 ---
 
@@ -704,7 +704,7 @@ O delay é calculado em `msUntilNextBusinessHours()` em `queue.ts` e aplicado co
 
 ### Problema resolvido
 
-O fluxo de autenticação do AgroLink usa OTP via WhatsApp (Twilio). Em ambientes de desenvolvimento, QA e demonstrações não é desejável enviar mensagens reais — seja por custo, dependência de conectividade ou por expor números de telefone reais de testadores.
+O fluxo de autenticação do AgraIA usa OTP via WhatsApp (Twilio). Em ambientes de desenvolvimento, QA e demonstrações não é desejável enviar mensagens reais — seja por custo, dependência de conectividade ou por expor números de telefone reais de testadores.
 
 ### Solução
 

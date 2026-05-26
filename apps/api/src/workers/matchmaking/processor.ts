@@ -1,6 +1,6 @@
 import { Worker } from 'bullmq'
-import { prisma } from '@agrolink/db'
-import type { BadgeTier } from '@agrolink/db'
+import { prisma } from '@agraia/db'
+import type { BadgeTier } from '@agraia/db'
 import { computeMatchScore } from '../../modules/matchmaking/algorithm.js'
 import type { CandidateProfile } from '../../modules/matchmaking/algorithm.js'
 import { createWhatsAppAdapter } from '../../integrations/whatsapp/index.js'

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@agrolink/ui'
+import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@agraia/ui'
 import { ScreenHeader } from '@/components/layout/screen-header'
 
 // Mock — Sprint 4: GET /api/v1/transactions/:id

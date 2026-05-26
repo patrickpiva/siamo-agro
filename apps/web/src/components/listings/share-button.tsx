@@ -1,6 +1,6 @@
 'use client'
 
-import { Share2 } from '@agrolink/ui/icons'
+import { Share2 } from '@agraia/ui/icons'
 
 interface ShareButtonProps {
   title: string

@@ -4,14 +4,14 @@
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@agrolink/web", "dev"],
+      "runtimeArgs": ["--filter", "@agraia/web", "dev"],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "api",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@agrolink/api", "dev"],
+      "runtimeArgs": ["--filter", "@agraia/api", "dev"],
       "port": 3001,
       "autoPort": true
     }

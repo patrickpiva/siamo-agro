@@ -2,14 +2,14 @@
 
 import { Suspense, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, TrendingUp, Clock, Filter, Map, Search } from '@agrolink/ui/icons'
-import { CATEGORY_ICONS } from '@agrolink/ui/icons'
-import { SearchBar, SuggestionChip, EmptyState } from '@agrolink/ui'
+import { ArrowLeft, TrendingUp, Clock, Filter, Map, Search } from '@agraia/ui/icons'
+import { CATEGORY_ICONS } from '@agraia/ui/icons'
+import { SearchBar, SuggestionChip, EmptyState } from '@agraia/ui'
 import { FilterSheet } from '@/components/search/filter-sheet'
 import { ResultItem } from '@/components/search/result-item'
 import type { ResultItemData } from '@/components/search/result-item'
 import type { FilterValues } from '@/components/search/filter-sheet'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 import Link from 'next/link'
 
 // Mock results matching the design spec

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button, BottomCTA } from '@agrolink/ui'
-import { WhatsAppLogo } from '@agrolink/ui/icons'
+import { Button, BottomCTA } from '@agraia/ui'
+import { WhatsAppLogo } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { getServerSession } from '@/lib/server-auth'
 
@@ -15,7 +15,7 @@ export default async function LandingPage() {
       {/* Logo */}
       <div className="px-6 pt-14 text-center">
         <span className="text-accent-forest dark:text-accent-lime font-mono text-2xl font-medium tracking-[-0.5px]">
-          [AgroLink]
+          [AgraIA]
         </span>
       </div>
 
@@ -48,7 +48,7 @@ export default async function LandingPage() {
           <Link href="/entrar">Entrar com WhatsApp</Link>
         </Button>
         <Button variant="ghost-muted" asChild>
-          <Link href="/sobre">Saiba mais sobre o AgroLink</Link>
+          <Link href="/sobre">Saiba mais sobre o AgraIA</Link>
         </Button>
       </BottomCTA>
     </main>

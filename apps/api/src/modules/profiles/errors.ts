@@ -1,4 +1,4 @@
-import { AppError } from '@agrolink/shared'
+import { AppError } from '@agraia/shared'
 
 export class ProfileAlreadyExistsError extends AppError {
   constructor() {

@@ -1,4 +1,4 @@
-import type { BadgeTier, ListingKind, ListingStatus } from '@agrolink/db'
+import type { BadgeTier, ListingKind, ListingStatus } from '@agraia/db'
 
 // ─── Weights ──────────────────────────────────────────────────────────────────
 //

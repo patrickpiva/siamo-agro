@@ -196,7 +196,7 @@
     C = {},
     P = new WeakMap(),
     T = new WeakMap(),
-    k = {
+    A = {
       get(e, t) {
         if (!N.includes(t)) return e[t]
         let a = C[t]
@@ -210,10 +210,10 @@
         )
       },
     }
-  async function* A(...e) {
+  async function* k(...e) {
     let t = this
     if ((t instanceof IDBCursor || (t = await t.openCursor(...e)), !t)) return
-    let a = new Proxy(t, k)
+    let a = new Proxy(t, A)
     for (T.set(a, t), _.set(a, v(t)); t; )
       (yield a, (t = await (P.get(a) || t.continue())), P.delete(a))
   }
@@ -225,7 +225,7 @@
   }
   x = ((e) => ({
     ...e,
-    get: (t, a, s) => (I(t, a) ? A : e.get(t, a, s)),
+    get: (t, a, s) => (I(t, a) ? k : e.get(t, a, s)),
     has: (t, a) => I(t, a) || e.has(t, a),
   }))(x)
   let U = async (t, a) => {
@@ -1823,187 +1823,205 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
   new eb({
     precacheEntries: [
       {
-        revision: '2f9e9032c3cc87b9138b2f3e11639e91',
-        url: '/_next/static/Pg5n0oywcS8A2_RG7AUz8/_buildManifest.js',
+        revision: '30fefb0f2afc68c94abf6cfd02cd5b00',
+        url: '/_next/static/5txdsolsDupQ-MTOQ6qir/_buildManifest.js',
       },
       {
         revision: 'b6652df95db52feb4daf4eca35380933',
-        url: '/_next/static/Pg5n0oywcS8A2_RG7AUz8/_ssgManifest.js',
+        url: '/_next/static/5txdsolsDupQ-MTOQ6qir/_ssgManifest.js',
       },
-      { revision: null, url: '/_next/static/chunks/1220-1c2a047c70dbcec2.js' },
-      { revision: null, url: '/_next/static/chunks/1775-4cfdfab0e0ea8e1d.js' },
-      { revision: null, url: '/_next/static/chunks/2575-e91494d6c1a05e3f.js' },
-      { revision: null, url: '/_next/static/chunks/2673.077170ecb82730b2.js' },
-      { revision: null, url: '/_next/static/chunks/3000-f7d2b1e81e629336.js' },
-      { revision: null, url: '/_next/static/chunks/3708-3fcf0687999ca462.js' },
-      { revision: null, url: '/_next/static/chunks/3867-3da9621661fdd007.js' },
-      { revision: null, url: '/_next/static/chunks/3947-1c1eb99c18b3d9de.js' },
-      { revision: null, url: '/_next/static/chunks/4056-36b1b87ad9ac33e5.js' },
-      { revision: null, url: '/_next/static/chunks/4683-ee387365d37ed3ef.js' },
-      { revision: null, url: '/_next/static/chunks/473-13b032fc3ecd1603.js' },
-      { revision: null, url: '/_next/static/chunks/9007-c4a3c5efe4dd3613.js' },
-      { revision: null, url: '/_next/static/chunks/9822-27e6193ee057db4b.js' },
-      { revision: null, url: '/_next/static/chunks/9987-284b6f24159ec1d8.js' },
-      { revision: null, url: '/_next/static/chunks/a29c5da9-11da498635040961.js' },
-      { revision: null, url: '/_next/static/chunks/app/_not-found/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/ajuda/page-0b706459f290a8d7.js' },
+      { revision: null, url: '/_next/static/chunks/1220-d905499e8eb63094.js' },
+      { revision: null, url: '/_next/static/chunks/2540-8c8267b66d2e730b.js' },
+      { revision: null, url: '/_next/static/chunks/2673.e25a8f88ede4e914.js' },
+      { revision: null, url: '/_next/static/chunks/3000-e00a17d2f25da224.js' },
+      { revision: null, url: '/_next/static/chunks/3708-db8999161a8146a7.js' },
+      { revision: null, url: '/_next/static/chunks/3867-b7916a5899776484.js' },
+      { revision: null, url: '/_next/static/chunks/3947-c381b2b7314ab952.js' },
+      { revision: null, url: '/_next/static/chunks/4050-db5cdf75cc323903.js' },
+      { revision: null, url: '/_next/static/chunks/4056-7bb0cffe5ed4ed59.js' },
+      { revision: null, url: '/_next/static/chunks/4683-eff81d055df9329e.js' },
+      { revision: null, url: '/_next/static/chunks/473-804cf5499c45b964.js' },
+      { revision: null, url: '/_next/static/chunks/51-583d3638b75adb8d.js' },
+      { revision: null, url: '/_next/static/chunks/9822-46f38513dc5f489e.js' },
+      { revision: null, url: '/_next/static/chunks/9882-438e935df3bc72fc.js' },
+      { revision: null, url: '/_next/static/chunks/9987-be09644461c7d7dd.js' },
+      { revision: null, url: '/_next/static/chunks/a29c5da9-68f87ed484caa559.js' },
+      { revision: null, url: '/_next/static/chunks/a4ae5d20-91643fd1a4c5f378.js' },
+      { revision: null, url: '/_next/static/chunks/app/_not-found/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/ajuda/page-3a1bce19dd7ded34.js' },
       {
         revision: null,
-        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/editar/page-cf0df6a2385b9dac.js',
-      },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/matches/page-0b46c6cb73be3a9c.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/anuncio/%5Bid%5D/page-1fd045de86865a30.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/proposta/page-5bfd631b5e33b432.js',
+        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/editar/page-1f95f9573ac8b974.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/propostas/page-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/matches/page-9bab561b6addae30.js',
       },
-      { revision: null, url: '/_next/static/chunks/app/anuncio/meus/page-1ce30c97eb71d812.js' },
+      { revision: null, url: '/_next/static/chunks/app/anuncio/%5Bid%5D/page-417189cf235d56ee.js' },
       {
         revision: null,
-        url: '/_next/static/chunks/app/anuncio/novo/categoria/page-dc6c3d28b49cc4f0.js',
-      },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/anuncio/novo/detalhes/page-f04bc83582884831.js',
+        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/proposta/page-24d82788253cc925.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/anuncio/novo/fotos/page-ffe9b30850ff63d5.js',
+        url: '/_next/static/chunks/app/anuncio/%5Bid%5D/propostas/page-edf53c4bc36950b9.js',
       },
-      { revision: null, url: '/_next/static/chunks/app/anuncio/novo/layout-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/anuncio/novo/page-78fa95297515692c.js' },
+      { revision: null, url: '/_next/static/chunks/app/anuncio/meus/page-a26eb28efb3ab08d.js' },
       {
         revision: null,
-        url: '/_next/static/chunks/app/anuncio/novo/revisao/page-85070fb9acd52cb9.js',
-      },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/anuncio/novo/sucesso/page-b09b798a76384067.js',
+        url: '/_next/static/chunks/app/anuncio/novo/categoria/page-e64e0e0668e8fa74.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/auth/otp/request/route-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/anuncio/novo/detalhes/page-d86147d5aead2e38.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/auth/otp/verify/route-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/anuncio/novo/fotos/page-96a22da6ce864cd9.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/anuncio/novo/layout-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/anuncio/novo/page-2ea23776e7636a26.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/anuncio/novo/revisao/page-dd51ee5b650cc613.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/matches/route-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/anuncio/novo/sucesso/page-e02e2d3cfec01d5d.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/pause/route-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/api/auth/otp/request/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/route-e609383caa0adebf.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/api/listings/route-e609383caa0adebf.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/api/v1/privacy/consent/route-e609383caa0adebf.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/api/v1/profiles/route-e609383caa0adebf.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/api/v1/uploads/confirm/route-e609383caa0adebf.js',
+        url: '/_next/static/chunks/app/api/auth/otp/verify/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/api/v1/uploads/presigned/route-e609383caa0adebf.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/busca/page-43884cc410164d09.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/cadastro/consentimento/page-eed5d0bcb958b43a.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/cadastro/dados/page-de02d297c47df495.js' },
-      { revision: null, url: '/_next/static/chunks/app/cadastro/foto/page-4cfd40097ce202e0.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/cadastro/localizacao/page-00e9ce548e04b20e.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/cadastro/perfil/page-87a7d6a69ad8fe1a.js' },
-      { revision: null, url: '/_next/static/chunks/app/cadastro/pronto/page-0b46c6cb73be3a9c.js' },
-      { revision: null, url: '/_next/static/chunks/app/coletivas/nova/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/coletivas/page-0b46c6cb73be3a9c.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/configuracoes/aparencia/page-11d0ac0a3f0f009e.js',
+        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/matches/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/configuracoes/notificacoes/page-3ae3f72f33e5d6fb.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/configuracoes/page-21379283b8488e4e.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/configuracoes/privacidade/page-d7a3a845f1a636a1.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/design-system/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/entrar/codigo/page-cb243d1430f5e18c.js' },
-      { revision: null, url: '/_next/static/chunks/app/entrar/page-a768b794c7037592.js' },
-      { revision: null, url: '/_next/static/chunks/app/error-2ecdc22a7ff84065.js' },
-      { revision: null, url: '/_next/static/chunks/app/feed/page-ad6d694a724530b5.js' },
-      { revision: null, url: '/_next/static/chunks/app/layout-46e9269db6405f31.js' },
-      { revision: null, url: '/_next/static/chunks/app/match/%5Bid%5D/page-0b46c6cb73be3a9c.js' },
-      { revision: null, url: '/_next/static/chunks/app/matches/page-600e813d9e7b6a01.js' },
-      { revision: null, url: '/_next/static/chunks/app/not-found-6f499531d701a1ff.js' },
-      { revision: null, url: '/_next/static/chunks/app/notificacoes/page-b7bec3baadd40a74.js' },
-      { revision: null, url: '/_next/static/chunks/app/page-0b46c6cb73be3a9c.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/perfil/%5Bid%5D/loading-a1466201a42fe1bb.js',
-      },
-      { revision: null, url: '/_next/static/chunks/app/perfil/%5Bid%5D/page-690f3e29e42b2877.js' },
-      { revision: null, url: '/_next/static/chunks/app/perfil/editar/page-06b026191b554e83.js' },
-      { revision: null, url: '/_next/static/chunks/app/perfil/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/privacidade/page-e609383caa0adebf.js' },
-      {
-        revision: null,
-        url: '/_next/static/chunks/app/proposta/%5Bid%5D/enviada/page-0b46c6cb73be3a9c.js',
+        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/pause/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/proposta/%5Bid%5D/page-45b933b10e8e4616.js',
+        url: '/_next/static/chunks/app/api/listings/%5Bid%5D/route-dd0f0b0006d74985.js',
       },
-      { revision: null, url: '/_next/static/chunks/app/propostas/page-46c17e8fe15c6197.js' },
-      { revision: null, url: '/_next/static/chunks/app/sobre/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/termos/page-e609383caa0adebf.js' },
-      { revision: null, url: '/_next/static/chunks/app/test/switch/page-a1fad3c081f4d44d.js' },
+      { revision: null, url: '/_next/static/chunks/app/api/listings/route-dd0f0b0006d74985.js' },
       {
         revision: null,
-        url: '/_next/static/chunks/app/transacao/%5Bid%5D/avaliar/page-063024a27eb6e806.js',
+        url: '/_next/static/chunks/app/api/proxy/%5B...path%5D/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/transacao/%5Bid%5D/concluir/page-6350876efc79f38a.js',
+        url: '/_next/static/chunks/app/api/v1/privacy/consent/route-dd0f0b0006d74985.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/api/v1/profiles/route-dd0f0b0006d74985.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/api/v1/uploads/confirm/route-dd0f0b0006d74985.js',
       },
       {
         revision: null,
-        url: '/_next/static/chunks/app/transacao/%5Bid%5D/page-d143b13bcb8eca52.js',
+        url: '/_next/static/chunks/app/api/v1/uploads/presigned/route-dd0f0b0006d74985.js',
       },
-      { revision: null, url: '/_next/static/chunks/app/transacoes/page-f23ca9ad1bd53ed4.js' },
-      { revision: null, url: '/_next/static/chunks/framework-926c108105450e03.js' },
-      { revision: null, url: '/_next/static/chunks/main-8cf8735510d73443.js' },
-      { revision: null, url: '/_next/static/chunks/main-app-abe4d6b1c421d49f.js' },
-      { revision: null, url: '/_next/static/chunks/pages/_app-ee9ba1aef9914023.js' },
-      { revision: null, url: '/_next/static/chunks/pages/_error-0c2ba06330a9db5d.js' },
+      { revision: null, url: '/_next/static/chunks/app/busca/page-cc5d6f7b24b72582.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/cadastro/consentimento/page-f72dc1e98f704881.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/cadastro/dados/page-c973755e0fbd748f.js' },
+      { revision: null, url: '/_next/static/chunks/app/cadastro/foto/page-fe9fd38f24ad39f3.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/cadastro/localizacao/page-a9f41c9920ad94f5.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/cadastro/perfil/page-807cfdbfe366bf2b.js' },
+      { revision: null, url: '/_next/static/chunks/app/cadastro/pronto/page-9bab561b6addae30.js' },
+      { revision: null, url: '/_next/static/chunks/app/coletivas/nova/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/coletivas/page-9bab561b6addae30.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/configuracoes/aparencia/page-53ac9554d4596ca0.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/configuracoes/notificacoes/page-082fe36744a45692.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/configuracoes/page-135eae18b4acd214.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/configuracoes/privacidade/page-6125d27125f39053.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/design-system/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/entrar/codigo/page-f94ec40aad9af3b4.js' },
+      { revision: null, url: '/_next/static/chunks/app/entrar/page-956ed476b3b0890a.js' },
+      { revision: null, url: '/_next/static/chunks/app/error-f60341d88b3baf87.js' },
+      { revision: null, url: '/_next/static/chunks/app/feed/page-bcbe4b2adb8b03d8.js' },
+      { revision: null, url: '/_next/static/chunks/app/layout-9099a549475d3e64.js' },
+      { revision: null, url: '/_next/static/chunks/app/match/%5Bid%5D/page-9bab561b6addae30.js' },
+      { revision: null, url: '/_next/static/chunks/app/matches/page-221839af3cc01ddb.js' },
+      { revision: null, url: '/_next/static/chunks/app/not-found-5c722f37ce4260a1.js' },
+      { revision: null, url: '/_next/static/chunks/app/notificacoes/page-bb48889d1c3c6b4b.js' },
+      { revision: null, url: '/_next/static/chunks/app/page-9bab561b6addae30.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/perfil/%5Bid%5D/loading-0df07d7099718f7c.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/perfil/%5Bid%5D/page-768ac120263b8318.js' },
+      { revision: null, url: '/_next/static/chunks/app/perfil/editar/page-a5e5d28a4fced9bf.js' },
+      { revision: null, url: '/_next/static/chunks/app/perfil/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/privacidade/page-dd0f0b0006d74985.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/proposta/%5Bid%5D/enviada/page-9bab561b6addae30.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/proposta/%5Bid%5D/page-2381aa8209193c0b.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/propostas/page-c5c06b5f9c5aaabc.js' },
+      { revision: null, url: '/_next/static/chunks/app/sobre/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/termos/page-dd0f0b0006d74985.js' },
+      { revision: null, url: '/_next/static/chunks/app/test/switch/page-9c251ef0e1a30231.js' },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacao/%5Bid%5D/avaliar/page-f414e4a3fbfc9986.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacao/%5Bid%5D/concluir/page-5f49ac531f430ac6.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacao/%5Bid%5D/page-f4141354a0c80380.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacoes/%5Bid%5D/avaliar/page-3e960f59db4c1351.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacoes/%5Bid%5D/concluir/page-8d83515cc4c21554.js',
+      },
+      {
+        revision: null,
+        url: '/_next/static/chunks/app/transacoes/%5Bid%5D/page-a8649077aba73ccb.js',
+      },
+      { revision: null, url: '/_next/static/chunks/app/transacoes/page-9bab561b6addae30.js' },
+      { revision: null, url: '/_next/static/chunks/framework-71a05223244a9350.js' },
+      { revision: null, url: '/_next/static/chunks/main-9e7f011c23f55a9c.js' },
+      { revision: null, url: '/_next/static/chunks/main-app-45e68cf99ecd3d0e.js' },
+      { revision: null, url: '/_next/static/chunks/pages/_app-7c5dcf9314380093.js' },
+      { revision: null, url: '/_next/static/chunks/pages/_error-2cb582df2ccc2e57.js' },
       {
         revision: '846118c33b2c0e922d7b3a7676f81f6f',
         url: '/_next/static/chunks/polyfills-42372ed130431b0a.js',
       },
-      { revision: null, url: '/_next/static/chunks/webpack-bf635dabd30fbd18.js' },
-      { revision: null, url: '/_next/static/css/b90d81c5ba9450fc.css' },
+      { revision: null, url: '/_next/static/chunks/webpack-8aa9f2892a73dc6d.js' },
+      { revision: null, url: '/_next/static/css/9637647a855a3eee.css' },
       {
         revision: '9dda5cfc9a46f256d0e131bb535e46f8',
         url: '/_next/static/media/19cfc7226ec3afaa-s.woff2',
@@ -2057,7 +2075,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
         url: '/_next/static/media/ff71da380fbe67dd-s.woff2',
       },
       { revision: '0047e91a1ea053a2f7246021ba9f2184', url: '/icons/icon.svg' },
-      { revision: 'e9a2250ecb2c55615ef05dc2340752c7', url: '/manifest.json' },
+      { revision: '5922d21e4ab3c4e4f1842af755080b51', url: '/manifest.json' },
     ],
     skipWaiting: !0,
     clientsClaim: !0,
@@ -2073,7 +2091,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           )
         },
         handler: new ey({
-          cacheName: 'agrolink-api-listings',
+          cacheName: 'agraia-api-listings',
           plugins: [new eu({ maxEntries: 50, maxAgeSeconds: 21600 })],
         }),
       },
@@ -2086,7 +2104,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           )
         },
         handler: new ey({
-          cacheName: 'agrolink-api-profiles',
+          cacheName: 'agraia-api-profiles',
           plugins: [new eu({ maxEntries: 30, maxAgeSeconds: 21600 })],
         }),
       },
@@ -2099,7 +2117,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           )
         },
         handler: new X({
-          cacheName: 'agrolink-api-notifications',
+          cacheName: 'agraia-api-notifications',
           plugins: [new eu({ maxEntries: 20, maxAgeSeconds: 3600 })],
           networkTimeoutSeconds: 5,
         }),
@@ -2122,7 +2140,7 @@ This is generally NOT safe. Learn more at https://bit.ly/wb-precache`)
           return 'navigate' === t.mode
         },
         handler: new X({
-          cacheName: 'agrolink-pages',
+          cacheName: 'agraia-pages',
           plugins: [new eu({ maxEntries: 20, maxAgeSeconds: 86400 })],
           networkTimeoutSeconds: 5,
         }),

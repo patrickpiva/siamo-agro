@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Check } from '@agrolink/ui/icons'
+import { Check } from '@agraia/ui/icons'
 import { fetchListing } from '@/lib/api'
 import { ShareButton } from '@/components/listings/share-button'
 
@@ -106,7 +106,7 @@ async function SuccessContent({ id }: { id: string }) {
         </Link>
         <div className="grid grid-cols-2 gap-2">
           <ShareButton
-            title={listing?.title ?? 'Anúncio no AgroLink'}
+            title={listing?.title ?? 'Anúncio no AgraIA'}
             url={`${appUrl}/anuncio/${id}`}
           />
           <Link

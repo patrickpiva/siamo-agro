@@ -1,4 +1,4 @@
-import { AppError } from '@agrolink/shared'
+import { AppError } from '@agraia/shared'
 
 export class MatchesListingNotFoundError extends AppError {
   constructor(id: string) {

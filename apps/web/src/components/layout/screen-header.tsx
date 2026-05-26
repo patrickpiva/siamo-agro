@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { ArrowLeft } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 interface ScreenHeaderProps {
   backHref?: string

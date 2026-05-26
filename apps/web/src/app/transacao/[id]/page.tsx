@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { StateBanner, ChatBubble, ChatInput } from '@agrolink/ui'
+import { StateBanner, ChatBubble, ChatInput } from '@agraia/ui'
 import { TransactionStrip } from '@/components/transactions/transaction-strip'
 import { ScreenHeader } from '@/components/layout/screen-header'
 

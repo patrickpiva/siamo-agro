@@ -1,4 +1,4 @@
-import { AppError } from '@agrolink/shared'
+import { AppError } from '@agraia/shared'
 
 // OTP request
 export class OtpRateLimitError extends AppError {

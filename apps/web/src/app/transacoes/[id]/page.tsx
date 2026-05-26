@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { requireSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@agrolink/ui'
-import { MoreVertical } from '@agrolink/ui/icons'
+import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@agraia/ui'
+import { MoreVertical } from '@agraia/ui/icons'
 import { ChatView } from '@/components/transactions/chat-view'
 import {
   TransactionActionButton,

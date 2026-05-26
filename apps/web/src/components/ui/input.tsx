@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string

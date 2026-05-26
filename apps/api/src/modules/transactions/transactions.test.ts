@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import type { TransactionStatus, CancellationReason } from '@agrolink/db'
+import type { TransactionStatus, CancellationReason } from '@agraia/db'
 import { TransactionService } from './service.js'
 import {
   TransactionNotFoundError,

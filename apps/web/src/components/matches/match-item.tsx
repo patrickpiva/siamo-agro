@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin } from '@agrolink/ui/icons'
-import { MatchScoreBadge } from '@agrolink/ui'
-import { Star } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { MapPin } from '@agraia/ui/icons'
+import { MatchScoreBadge } from '@agraia/ui'
+import { Star } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 export interface MatchItemData {
   id: string

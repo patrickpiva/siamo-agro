@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Route } from 'next'
-import { MatchScoreBadge } from '@agrolink/ui'
+import { MatchScoreBadge } from '@agraia/ui'
 import type { MatchResult } from '@/lib/matches-api'
 
 interface MatchCardProps {

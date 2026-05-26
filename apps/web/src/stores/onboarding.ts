@@ -90,7 +90,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       reset: () => set(initialState),
     }),
     {
-      name: 'agrolink:onboarding',
+      name: 'agraia:onboarding',
       storage: createJSONStorage(() => sessionStorage),
     },
   ),

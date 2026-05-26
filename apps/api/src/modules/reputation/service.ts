@@ -1,7 +1,7 @@
-import type { PrismaClient } from '@agrolink/db'
+import type { PrismaClient } from '@agraia/db'
 import type { SubmitRatingBody } from './schema.js'
 import { RatingNotAllowedError, RatingConflictError, ProfileNotFoundError } from './errors.js'
-import { Prisma } from '@agrolink/db'
+import { Prisma } from '@agraia/db'
 import { computeReputation } from './algorithm.js'
 import { addReputationRecomputeJob } from '../../workers/reputation/queue.js'
 

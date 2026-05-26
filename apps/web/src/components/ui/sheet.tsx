@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 const Sheet = DialogPrimitive.Root
 const SheetTrigger = DialogPrimitive.Trigger

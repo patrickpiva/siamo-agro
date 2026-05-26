@@ -2,10 +2,10 @@ import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ListingMiniCard } from '@agrolink/ui'
-import { Share2, Settings } from '@agrolink/ui/icons'
+import { ListingMiniCard } from '@agraia/ui'
+import { Share2, Settings } from '@agraia/ui/icons'
 import { BackButton } from '@/components/layout/back-button'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { getServerSession } from '@/lib/server-auth'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
@@ -70,10 +70,10 @@ async function getReputation(profileId: string): Promise<ReputationData | null> 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { id } = await params
   const profile = await getProfile(id)
-  if (!profile) return { title: 'Perfil não encontrado — AgroLink' }
+  if (!profile) return { title: 'Perfil não encontrado — AgraIA' }
   return {
-    title: `${profile.name} — AgroLink`,
-    description: `Perfil de ${profile.name} no AgroLink. Nota ${profile.currentRating.toFixed(1)}.`,
+    title: `${profile.name} — AgraIA`,
+    description: `Perfil de ${profile.name} no AgraIA. Nota ${profile.currentRating.toFixed(1)}.`,
   }
 }
 

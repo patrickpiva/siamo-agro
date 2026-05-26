@@ -3,8 +3,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, CheckCircle } from '@agrolink/ui/icons'
-import { cn, EmptyState } from '@agrolink/ui'
+import { ArrowLeft, CheckCircle } from '@agraia/ui/icons'
+import { cn, EmptyState } from '@agraia/ui'
 import {
   NotificationItem,
   type NotificationData,

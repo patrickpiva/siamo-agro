@@ -78,7 +78,7 @@ export class TwilioAdapter implements WhatsAppAdapter {
       '[Twilio] TWILIO_CONTENT_SID não configurado — usando texto livre. Sujeito a erro "Outside messaging window".',
     )
 
-    const message = `Seu código de acesso AgroLink é: ${code}. Válido por 5 minutos. Não compartilhe.`
+    const message = `Seu código de acesso AgraIA é: ${code}. Válido por 5 minutos. Não compartilhe.`
 
     const body = new URLSearchParams({
       From: this.fromNumber,

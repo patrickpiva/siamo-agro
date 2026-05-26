@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { Route } from 'next'
-import { ChatBubble, ChatInput } from '@agrolink/ui'
-import { CheckCircle } from '@agrolink/ui/icons'
+import { ChatBubble, ChatInput } from '@agraia/ui'
+import { CheckCircle } from '@agraia/ui/icons'
 import { getSupabase } from '@/lib/supabase-client'
 
 interface Message {

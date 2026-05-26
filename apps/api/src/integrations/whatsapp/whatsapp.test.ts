@@ -129,14 +129,14 @@ describe('MockAdapter', () => {
 
     const [call] = adapter.getCalls()
     expect(call?.renderedBody).toContain('654321')
-    expect(call?.renderedBody).toContain('AgroLink')
+    expect(call?.renderedBody).toContain('AgraIA')
     expect(call?.renderedBody).toContain('5 minutos')
   })
 
   it('sendNotification registra template e params corretamente', async () => {
     await adapter.sendNotification('+5511999990001', 'new_match', {
       listing: 'Pulverização de soja',
-      url: 'https://agrolink.com.br/matches/123',
+      url: 'https://agra.ia.br/matches/123',
     })
 
     const calls = adapter.getCalls()
@@ -153,7 +153,7 @@ describe('MockAdapter', () => {
       name: 'João Silva',
       listing: 'Colheita de milho',
       amount: '1.500,00',
-      url: 'https://agrolink.com.br/proposals/456',
+      url: 'https://agra.ia.br/proposals/456',
     })
 
     const [call] = adapter.getCalls()

@@ -6,7 +6,7 @@ import { getUserActiveListings } from '@/lib/server-listings'
 import { MobileNavBar } from '@/components/mobile-nav-bar'
 import { MatchesPageClient } from './matches-page-client'
 
-export const metadata: Metadata = { title: 'Meus Matches — AgroLink' }
+export const metadata: Metadata = { title: 'Meus Matches — AgraIA' }
 
 export default async function MatchesPage() {
   const session = await getServerSession()

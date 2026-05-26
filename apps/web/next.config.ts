@@ -8,7 +8,7 @@ import withSerwistInit from '@serwist/next'
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
-  transpilePackages: ['@agrolink/ui', '@agrolink/shared'],
+  transpilePackages: ['@agraia/ui', '@agraia/shared'],
   // Derives NEXT_PUBLIC_* vars from their server-side counterparts so client
   // components get the values without requiring duplicate entries in .env.
   env: {

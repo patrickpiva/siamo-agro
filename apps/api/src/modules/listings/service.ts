@@ -1,6 +1,6 @@
-import { Prisma, type $Enums } from '@agrolink/db'
-import type { PrismaClient } from '@agrolink/db'
-import { isCategoryValidForKind } from '@agrolink/shared'
+import { Prisma, type $Enums } from '@agraia/db'
+import type { PrismaClient } from '@agraia/db'
+import { isCategoryValidForKind } from '@agraia/shared'
 import { addComputeMatchesJob } from '../../queues/listings-queue.js'
 import {
   ListingNotFoundError,

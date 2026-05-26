@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ReputationSeal } from '@agrolink/ui'
+import { ReputationSeal } from '@agraia/ui'
 
 interface ReputationHeroProps {
   name: string
@@ -61,7 +61,7 @@ export function ReputationHero({
 
       {/* Sub */}
       <p className="text-muted-foreground text-[12px] leading-[1.4]">
-        {TYPE_LABEL[type] ?? type} · {city}, {state} · no AgroLink há {memberYears}{' '}
+        {TYPE_LABEL[type] ?? type} · {city}, {state} · no AgraIA há {memberYears}{' '}
         {memberYears === 1 ? 'ano' : 'anos'}
       </p>
     </div>

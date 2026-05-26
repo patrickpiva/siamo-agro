@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 export type FeedTab = 'matches' | 'recent' | 'region' | 'saved'
 

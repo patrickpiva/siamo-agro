@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@agrolink/ui/components",
-    "utils": "@agrolink/ui/lib/utils",
-    "ui": "@agrolink/ui/components",
-    "lib": "@agrolink/ui/lib",
-    "hooks": "@agrolink/ui/hooks"
+    "components": "@agraia/ui/components",
+    "utils": "@agraia/ui/lib/utils",
+    "ui": "@agraia/ui/components",
+    "lib": "@agraia/ui/lib",
+    "hooks": "@agraia/ui/hooks"
   },
   "iconLibrary": "lucide"
 }

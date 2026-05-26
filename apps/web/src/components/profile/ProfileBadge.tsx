@@ -1,5 +1,5 @@
 import { Medal } from 'lucide-react'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 import type { BadgeTier } from '@/lib/profile-mock'
 
 interface ProfileBadgeProps {
