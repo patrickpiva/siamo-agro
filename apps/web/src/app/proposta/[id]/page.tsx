@@ -1,13 +1,13 @@
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { requireSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
-import { StateBanner, ProposalBlock, ListingContextStrip } from '@agrolink/ui'
+import { prisma } from '@agraia/db'
+import { StateBanner, ProposalBlock, ListingContextStrip } from '@agraia/ui'
 import { ProposerCard } from '@/components/transactions/proposer-card'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProposalReviewActions } from '@/components/transactions/proposal-review-actions'
 
-export const metadata: Metadata = { title: 'Nova proposta — AgroLink' }
+export const metadata: Metadata = { title: 'Nova proposta — AgraIA' }
 
 interface PageProps {
   params: Promise<{ id: string }>

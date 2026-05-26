@@ -1,5 +1,5 @@
 import { WifiOff } from 'lucide-react'
-import { ErrorScreen } from '@agrolink/ui'
+import { ErrorScreen } from '@agraia/ui'
 
 interface NetworkErrorProps {
   onRetry?: () => void

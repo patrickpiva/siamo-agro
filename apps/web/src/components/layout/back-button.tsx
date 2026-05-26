@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
-import { ArrowLeft } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { ArrowLeft } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 interface BackButtonProps {
   fallbackHref?: string

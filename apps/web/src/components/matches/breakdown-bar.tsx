@@ -1,4 +1,4 @@
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 import type { ReactNode } from 'react'
 
 export type BreakdownColorClass = 'distance' | 'reputation' | 'compatibility' | 'responsiveness'

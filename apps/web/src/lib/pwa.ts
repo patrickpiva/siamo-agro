@@ -1,5 +1,5 @@
-const VISITS_KEY = 'agrolink:visits'
-const DISMISSED_KEY = 'agrolink:pwa-dismissed-at'
+const VISITS_KEY = 'agraia:visits'
+const DISMISSED_KEY = 'agraia:pwa-dismissed-at'
 const DISMISS_TTL_MS = 7 * 24 * 3600 * 1000 // 7 days
 
 export function recordVisit(): void {

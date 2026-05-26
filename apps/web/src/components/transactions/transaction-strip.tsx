@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { cn, formatBRL } from '@agrolink/ui'
+import { cn, formatBRL } from '@agraia/ui'
 
 interface TransactionStripProps {
   transactionId: string

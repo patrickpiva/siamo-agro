@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { formatBRL } from '@agrolink/ui'
+import { formatBRL } from '@agraia/ui'
 
 type TxStatus = 'PROPOSED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 

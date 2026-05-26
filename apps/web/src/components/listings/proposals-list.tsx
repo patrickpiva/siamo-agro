@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ChevronRight } from '@agrolink/ui/icons'
+import { ChevronRight } from '@agraia/ui/icons'
 
 function formatBRL(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

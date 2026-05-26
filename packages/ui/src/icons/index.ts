@@ -1,14 +1,14 @@
 /**
- * Sistema de ícones do AgroLink
+ * Sistema de ícones do AgraIA
  *
  * Fonte única para todos os ícones do projeto. Combina:
  * - Lucide React (ícones genéricos UI)
- * - Ícones AgroLink custom (domínio agropecuário)
+ * - Ícones AgraIA custom (domínio agropecuário)
  * - Ícones de tipo de anúncio (kinds)
  * - Logos sociais (WhatsApp, etc.)
  *
  * REGRA: nenhum componente da aplicação importa de 'lucide-react' direto.
- * Sempre importa daqui: import { Bell, CoffeeBean } from '@agrolink/ui/icons'
+ * Sempre importa daqui: import { Bell, CoffeeBean } from '@agraia/ui/icons'
  *
  * Tamanhos padrão:
  *   size={16} — inline em texto, badges, chips
@@ -154,17 +154,17 @@ export {
 // ============================================================
 // AGROLINK CUSTOM — domínio agropecuário
 // ============================================================
-export { CoffeeBean } from './agrolink/coffee-bean'
-export { Soybean } from './agrolink/soybean'
-export { Corn } from './agrolink/corn'
-export { Cattle } from './agrolink/cattle'
-export { Tractor } from './agrolink/tractor'
-export { Agronomist } from './agrolink/agronomist'
-export { Harvester } from './agrolink/harvester'
-export { Irrigation } from './agrolink/irrigation'
-export { Soil } from './agrolink/soil'
-export { Farm } from './agrolink/farm'
-export { Citrus } from './agrolink/citrus'
+export { CoffeeBean } from './agraia/coffee-bean'
+export { Soybean } from './agraia/soybean'
+export { Corn } from './agraia/corn'
+export { Cattle } from './agraia/cattle'
+export { Tractor } from './agraia/tractor'
+export { Agronomist } from './agraia/agronomist'
+export { Harvester } from './agraia/harvester'
+export { Irrigation } from './agraia/irrigation'
+export { Soil } from './agraia/soil'
+export { Farm } from './agraia/farm'
+export { Citrus } from './agraia/citrus'
 
 // ============================================================
 // KINDS — tipos de anúncio
@@ -198,17 +198,17 @@ export type IconProps = {
  *   const Icon = CATEGORY_ICONS[listing.category] ?? Package;
  *   <Icon size={24} />
  */
-import { CoffeeBean } from './agrolink/coffee-bean'
-import { Soybean } from './agrolink/soybean'
-import { Corn } from './agrolink/corn'
-import { Cattle } from './agrolink/cattle'
-import { Tractor } from './agrolink/tractor'
-import { Agronomist } from './agrolink/agronomist'
-import { Harvester } from './agrolink/harvester'
-import { Irrigation } from './agrolink/irrigation'
-import { Soil } from './agrolink/soil'
-import { Farm } from './agrolink/farm'
-import { Citrus } from './agrolink/citrus'
+import { CoffeeBean } from './agraia/coffee-bean'
+import { Soybean } from './agraia/soybean'
+import { Corn } from './agraia/corn'
+import { Cattle } from './agraia/cattle'
+import { Tractor } from './agraia/tractor'
+import { Agronomist } from './agraia/agronomist'
+import { Harvester } from './agraia/harvester'
+import { Irrigation } from './agraia/irrigation'
+import { Soil } from './agraia/soil'
+import { Farm } from './agraia/farm'
+import { Citrus } from './agraia/citrus'
 import { Wheat, Milk, LeafyGreen } from 'lucide-react'
 
 export const CATEGORY_ICONS = {

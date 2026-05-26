@@ -10,10 +10,10 @@ import {
   SummaryBadge,
   PriceInput,
   Toggle,
-} from '@agrolink/ui'
+} from '@agraia/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 // ─── Price unit by category ───────────────────────────────────────────────────
 

@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Plus, MessageCircle, User } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { Home, Search, Plus, MessageCircle, User } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 const TABS = [
   { href: '/feed', label: 'FEED', Icon: Home },

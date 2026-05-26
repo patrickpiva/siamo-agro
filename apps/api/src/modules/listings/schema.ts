@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { CATEGORIES, isCategoryValidForKind } from '@agrolink/shared'
+import { CATEGORIES, isCategoryValidForKind } from '@agraia/shared'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

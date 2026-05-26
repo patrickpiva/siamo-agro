@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 
 // Resolves the current user's profile ID and redirects to /perfil/[id].
 // Unauthenticated users are sent to /entrar.

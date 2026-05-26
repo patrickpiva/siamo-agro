@@ -3,7 +3,7 @@ import type {
   TransactionStatus,
   CancellationReason,
   NotificationType,
-} from '@agrolink/db'
+} from '@agraia/db'
 import type {
   CreateTransactionBody,
   ListTransactionsQuery,
@@ -22,7 +22,7 @@ import { addAutoCancelJob, addStaleProgressAlertJob } from '../../workers/transa
 import { addReputationRecomputeJob } from '../../workers/reputation/queue.js'
 
 const whatsapp = createWhatsAppAdapter()
-const APP_URL = process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://agrolink.app'
+const APP_URL = process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://agraia.app'
 
 const CANCELLABLE: TransactionStatus[] = ['PROPOSED', 'ACCEPTED', 'IN_PROGRESS']
 

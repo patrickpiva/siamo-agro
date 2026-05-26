@@ -32,7 +32,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/listings') ||
         url.pathname.startsWith('/api/proxy/listings'),
       handler: new StaleWhileRevalidate({
-        cacheName: 'agrolink-api-listings',
+        cacheName: 'agraia-api-listings',
         plugins: [new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 6 * 3600 })],
       }),
     },
@@ -43,7 +43,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/profiles') ||
         url.pathname.startsWith('/api/proxy/profiles'),
       handler: new StaleWhileRevalidate({
-        cacheName: 'agrolink-api-profiles',
+        cacheName: 'agraia-api-profiles',
         plugins: [new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 6 * 3600 })],
       }),
     },
@@ -54,7 +54,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/notifications') ||
         url.pathname.startsWith('/api/proxy/notifications'),
       handler: new NetworkFirst({
-        cacheName: 'agrolink-api-notifications',
+        cacheName: 'agraia-api-notifications',
         plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 3600 })],
         networkTimeoutSeconds: 5,
       }),
@@ -74,7 +74,7 @@ const serwist = new Serwist({
     {
       matcher: ({ request }) => request.mode === 'navigate',
       handler: new NetworkFirst({
-        cacheName: 'agrolink-pages',
+        cacheName: 'agraia-pages',
         plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 24 * 3600 })],
         networkTimeoutSeconds: 5,
       }),

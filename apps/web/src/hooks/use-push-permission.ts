@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 
-const SESSION_KEY = 'agrolink:session-count'
-const DISMISSED_KEY = 'agrolink:push-dismissed-at'
-const DENIED_KEY = 'agrolink:push-denied-at'
+const SESSION_KEY = 'agraia:session-count'
+const DISMISSED_KEY = 'agraia:push-dismissed-at'
+const DENIED_KEY = 'agraia:push-denied-at'
 const SOFT_TTL_MS = 7 * 24 * 3600 * 1000 // 7 days
 const HARD_TTL_MS = 30 * 24 * 3600 * 1000 // 30 days
 

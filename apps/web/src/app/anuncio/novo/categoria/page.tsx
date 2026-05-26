@@ -10,8 +10,8 @@ import {
   Users,
   Plus,
   type IconProps,
-} from '@agrolink/ui/icons'
-import { ProgressIndicator, BottomCTA, Button, SectionLabel, SummaryBadge, cn } from '@agrolink/ui'
+} from '@agraia/ui/icons'
+import { ProgressIndicator, BottomCTA, Button, SectionLabel, SummaryBadge, cn } from '@agraia/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'
 

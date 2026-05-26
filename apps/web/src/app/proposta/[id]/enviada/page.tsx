@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Send, Clock, Bell } from '@agrolink/ui/icons'
-import { ProposalBlock } from '@agrolink/ui'
+import { Send, Clock, Bell } from '@agraia/ui/icons'
+import { ProposalBlock } from '@agraia/ui'
 
-export const metadata: Metadata = { title: 'Proposta enviada — AgroLink' }
+export const metadata: Metadata = { title: 'Proposta enviada — AgraIA' }
 
 interface Props {
   searchParams: Promise<{

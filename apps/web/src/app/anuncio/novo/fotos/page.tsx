@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, Image, Plus, Trash2 } from '@agrolink/ui/icons'
-import { ProgressIndicator, BottomCTA, Button, cn } from '@agrolink/ui'
+import { Camera, Image, Plus, Trash2 } from '@agraia/ui/icons'
+import { ProgressIndicator, BottomCTA, Button, cn } from '@agraia/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore, type PendingPhoto } from '@/stores/listing-draft'
 import { uploadImages } from '@/lib/upload'

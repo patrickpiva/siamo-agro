@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@agrolink/ui/icons'
+import { ArrowLeft } from '@agraia/ui/icons'
 import { MatchItem } from '@/components/matches/match-item'
 import type { MatchItemData } from '@/components/matches/match-item'
 
-export const metadata: Metadata = { title: 'Matches do anúncio — AgroLink' }
+export const metadata: Metadata = { title: 'Matches do anúncio — AgraIA' }
 
 // Mock data matching the design spec
 const MOCK_MATCHES: MatchItemData[] = [

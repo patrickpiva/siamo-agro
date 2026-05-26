@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { CATEGORIES } from '@agrolink/shared'
+import { CATEGORIES } from '@agraia/shared'
 import { useWizardStore } from './use-wizard-store'
-import type { ListingKindKey } from '@agrolink/shared'
+import type { ListingKindKey } from '@agraia/shared'
 
 export function StepDetails() {
   const { kind, category, title, description, setDetails, setStep } = useWizardStore()

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { WifiOff, Bell, Zap } from 'lucide-react'
 import { usePWAInstall } from '@/hooks/use-pwa-install'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface PWAInstallSheetProps {
   onClose: () => void
@@ -100,7 +100,7 @@ export function PWAInstallSheet({ onClose }: PWAInstallSheetProps) {
           <PWAAppIcon />
           <div>
             <p id="pwa-sheet-title" className="text-[22px] font-medium">
-              AgroLink
+              AgraIA
             </p>
             <p className="text-muted-foreground text-[13px]">Adicionar à tela inicial</p>
           </div>

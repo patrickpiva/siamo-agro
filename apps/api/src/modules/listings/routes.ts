@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { FastifyError } from 'fastify'
-import { prisma } from '@agrolink/db'
-import { AppError } from '@agrolink/shared'
+import { prisma } from '@agraia/db'
+import { AppError } from '@agraia/shared'
 import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import { ListingsService } from './service.js'
 import {

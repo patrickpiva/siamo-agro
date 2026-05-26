@@ -1,6 +1,6 @@
 # Skill: qa-feature
 
-Checklist de qualidade antes de abrir um PR no AgroLink.
+Checklist de qualidade antes de abrir um PR no AgraIA.
 Executar **na ordem** — cada etapa é um gate. Não pular para a próxima se a atual falhar.
 
 ---

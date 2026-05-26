@@ -1,5 +1,5 @@
-import type { PrismaClient } from '@agrolink/db'
-import { AppError } from '@agrolink/shared'
+import type { PrismaClient } from '@agraia/db'
+import { AppError } from '@agraia/shared'
 import type { ListNotificationsQuery } from './schema.js'
 
 export class NotificationsService {

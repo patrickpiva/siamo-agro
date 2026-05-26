@@ -1,6 +1,6 @@
 import { MessageCircle } from 'lucide-react'
-import { EmptyState } from '@agrolink/ui'
-import { prisma } from '@agrolink/db'
+import { EmptyState } from '@agraia/ui'
+import { prisma } from '@agraia/db'
 import { getServerSession } from '@/lib/server-auth'
 import { redirect } from 'next/navigation'
 import { TransactionCard } from '@/components/transactions/transaction-card'

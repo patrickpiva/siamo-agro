@@ -1,5 +1,5 @@
-import { Check, Clock } from '@agrolink/ui/icons'
-import { cn } from '@agrolink/ui'
+import { Check, Clock } from '@agraia/ui/icons'
+import { cn } from '@agraia/ui'
 
 interface Party {
   name: string

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Star } from '@agrolink/ui/icons'
-import { getInitials } from '@agrolink/ui'
+import { Star } from '@agraia/ui/icons'
+import { getInitials } from '@agraia/ui'
 import type { ListingProfile } from '@/lib/api'
 
 const BADGE_LABELS: Record<string, string> = {
@@ -70,7 +70,7 @@ export function SellerCard({ profile }: SellerCardProps) {
           <StatCell value={profile.responseTime ?? '—'} label="resposta" />
           <StatCell
             value={profile.yearsActive ? `${profile.yearsActive} anos` : '—'}
-            label="no AgroLink"
+            label="no AgraIA"
           />
         </div>
       </div>

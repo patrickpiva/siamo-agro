@@ -1,4 +1,4 @@
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 
 export interface ActiveListing {
   id: string

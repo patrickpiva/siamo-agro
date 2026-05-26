@@ -1,4 +1,4 @@
-const QUEUE_KEY = 'agrolink:offline-queue'
+const QUEUE_KEY = 'agraia:offline-queue'
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
 
 export interface QueuedMessage {

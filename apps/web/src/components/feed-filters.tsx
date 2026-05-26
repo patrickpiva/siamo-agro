@@ -4,8 +4,8 @@ import { useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { LayoutGrid, Package, Search, Wrench, Tractor } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { CATEGORIES } from '@agrolink/shared'
-import type { ListingKindKey } from '@agrolink/shared'
+import { CATEGORIES } from '@agraia/shared'
+import type { ListingKindKey } from '@agraia/shared'
 
 const KINDS: { key: string; label: string; Icon: LucideIcon }[] = [
   { key: '', label: 'Todos', Icon: LayoutGrid },

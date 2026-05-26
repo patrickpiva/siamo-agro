@@ -19,7 +19,7 @@ export class EvolutionApiAdapter implements WhatsAppAdapter {
   }
 
   async sendOtp(phone: string, code: string): Promise<void> {
-    const message = `Seu código de acesso AgroLink é: *${code}*\n\nVálido por 5 minutos. Não compartilhe com ninguém.`
+    const message = `Seu código de acesso AgraIA é: *${code}*\n\nVálido por 5 minutos. Não compartilhe com ninguém.`
 
     if (!this.baseUrl || !this.apiKey || !this.instance) {
       // Stub para desenvolvimento — nunca logar o code em produção

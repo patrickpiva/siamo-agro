@@ -2,11 +2,11 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { requireSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ChevronRight } from '@agrolink/ui/icons'
+import { ChevronRight } from '@agraia/ui/icons'
 
-export const metadata: Metadata = { title: 'Propostas recebidas — AgroLink' }
+export const metadata: Metadata = { title: 'Propostas recebidas — AgraIA' }
 
 interface PageProps {
   params: Promise<{ id: string }>

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Button, BottomCTA } from '@agrolink/ui'
-import { Check, Plus, Search, User, ChevronRight } from '@agrolink/ui/icons'
+import { Button, BottomCTA } from '@agraia/ui'
+import { Check, Plus, Search, User, ChevronRight } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 
 const NEXT_STEPS = [
@@ -50,7 +50,7 @@ export default async function CadastroProntoPage({ searchParams }: PageProps) {
               <span className="text-accent-forest dark:text-accent-lime">{firstName}</span>
             </>
           ) : (
-            'Bem-vindo ao AgroLink'
+            'Bem-vindo ao AgraIA'
           )}
         </h1>
 
@@ -86,7 +86,7 @@ export default async function CadastroProntoPage({ searchParams }: PageProps) {
 
       <BottomCTA>
         <Button variant="cta" asChild>
-          <Link href="/feed">Explorar AgroLink</Link>
+          <Link href="/feed">Explorar AgraIA</Link>
         </Button>
       </BottomCTA>
     </main>

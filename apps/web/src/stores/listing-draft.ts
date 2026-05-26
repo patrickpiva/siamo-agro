@@ -175,7 +175,7 @@ export const useListingDraftStore = create<ListingDraftState & ListingDraftActio
         }),
     }),
     {
-      name: 'agrolink:listing-draft',
+      name: 'agraia:listing-draft',
       storage: createJSONStorage(() =>
         typeof window !== 'undefined'
           ? sessionStorage

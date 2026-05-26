@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { HelpCircle, ArrowLeft } from 'lucide-react'
-import { ErrorScreen } from '@agrolink/ui'
+import { ErrorScreen } from '@agraia/ui'
 
 export default function NotFound() {
   const router = useRouter()

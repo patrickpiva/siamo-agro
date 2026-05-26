@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, ProgressIndicator, SelectCard } from '@agrolink/ui'
-import { CoffeeBean, Agronomist } from '@agrolink/ui/icons'
+import { Button, BottomCTA, ProgressIndicator, SelectCard } from '@agraia/ui'
+import { CoffeeBean, Agronomist } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'
@@ -48,7 +48,7 @@ export default function CadastroPerfilPage() {
 
       <div className="flex-1 px-5">
         <h1 className="mb-2 text-2xl font-medium leading-tight tracking-[-0.3px]">
-          Como você usa o AgroLink?
+          Como você usa o AgraIA?
         </h1>
         <p className="text-fg-secondary mb-6 text-sm leading-relaxed">
           Você poderá ajustar isso depois nas configurações.

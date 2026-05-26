@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Trash2 } from '@agrolink/ui/icons'
-import { SettingsGroup, ConsentRow, PrivacyActionCard } from '@agrolink/ui'
+import { ArrowLeft, Download, Eye, Trash2 } from '@agraia/ui/icons'
+import { SettingsGroup, ConsentRow, PrivacyActionCard } from '@agraia/ui'
 import * as Dialog from '@radix-ui/react-dialog'
 
 interface Consents {
@@ -91,7 +91,7 @@ export default function PrivacidadePage() {
           />
           <ConsentRow
             title="Comunicações de marketing"
-            description="Dicas, tendências e novidades do AgroLink por WhatsApp"
+            description="Dicas, tendências e novidades do AgraIA por WhatsApp"
             acceptedAt={consents?.marketingOptInAt}
             revocable
             currentValue={consents?.marketingOptIn ?? false}

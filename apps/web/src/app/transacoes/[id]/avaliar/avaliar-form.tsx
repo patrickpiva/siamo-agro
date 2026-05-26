@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { StarRating, RatingCategoryRow } from '@agrolink/ui'
+import { StarRating, RatingCategoryRow } from '@agraia/ui'
 
 interface AvaliarFormProps {
   transactionId: string

@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@agrolink/db'
+import type { PrismaClient } from '@agraia/db'
 import { scoreCompatibilityPair } from './algorithm.js'
 import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import { MatchesListingNotFoundError, MatchesForbiddenError } from './errors.js'

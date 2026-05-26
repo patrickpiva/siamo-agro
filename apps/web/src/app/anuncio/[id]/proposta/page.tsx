@@ -8,8 +8,8 @@ import {
   QuantityStepper,
   BottomCTA,
   Button,
-} from '@agrolink/ui'
-import { AlertCircle } from '@agrolink/ui/icons'
+} from '@agraia/ui'
+import { AlertCircle } from '@agraia/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { fetchListing, type Listing } from '@/lib/api-client'
 

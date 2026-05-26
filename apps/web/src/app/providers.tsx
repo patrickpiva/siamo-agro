@@ -53,8 +53,8 @@ export function Providers({ children }: { children: ReactNode }) {
       void queryClient.invalidateQueries({ queryKey: ['listings'] })
       void queryClient.invalidateQueries({ queryKey: ['notifications'] })
     }
-    window.addEventListener('agrolink:reconnected', handleReconnected)
-    return () => window.removeEventListener('agrolink:reconnected', handleReconnected)
+    window.addEventListener('agraia:reconnected', handleReconnected)
+    return () => window.removeEventListener('agraia:reconnected', handleReconnected)
   }, [queryClient])
 
   return (

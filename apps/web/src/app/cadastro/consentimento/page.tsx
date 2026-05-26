@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, ProgressIndicator, ConsentCheckbox } from '@agrolink/ui'
+import { Button, BottomCTA, ProgressIndicator, ConsentCheckbox } from '@agraia/ui'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'

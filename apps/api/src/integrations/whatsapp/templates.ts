@@ -6,7 +6,7 @@ type Renderer<T extends WhatsAppTemplateName> = (params: WhatsAppTemplateParams[
 
 const TEMPLATES = {
   otp: ({ code }: WhatsAppTemplateParams['otp']) =>
-    `Seu código AgroLink: ${code}. Válido por 5 minutos. Não compartilhe com ninguém.`,
+    `Seu código AgraIA: ${code}. Válido por 5 minutos. Não compartilhe com ninguém.`,
 
   new_match: ({ listing, url }: WhatsAppTemplateParams['new_match']) =>
     `Novo match encontrado para seu anúncio '${listing}'. Ver detalhes: ${url}`,

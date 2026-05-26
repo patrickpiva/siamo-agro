@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'
-import { AvatarUpload } from '@agrolink/ui'
-import { MapPin, Settings } from '@agrolink/ui/icons'
+import { AvatarUpload } from '@agraia/ui'
+import { MapPin, Settings } from '@agraia/ui/icons'
 import Link from 'next/link'
 
 const editProfileSchema = z.object({

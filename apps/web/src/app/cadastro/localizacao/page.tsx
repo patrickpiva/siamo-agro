@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, ProgressIndicator, SectionLabel } from '@agrolink/ui'
-import { Navigation, ChevronRight } from '@agrolink/ui/icons'
+import { Button, BottomCTA, ProgressIndicator, SectionLabel } from '@agraia/ui'
+import { Navigation, ChevronRight } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface LocationData {
   latitude: number
@@ -89,7 +89,7 @@ async function reverseGeocode(
     url.searchParams.set('lon', lng.toString())
     url.searchParams.set('format', 'json')
     const res = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'AgroLink/1.0 (agrolinkbr@gmail.com)' },
+      headers: { 'User-Agent': 'AgraIA/1.0 (agraiabr@gmail.com)' },
       signal: AbortSignal.timeout(5_000),
     })
     if (!res.ok) return null

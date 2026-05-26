@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil } from '@agrolink/ui/icons'
+import { Pencil } from '@agraia/ui/icons'
 import { EditProfileSheet } from './EditProfileSheet'
 import type { ProfileData } from '@/lib/profile-mock'
 

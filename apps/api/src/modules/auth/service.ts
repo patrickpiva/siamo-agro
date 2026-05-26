@@ -1,7 +1,7 @@
 import { randomBytes, randomInt } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import type { PrismaClient } from '@agrolink/db'
+import type { PrismaClient } from '@agraia/db'
 import type { WhatsAppAdapter } from '../../adapters/whatsapp/index.js'
 import {
   OtpRateLimitError,

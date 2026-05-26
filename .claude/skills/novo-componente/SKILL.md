@@ -1,6 +1,6 @@
 # Skill: novo-componente
 
-Cria um componente React para o app web do AgroLink.
+Cria um componente React para o app web do AgraIA.
 Use quando o usuário pedir para criar um componente, widget ou elemento de UI.
 
 ## Antes de começar — decisão crítica
@@ -27,7 +27,7 @@ Perguntar (ou inferir pelo contexto):
 ```typescript
 // Sem "use client" — Server Component por padrão
 
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface {Nome}Props {
   // Props tipadas com interface, não type
@@ -53,7 +53,7 @@ export function {Nome}({ children, className }: {Nome}Props) {
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface {Nome}Props {
   defaultValue?: string
@@ -85,7 +85,7 @@ Usar quando há mais de 2 variações visuais (tamanho, aparência, estado).
 
 ```typescript
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 const {nome}Variants = cva(
   // classes base — sempre aplicadas
@@ -138,7 +138,7 @@ Usar quando o componente é um elemento de formulário ou precisa expor o DOM no
 
 ```typescript
 import { forwardRef } from 'react'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface {Nome}Props extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -226,7 +226,7 @@ describe('{Nome}', () => {
 - [ ] `cva` se há mais de 2 variantes visuais
 - [ ] Touch target mínimo 48px (`min-h-[var(--tap-target)]`) em elementos interativos
 - [ ] Cores via tokens CSS (`bg-primary`, `text-foreground`) — nunca hex direto
-- [ ] `cn()` de `@agrolink/ui` para merge de classes
+- [ ] `cn()` de `@agraia/ui` para merge de classes
 - [ ] `{Nome}.displayName` definido se usar `forwardRef`
 - [ ] Exportado em `packages/ui/src/index.ts` se componente de pacote compartilhado
 - [ ] Teste criado se o componente tem lógica de estado ou interação

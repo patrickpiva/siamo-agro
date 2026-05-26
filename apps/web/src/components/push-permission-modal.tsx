@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { Bell, Send, Star, CheckCircle } from 'lucide-react'
 import { usePushPermission } from '@/hooks/use-push-permission'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
 interface PushPermissionModalProps {
   onClose: () => void

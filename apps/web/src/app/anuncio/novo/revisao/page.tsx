@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ProgressIndicator, BottomCTA, Button, KindBadge } from '@agrolink/ui'
+import { ProgressIndicator, BottomCTA, Button, KindBadge } from '@agraia/ui'
 import { ReviewCard } from '@/components/listings/review-card'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Camera, Trash2 } from '@agrolink/ui/icons'
+import { Save, Camera, Trash2 } from '@agraia/ui/icons'
 import {
   SectionLabel,
   PriceInput,
@@ -12,7 +12,7 @@ import {
   KindBadge,
   StatusBadge,
   cn,
-} from '@agrolink/ui'
+} from '@agraia/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { uploadImages } from '@/lib/upload'
 import type { Listing } from '@/lib/api'

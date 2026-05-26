@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { CATEGORY_ICONS } from '@agrolink/ui/icons'
-import { MatchScoreBadge } from '@agrolink/ui'
-import { cn } from '@agrolink/ui'
+import { CATEGORY_ICONS } from '@agraia/ui/icons'
+import { MatchScoreBadge } from '@agraia/ui'
+import { cn } from '@agraia/ui'
 
 export interface ResultItemData {
   id: string

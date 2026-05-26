@@ -1,5 +1,5 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '@agrolink/db'
+import { prisma } from '@agraia/db'
 import { TransactionService } from './service.js'
 import {
   TransactionParamsSchema,

@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { requireSession } from '@/lib/server-auth'
-import { prisma } from '@agrolink/db'
-import { formatBRL } from '@agrolink/ui'
+import { prisma } from '@agraia/db'
+import { formatBRL } from '@agraia/ui'
 import { BackButton } from '@/components/layout/back-button'
 import { AvaliarForm } from './avaliar-form'
 

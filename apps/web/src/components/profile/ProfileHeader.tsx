@@ -1,5 +1,5 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { getInitials } from '@agrolink/ui'
+import { getInitials } from '@agraia/ui'
 import { ProfileBadge } from './ProfileBadge'
 import { ProfileRating } from './ProfileRating'
 import type { ProfileData } from '@/lib/profile-mock'

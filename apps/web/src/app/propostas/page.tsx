@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { MessageSquare } from '@agrolink/ui/icons'
+import { MessageSquare } from '@agraia/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 
-export const metadata: Metadata = { title: 'Minhas propostas — AgroLink' }
+export const metadata: Metadata = { title: 'Minhas propostas — AgraIA' }
 
 interface Props {
   searchParams: Promise<{ role?: string }>

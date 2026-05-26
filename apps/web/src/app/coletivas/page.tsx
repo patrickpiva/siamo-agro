@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft, Plus } from '@agrolink/ui/icons'
+import { ArrowLeft, Plus } from '@agraia/ui/icons'
 import { CollectiveCard } from '@/components/collective/collective-card'
 import type { CollectiveCampaign } from '@/components/collective/collective-card'
-import { cn } from '@agrolink/ui'
+import { cn } from '@agraia/ui'
 
-export const metadata: Metadata = { title: 'Compras coletivas — AgroLink' }
+export const metadata: Metadata = { title: 'Compras coletivas — AgraIA' }
 
 // Mock data matching the design spec
 const MOCK_CAMPAIGNS: CollectiveCampaign[] = [
