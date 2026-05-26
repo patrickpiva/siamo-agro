@@ -52,6 +52,12 @@ export class AuthService {
   // ── OTP Request ─────────────────────────────────────────────────────────────
 
   async requestOtp(phone: string): Promise<{ expiresIn: number }> {
+    // Demo accounts: skip rate limit, DB write and WhatsApp delivery
+    if (this.isDemoPhone(phone)) {
+      console.info(`[auth] OTP demo solicitado para ${this.maskPhone(phone)} — sem envio`)
+      return { expiresIn: OTP_EXPIRES_SECONDS }
+    }
+
     await this.enforceRateLimit(phone)
 
     const code = randomInt(100_000, 999_999).toString()
@@ -73,6 +79,12 @@ export class AuthService {
   // ── OTP Verify ──────────────────────────────────────────────────────────────
 
   async verifyOtp(phone: string, code: string): Promise<VerifyOtpResult> {
+    // Demo accounts: fixed OTP, skip the entire OTP table flow
+    if (this.isDemoPhone(phone)) {
+      if (!this.demoOtp || code !== this.demoOtp) throw new OtpInvalidError()
+      return this.issueSessionForPhone(phone)
+    }
+
     const result = await this.prisma.$transaction(async (tx) => {
       // Busca o OTP mais recente, válido e não usado
       const otp = await tx.otpCode.findFirst({
@@ -251,6 +263,61 @@ export class AuthService {
   }
 
   // ── Helpers privados ────────────────────────────────────────────────────────
+
+  /** Issues a full session (tokens + user record) for a phone, bypassing OTP. */
+  private async issueSessionForPhone(phone: string): Promise<VerifyOtpResult> {
+    return this.prisma.$transaction(async (tx) => {
+      let user = await tx.user.findUnique({
+        where: { phone },
+        include: { profile: true },
+      })
+
+      if (!user) {
+        user = await tx.user.create({
+          data: { phone, status: 'ACTIVE' },
+          include: { profile: true },
+        })
+      }
+
+      const needsOnboarding = !user.profile
+      const accessToken = this.signAccessToken({ id: user.id, phone: user.phone ?? '' })
+      const { raw: refreshToken, hash: refreshTokenHash } = await this.generateRefreshToken()
+
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS)
+
+      await tx.refreshToken.create({
+        data: { userId: user.id, tokenHash: refreshTokenHash, expiresAt },
+      })
+
+      console.info(`[auth] Login demo para user ${user.id}`)
+
+      return {
+        accessToken,
+        refreshToken,
+        needsOnboarding,
+        user: {
+          id: user.id,
+          phone: user.phone,
+          status: user.status,
+          createdAt: user.createdAt.toISOString(),
+        } satisfies AuthUser,
+      }
+    })
+  }
+
+  private isDemoPhone(phone: string): boolean {
+    const list = process.env['DEMO_PHONES'] ?? ''
+    if (!list) return false
+    return list
+      .split(',')
+      .map((p) => p.trim())
+      .includes(phone)
+  }
+
+  private get demoOtp(): string {
+    return process.env['DEMO_OTP'] ?? ''
+  }
 
   private async enforceRateLimit(phone: string): Promise<void> {
     const windowStart = new Date(Date.now() - OTP_RATE_LIMIT_WINDOW_MS)
