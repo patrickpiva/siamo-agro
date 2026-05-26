@@ -25,6 +25,7 @@ const mockPrisma = {
   listingPhoto: {
     createMany: vi.fn(),
     deleteMany: vi.fn(),
+    findMany: vi.fn().mockResolvedValue([]),
   },
   $transaction: vi.fn(),
   $queryRaw: vi.fn(),
@@ -115,7 +116,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn() },
           }),
       )
 
@@ -144,7 +145,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn() },
           }),
       )
 
@@ -177,7 +178,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn() },
           }),
       )
 
@@ -212,7 +213,7 @@ describe('ListingsService', () => {
               create: vi.fn().mockResolvedValue(listing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(listing),
             },
-            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn() },
+            listingPhoto: { createMany: vi.fn(), deleteMany: vi.fn(), findMany: vi.fn() },
           }),
       )
 
@@ -460,7 +461,7 @@ describe('ListingsService', () => {
               update: vi.fn().mockResolvedValue(updatedListing),
               findUniqueOrThrow: vi.fn().mockResolvedValue(updatedListing),
             },
-            listingPhoto: { deleteMany: vi.fn(), createMany: vi.fn() },
+            listingPhoto: { deleteMany: vi.fn(), createMany: vi.fn(), findMany: vi.fn() },
           }),
       )
 

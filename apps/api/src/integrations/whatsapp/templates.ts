@@ -16,6 +16,29 @@ const TEMPLATES = {
 
   new_rating: ({ name, score, url }: WhatsAppTemplateParams['new_rating']) =>
     `${name} avaliou sua transação com ${score} estrelas. Ver: ${url}`,
+
+  transaction_accepted: ({ listing, url }: WhatsAppTemplateParams['transaction_accepted']) =>
+    `Sua proposta para '${listing}' foi aceita! Confirme o início do serviço: ${url}`,
+
+  transaction_started: ({ listing, url }: WhatsAppTemplateParams['transaction_started']) =>
+    `Transação '${listing}' iniciada. Acompanhe o andamento: ${url}`,
+
+  transaction_completed: ({ listing, url }: WhatsAppTemplateParams['transaction_completed']) =>
+    `Transação '${listing}' concluída com sucesso. Avalie sua experiência: ${url}`,
+
+  transaction_cancelled: ({
+    listing,
+    reason,
+    url,
+  }: WhatsAppTemplateParams['transaction_cancelled']) =>
+    `Transação '${listing}' foi cancelada (${reason}). Ver detalhes: ${url}`,
+
+  new_transaction_message: ({
+    name,
+    listing,
+    url,
+  }: WhatsAppTemplateParams['new_transaction_message']) =>
+    `${name} enviou uma mensagem sobre '${listing}'. Responder: ${url}`,
 } satisfies { [K in WhatsAppTemplateName]: Renderer<K> }
 
 // ─── Renderer ────────────────────────────────────────────────────────────────

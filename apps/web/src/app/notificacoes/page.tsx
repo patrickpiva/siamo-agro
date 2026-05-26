@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, CheckCircle } from '@agrolink/ui/icons'
 import { cn, EmptyState } from '@agrolink/ui'
 import {
@@ -47,6 +47,7 @@ function groupByDay(
 }
 
 function NotificationsContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const typeFilter = searchParams.get('type')
 
@@ -101,6 +102,8 @@ function NotificationsContent() {
         credentials: 'include',
       })
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+      // Bust Next.js router cache so feed re-fetches unread count on navigation back
+      router.refresh()
     } finally {
       setIsMarkingAll(false)
     }

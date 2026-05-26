@@ -43,7 +43,7 @@ export function StarRating({ value, onChange, readOnly, size = 44, className }: 
                 'flex items-center justify-center rounded-full border transition-colors',
                 filled
                   ? 'border-[#c6e845] bg-[#f0f7d9] dark:border-[rgba(198,232,69,0.3)] dark:bg-[rgba(198,232,69,0.12)]'
-                  : 'border-[#d8d8d0] bg-[#efeee7] dark:border-[rgba(255,255,255,0.12)] dark:bg-[rgba(255,255,255,0.06)]',
+                  : 'border-[#d8d8d0] bg-[#f5f5f0] dark:border-[rgba(255,255,255,0.12)] dark:bg-[rgba(255,255,255,0.05)]',
                 readOnly && 'cursor-default',
               )}
             >
@@ -55,7 +55,7 @@ export function StarRating({ value, onChange, readOnly, size = 44, className }: 
                   className="text-accent dark:text-primary"
                 />
               ) : (
-                <Star size={20} strokeWidth={1.5} className="text-[#b0b0a5] dark:text-[#8a8a82]" />
+                <Star size={20} strokeWidth={1.5} className="text-[#c0c0b8] dark:text-[#8a8a82]" />
               )}
             </button>
           )

@@ -13,7 +13,7 @@ interface MiniStarRatingProps {
 export function MiniStarRating({ value, onChange, readOnly, className }: MiniStarRatingProps) {
   return (
     <div
-      className={cn('flex gap-1', className)}
+      className={cn('flex gap-[3px]', className)}
       role={readOnly ? undefined : 'radiogroup'}
       aria-label="Avaliação"
     >
@@ -28,11 +28,12 @@ export function MiniStarRating({ value, onChange, readOnly, className }: MiniSta
             aria-label={`${n} estrela${n > 1 ? 's' : ''}`}
             disabled={readOnly}
             onClick={() => onChange?.(n)}
+            style={{ width: 24, height: 24, minWidth: 24, minHeight: 24 }}
             className={cn(
-              'flex size-6 items-center justify-center rounded-full transition-colors',
+              'flex shrink-0 items-center justify-center rounded-full transition-colors',
               filled
                 ? 'bg-[#f0f7d9] dark:bg-[rgba(198,232,69,0.1)]'
-                : 'bg-[#efeee7] dark:bg-[rgba(255,255,255,0.05)]',
+                : 'bg-[#efeee7] dark:bg-[rgba(255,255,255,0.06)]',
               readOnly && 'cursor-default',
             )}
           >
@@ -44,7 +45,7 @@ export function MiniStarRating({ value, onChange, readOnly, className }: MiniSta
                 className="text-accent dark:text-primary"
               />
             ) : (
-              <Star size={12} strokeWidth={2} className="text-[#b0b0a5] dark:text-[#8a8a82]" />
+              <Star size={12} strokeWidth={1.5} className="text-[#b0b0a5] dark:text-[#8a8a82]" />
             )}
           </button>
         )

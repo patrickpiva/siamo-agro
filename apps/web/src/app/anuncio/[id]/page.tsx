@@ -1,16 +1,38 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Bookmark, Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@agrolink/ui/icons'
+import { Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@agrolink/ui/icons'
+import { BookmarkButton } from '@/components/listings/bookmark-button'
 import { BackButton } from '@/components/layout/back-button'
 import { PriceBlock } from '@agrolink/ui'
 import { getServerSession } from '@/lib/server-auth'
-import { fetchListing, fetchListingProposals } from '@/lib/api'
+import { fetchListing } from '@/lib/api'
+import { prisma } from '@agrolink/db'
 import { ListingHero } from '@/components/listings/listing-hero'
 import { SellerCard } from '@/components/listings/seller-card'
 import { OwnerBanner } from '@/components/listings/owner-banner'
 import { OwnerStats } from '@/components/listings/owner-stats'
 import { ProposalsList } from '@/components/listings/proposals-list'
+
+const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
+
+interface SellerReputation {
+  currentRating: number
+  ratingCount: number
+}
+
+async function getSellerReputation(profileId: string): Promise<SellerReputation | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/profiles/${profileId}/reputation`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const json = (await res.json()) as { data: SellerReputation }
+    return json.data
+  } catch {
+    return null
+  }
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   COFFEE: 'CAFÉ',
@@ -73,7 +95,64 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
   if (!listing || listing.status === 'CLOSED') notFound()
 
   const isOwner = session?.userId === listing.profile.userId
-  const proposals = isOwner ? await fetchListingProposals(id, 3) : []
+
+  // Real counts + recent proposals via Prisma (owner only)
+  const [proposalCount, matchCount, recentProposals] = isOwner
+    ? await Promise.all([
+        prisma.transaction.count({
+          where: { listingId: id, status: 'PROPOSED' },
+        }),
+        prisma.matchScore.count({
+          where: { listingId: id },
+        }),
+        prisma.transaction.findMany({
+          where: { listingId: id, status: 'PROPOSED' },
+          include: {
+            buyer: { select: { id: true, profile: { select: { name: true, photo: true } } } },
+            messages: { orderBy: { createdAt: 'asc' }, take: 1 },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 3,
+        }),
+      ])
+    : [0, 0, []]
+
+  // Seller stats for the SellerCard (visitors only)
+  const sellerProfileId = listing.profile.id
+  const [sellerReputation, sellerProfile] =
+    !isOwner && sellerProfileId
+      ? await Promise.all([
+          getSellerReputation(sellerProfileId),
+          prisma.profile.findUnique({
+            where: { id: sellerProfileId },
+            select: { userId: true, createdAt: true },
+          }),
+        ])
+      : [null, null]
+
+  const sellerTransactionCount =
+    !isOwner && sellerProfile
+      ? await prisma.transaction.count({
+          where: {
+            OR: [{ buyerId: sellerProfile.userId }, { sellerId: sellerProfile.userId }],
+            status: 'COMPLETED',
+          },
+        })
+      : 0
+
+  const sellerYearsActive = sellerProfile
+    ? Math.floor((Date.now() - sellerProfile.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
+    : 0
+
+  // Check whether the current user has saved this listing
+  const isSaved =
+    session && !isOwner
+      ? (await prisma.savedListing.findUnique({
+          where: { userId_listingId: { userId: session.userId, listingId: id } },
+          select: { id: true },
+        })) !== null
+      : false
+
   const photos = [...listing.photos].sort((a, b) => a.order - b.order).map((p) => ({ url: p.url }))
 
   const catLabel = CATEGORY_LABELS[listing.category] ?? listing.category
@@ -106,13 +185,11 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
             </>
           ) : (
             <>
-              <button
-                type="button"
-                aria-label="Salvar anúncio"
-                className="bg-muted flex size-[48px] items-center justify-center rounded-full"
-              >
-                <Bookmark size={17} strokeWidth={1.8} />
-              </button>
+              <BookmarkButton
+                listingId={id}
+                initialSaved={isSaved}
+                isAuthenticated={session !== null}
+              />
               <button
                 type="button"
                 aria-label="Compartilhar anúncio"
@@ -128,11 +205,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       {/* ── Owner banner + stats ────────────────────────────────── */}
       {isOwner && <OwnerBanner status={listing.status} />}
       {isOwner && (
-        <OwnerStats
-          views={listing.viewCount}
-          proposals={listing.proposalCount ?? 0}
-          matches={listing.matchCount ?? 0}
-        />
+        <OwnerStats views={listing.viewCount} proposals={proposalCount} matches={matchCount} />
       )}
 
       {/* ── Hero carousel ───────────────────────────────────────── */}
@@ -183,7 +256,11 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
           <SellerCard
             profile={{
               ...listing.profile,
-              rating: listing.profile.rating ?? null,
+              rating: sellerReputation?.currentRating ?? listing.profile.rating ?? null,
+              reviewCount: sellerReputation?.ratingCount,
+              transactionCount: sellerTransactionCount,
+              yearsActive: sellerYearsActive > 0 ? sellerYearsActive : undefined,
+              responseTime: undefined,
             }}
           />
         )}
@@ -192,9 +269,9 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
         {isOwner && (
           <div className="mt-2">
             <p className="text-muted-foreground mb-[10px] font-mono text-[11px] tracking-[0.4px]">
-              [PROPOSTAS RECENTES · {listing.proposalCount ?? 0}]
+              [PROPOSTAS RECENTES · {proposalCount}]
             </p>
-            <ProposalsList proposals={proposals} listingId={id} />
+            <ProposalsList proposals={recentProposals} listingId={id} />
           </div>
         )}
       </div>

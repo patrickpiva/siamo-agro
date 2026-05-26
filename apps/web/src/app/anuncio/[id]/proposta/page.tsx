@@ -9,6 +9,7 @@ import {
   BottomCTA,
   Button,
 } from '@agrolink/ui'
+import { AlertCircle } from '@agrolink/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { fetchListing, type Listing } from '@/lib/api-client'
 
@@ -25,6 +26,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
   const [qty, setQty] = useState(1)
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     void fetchListing(id).then((data) => {
@@ -37,26 +39,67 @@ export default function PropostaPage({ params }: PropostaPageProps) {
 
   const totalCents = priceCents * qty
 
+  const ERROR_MESSAGES: Record<string, string> = {
+    TRANSACTION_CONFLICT: 'Você já tem uma proposta ativa para este anúncio.',
+    TRANSACTION_FORBIDDEN: 'Você não pode fazer uma proposta no próprio anúncio.',
+    LISTING_NOT_FOUND: 'Este anúncio não está mais disponível.',
+    VALIDATION_ERROR: 'Verifique os dados da proposta e tente novamente.',
+    UNAUTHORIZED: 'Sessão expirada. Faça login novamente.',
+    PROXY_ERROR: 'Sem conexão com o servidor. Verifique sua internet.',
+  }
+
   async function handleSubmit() {
+    if (!listing) return
     setSubmitting(true)
-    // Sprint 4: POST /api/v1/listings/:id/proposals
-    await new Promise((r) => setTimeout(r, 600))
-    const params = new URLSearchParams({
-      sellerName: listing?.profile.name ?? '',
-      title: listing?.title ?? '',
-      priceCents: String(priceCents),
-      qty: String(qty),
-      total: String(priceCents * qty),
-      ...(message && { message }),
-    })
-    router.push(`/proposta/mock-proposal-1/enviada?${params.toString()}`)
+    setSubmitError(null)
+    try {
+      const res = await fetch('/api/proxy/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: listing.id,
+          amount: (priceCents * qty) / 100,
+          message:
+            message ||
+            `Proposta de ${qty} un a ${(priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+        }),
+      })
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as {
+          error?: { code?: string; message?: string }
+        }
+        const code = body.error?.code ?? ''
+        setSubmitError(
+          ERROR_MESSAGES[code] ??
+            body.error?.message ??
+            'Erro ao enviar proposta. Tente novamente.',
+        )
+        setSubmitting(false)
+        return
+      }
+      const json = (await res.json()) as { data: { id: string } }
+      const params = new URLSearchParams({
+        sellerName: listing.profile.name,
+        priceCents: String(priceCents),
+        qty: String(qty),
+        total: String(priceCents * qty),
+        message: (
+          message ||
+          `Proposta de ${qty} un a ${(priceCents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+        ).slice(0, 200),
+      })
+      router.push(`/proposta/${json.data.id}/enviada?${params.toString()}`)
+    } catch {
+      setSubmitError('Sem conexão. Verifique sua internet e tente novamente.')
+      setSubmitting(false)
+    }
   }
 
   if (!listing) {
     return (
       <div className="bg-background flex min-h-screen flex-col">
         <ScreenHeader
-          backHref={`/anuncio/${id}`}
+          onBack={() => router.back()}
           title={<span className="text-[15px] font-medium">Fazer proposta</span>}
         />
         <div className="flex flex-1 items-center justify-center">
@@ -69,7 +112,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       <ScreenHeader
-        backHref={`/anuncio/${id}`}
+        onBack={() => router.back()}
         title={<span className="text-[15px] font-medium">Fazer proposta</span>}
       />
 
@@ -149,6 +192,12 @@ export default function PropostaPage({ params }: PropostaPageProps) {
 
       {/* CTA */}
       <BottomCTA>
+        {submitError && (
+          <div className="mb-3 flex items-start gap-2 rounded-[10px] border border-red-200 bg-red-50 px-3 py-2.5 dark:border-red-900/40 dark:bg-red-950/30">
+            <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-500" strokeWidth={2} />
+            <p className="text-[13px] leading-snug text-red-700 dark:text-red-400">{submitError}</p>
+          </div>
+        )}
         <Button
           variant={submitting ? 'cta-disabled' : 'cta'}
           disabled={submitting}

@@ -16,6 +16,7 @@ interface ProfileHeroProps {
   currentRating: number
   ratingCount: number
   location?: { city: string; state: string } | null
+  joinedAt?: Date | null
   stats: RepStats
   showEditOverlay?: boolean
 }
@@ -23,6 +24,16 @@ interface ProfileHeroProps {
 const TYPE_LABEL: Record<string, string> = {
   PRODUCER: 'Produtor Rural',
   PROVIDER: 'Prestador de Serviços',
+}
+
+function formatJoinedAt(joinedAt: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - joinedAt.getTime()
+  const diffMonths = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.44))
+  const years = Math.floor(diffMonths / 12)
+  if (years >= 1) return `no AgroLink há ${years} ${years === 1 ? 'ano' : 'anos'}`
+  if (diffMonths >= 1) return `no AgroLink há ${diffMonths} ${diffMonths === 1 ? 'mês' : 'meses'}`
+  return 'no AgroLink há menos de 1 mês'
 }
 
 export function ProfileHero({
@@ -33,6 +44,7 @@ export function ProfileHero({
   currentRating,
   ratingCount,
   location,
+  joinedAt,
   stats,
   showEditOverlay = false,
 }: ProfileHeroProps) {
@@ -75,12 +87,8 @@ export function ProfileHero({
         <p className="text-muted-foreground mt-[2px] text-[12px]">
           {TYPE_LABEL[profileType]}
           {location ? ` · ${location.city}, ${location.state}` : ''}
+          {joinedAt ? ` · ${formatJoinedAt(joinedAt)}` : ''}
         </p>
-        {ratingCount > 0 && (
-          <p className="text-muted-foreground font-mono text-[11px]">
-            {ratingCount} {ratingCount === 1 ? 'avaliação' : 'avaliações'}
-          </p>
-        )}
       </div>
 
       {/* Stats grid */}

@@ -2,6 +2,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { FastifyError } from 'fastify'
 import { prisma } from '@agrolink/db'
 import { AppError } from '@agrolink/shared'
+import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import { ListingsService } from './service.js'
 import {
   CreateListingBodySchema,
@@ -34,6 +35,11 @@ export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
     onRequest: [app.authenticate],
     handler: async (request, reply) => {
       const listing = await service.create(request.user.id, request.body)
+      // Trigger match computation immediately after creation so the listing
+      // owner and nearby candidates see it in their "Matches para mim" feed.
+      addComputeMatchesJob(listing.id).catch((err: unknown) =>
+        console.error('[listings] erro ao despachar job de matches:', err),
+      )
       return reply.code(201).send({ data: listing, error: null })
     },
   })

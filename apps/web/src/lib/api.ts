@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
+const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +38,9 @@ export interface Listing {
   updatedAt: string
   photos: ListingPhoto[]
   profile: ListingProfile
+  /** Present only on listings returned by the personalized matches feed. */
+  matchScore?: number
+  distanceKm?: number | null
 }
 
 export interface ListingMeta {

@@ -9,6 +9,7 @@ import { prisma } from '@agrolink/db'
 import { getServerSession } from '@/lib/server-auth'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
+import { ReviewItem } from '@/components/profile/review-item'
 
 interface ProfilePageProps {
   params: Promise<{ id: string }>
@@ -27,6 +28,43 @@ async function getProfile(id: string) {
       },
     },
   })
+}
+
+interface RecentRating {
+  score: number
+  comment: string | null
+  reliability: number | null
+  communication: number | null
+  quality: number | null
+  rater: { name: string | null; photo: string | null }
+  transaction: { id: string; amount: number; kind: string; title: string }
+  createdAt: string
+}
+
+interface ReputationData {
+  currentRating: number
+  ratingCount: number
+  categoryAverages: {
+    reliability: number | null
+    communication: number | null
+    quality: number | null
+  }
+  recentRatings: RecentRating[]
+}
+
+const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
+
+async function getReputation(profileId: string): Promise<ReputationData | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/v1/profiles/${profileId}/reputation`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const json = (await res.json()) as { data: ReputationData }
+    return json.data
+  } catch {
+    return null
+  }
 }
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
@@ -69,24 +107,29 @@ function ProfileSkeleton() {
 
 async function ProfileContent({ id }: { id: string }) {
   const [profile, session] = await Promise.all([getProfile(id), getServerSession()])
+  const reputation = profile ? await getReputation(profile.id) : null
 
   if (!profile) notFound()
 
   const isOwn = session?.userId === profile.userId
 
-  const transactionCount = isOwn
-    ? await prisma.transaction.count({
-        where: {
-          OR: [{ buyerId: session.userId }, { sellerId: session.userId }],
-          status: 'COMPLETED',
-        },
-      })
-    : 0
+  // Use the live ratingCount from the reputation API (fresh query) because the
+  // stored profile.ratingCount is only updated by the async recompute worker
+  // and may lag behind actual ratings.
+  const effectiveRatingCount = reputation?.ratingCount ?? profile.ratingCount
+  const effectiveCurrentRating = reputation?.currentRating ?? profile.currentRating
+
+  const transactionCount = await prisma.transaction.count({
+    where: {
+      OR: [{ buyerId: profile.userId }, { sellerId: profile.userId }],
+      status: 'COMPLETED',
+    },
+  })
 
   return (
-    <div className="bg-background flex flex-col pb-24">
+    <div className="bg-background flex flex-col" style={{ paddingBottom: 320 }}>
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
+      <header className="bg-background/80 sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm">
         <BackButton fallbackHref="/feed" />
 
         {isOwn ? (
@@ -122,32 +165,31 @@ async function ProfileContent({ id }: { id: string }) {
         photo={profile.photo}
         profileType={profile.type}
         badge={profile.badge}
-        currentRating={profile.currentRating}
-        ratingCount={profile.ratingCount}
+        currentRating={effectiveCurrentRating}
+        ratingCount={effectiveRatingCount}
         location={profile.location}
+        joinedAt={profile.createdAt}
         stats={{
           transactions: transactionCount,
-          ratings: profile.ratingCount,
+          ratings: effectiveRatingCount,
           responseTime: isOwn ? '< 2h' : '—',
         }}
         showEditOverlay={isOwn}
       />
 
       {/* Reputation breakdown */}
-      {profile.ratingCount > 0 && (
-        <div className="px-4 pb-4">
-          <ReputationBreakdown
-            reliability={profile.currentRating}
-            communication={profile.currentRating}
-            quality={profile.currentRating}
-          />
-        </div>
+      {effectiveRatingCount > 0 && (
+        <ReputationBreakdown
+          reliability={reputation?.categoryAverages.reliability ?? effectiveCurrentRating}
+          communication={reputation?.categoryAverages.communication ?? effectiveCurrentRating}
+          quality={reputation?.categoryAverages.quality ?? effectiveCurrentRating}
+        />
       )}
 
       {/* Listings */}
       <div className="pb-4">
         <p className="text-muted-foreground px-5 pb-3 pt-2 font-mono text-[11px] tracking-[0.4px]">
-          {isOwn ? 'MEUS ANÚNCIOS ATIVOS' : `ANÚNCIOS ATIVOS · ${profile.listings.length}`}
+          {isOwn ? '[MEUS ANÚNCIOS ATIVOS]' : `[ANÚNCIOS ATIVOS · ${profile.listings.length}]`}
         </p>
         {profile.listings.length === 0 ? (
           <p className="text-muted-foreground px-5 text-[13px]">
@@ -176,23 +218,40 @@ async function ProfileContent({ id }: { id: string }) {
       </div>
 
       {/* Reviews */}
-      <div className="border-border mx-5 mb-2 mt-2 border-t" />
-      <div className="mb-2 px-5">
+      <div className="border-border mx-5 mb-3 mt-2 border-t" />
+      <div className="mb-3 px-5">
         <p className="text-muted-foreground font-mono text-[11px] tracking-[0.4px]">
-          AVALIAÇÕES RECEBIDAS · {profile.ratingCount}
+          [AVALIAÇÕES RECENTES] · {effectiveRatingCount}
         </p>
       </div>
-      {profile.ratingCount === 0 ? (
+      {effectiveRatingCount === 0 ? (
         <p className="text-muted-foreground px-5 pb-6 text-[13px]">Ainda sem avaliações.</p>
+      ) : reputation?.recentRatings && reputation.recentRatings.length > 0 ? (
+        <div className="pb-4">
+          {reputation.recentRatings.map((r, i) => (
+            <ReviewItem
+              key={i}
+              score={r.score}
+              comment={r.comment}
+              reliability={r.reliability}
+              communication={r.communication}
+              quality={r.quality}
+              raterName={r.rater.name}
+              raterPhoto={r.rater.photo}
+              transactionKind={r.transaction.kind}
+              transactionTitle={r.transaction.title}
+              transactionAmount={r.transaction.amount}
+              createdAt={r.createdAt}
+            />
+          ))}
+        </div>
       ) : (
-        <p className="text-muted-foreground px-5 pb-6 text-[13px]">
-          Avaliações serão exibidas em breve.
-        </p>
+        <p className="text-muted-foreground px-5 pb-6 text-[13px]">Ainda sem avaliações.</p>
       )}
 
       {/* Fixed bottom CTA */}
       {isOwn ? (
-        <div className="border-border bg-background fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4">
+        <div className="border-border bg-background fixed bottom-[64px] left-0 right-0 border-t px-5 pb-4 pt-4">
           <Link
             href="/perfil/editar"
             className="bg-cta-bg text-cta-fg block w-full rounded-[12px] py-[15px] text-center text-[15px] font-medium"
@@ -200,16 +259,16 @@ async function ProfileContent({ id }: { id: string }) {
             Editar meu perfil
           </Link>
         </div>
-      ) : profile.listings[0] ? (
-        <div className="border-border bg-background fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4">
+      ) : (
+        <div className="border-border bg-background fixed bottom-[64px] left-0 right-0 border-t px-5 pb-4 pt-4">
           <Link
-            href={`/anuncio/${profile.listings[0].id}/proposta`}
+            href={`/busca?sellerId=${profile.userId}`}
             className="bg-cta-bg text-cta-fg block w-full rounded-[12px] py-[15px] text-center text-[15px] font-medium"
           >
-            Fazer proposta
+            Ver anúncios de {profile.name.split(' ')[0]}
           </Link>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

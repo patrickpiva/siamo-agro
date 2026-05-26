@@ -11,6 +11,8 @@ import {
   UpdateConsentsBodySchema,
   DataExportResponseSchema,
   DeleteMeResponseSchema,
+  FeedMatchesQuerySchema,
+  FeedMatchesResponseSchema,
   ErrorResponseSchema,
 } from './schema.js'
 
@@ -132,6 +134,25 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     handler: async (request, reply) => {
       const result = await service.requestDataExport(request.user.id)
       return reply.send({ data: result, error: null })
+    },
+  })
+
+  // ── GET /api/v1/me/feed/matches ───────────────────────────────────────────
+  // Personalized feed: listings where the authenticated user is a match candidate,
+  // ordered by match score descending. Returns `computing: true` when scores are
+  // being computed for the first time (user has active listings but no scores yet).
+  app.get('/feed/matches', {
+    schema: {
+      querystring: FeedMatchesQuerySchema,
+      response: {
+        200: FeedMatchesResponseSchema,
+        401: ErrorResponseSchema,
+      },
+    },
+    onRequest: [app.authenticate],
+    handler: async (request, reply) => {
+      const result = await service.getFeedMatches(request.user.id, request.query)
+      return reply.send({ ...result, error: null })
     },
   })
 

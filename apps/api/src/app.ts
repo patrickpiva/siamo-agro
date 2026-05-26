@@ -15,6 +15,9 @@ import { privacyRoutes } from './modules/privacy/routes.js'
 import { meRoutes } from './modules/me/routes.js'
 import { notificationsRoutes } from './modules/notifications/routes.js'
 import { helpRoutes } from './modules/help/routes.js'
+import { transactionsRoutes } from './modules/transactions/routes.js'
+import { reputationRoutes } from './modules/reputation/routes.js'
+import { savedListingsRoutes } from './modules/saved-listings/routes.js'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -77,6 +80,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(meRoutes, { prefix: '/api/v1/me' })
   await app.register(notificationsRoutes, { prefix: '/api/v1/notifications' })
   await app.register(helpRoutes, { prefix: '/api/v1/help' })
+  await app.register(transactionsRoutes, { prefix: '/api/v1/transactions' })
+  await app.register(reputationRoutes, { prefix: '/api/v1' })
+  await app.register(savedListingsRoutes, { prefix: '/api/v1/saved-listings' })
 
   return app
 }

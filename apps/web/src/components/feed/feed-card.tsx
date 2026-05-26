@@ -31,6 +31,30 @@ const KIND_LABEL: Record<string, string> = {
   EQUIPMENT: 'EQUIP.',
 }
 
+const CATEGORY_LABEL: Record<string, string> = {
+  COFFEE: 'Café',
+  CORN: 'Milho',
+  SOY: 'Soja',
+  GRAINS: 'Grãos',
+  LIVESTOCK: 'Pecuária',
+  DAIRY: 'Laticínios',
+  FRUITS: 'Frutas',
+  VEGETABLES: 'Hortaliças',
+  AGRONOMY: 'Agronomia',
+  VETERINARY: 'Veterinária',
+  CONSULTING: 'Consultoria',
+  MECHANICS: 'Mecânica',
+  LABOR: 'Mão de Obra',
+  TRANSPORT: 'Transporte',
+  IRRIGATION: 'Irrigação',
+  TRACTOR: 'Trator',
+  HARVESTER: 'Colheitadeira',
+  IRRIGATION_SYSTEM: 'Irrigação',
+  TOOLS: 'Ferramentas',
+  STORAGE: 'Armazenamento',
+  OTHER: 'Outros',
+}
+
 const CATEGORY_BG: Record<string, string> = {
   COFFEE: 'bg-[#D4B896] dark:bg-[#3d2817]',
   CORN: 'bg-[#C8D4B8] dark:bg-[#2d4a2a]',
@@ -130,7 +154,7 @@ export function FeedCard({ listing }: { listing: FeedCardListing }) {
             <CategoryIcon size={14} strokeWidth={1.8} className="text-accent dark:text-primary" />
           )}
           <span className="bg-primary-subtle border-primary text-accent dark:text-primary rounded-[4px] border-[0.5px] px-[7px] py-[2px] text-[10px] font-medium">
-            {listing.category}
+            {CATEGORY_LABEL[listing.category] ?? listing.category}
           </span>
         </div>
 
@@ -158,7 +182,7 @@ export function FeedCard({ listing }: { listing: FeedCardListing }) {
           </div>
           <span className="text-fg-secondary flex-1 truncate text-[12px]">
             {listing.owner.name}
-            {listing.owner.reputationScore != null && (
+            {listing.owner.reputationScore != null && listing.owner.reputationScore > 0 && (
               <span className="text-accent dark:text-primary ml-1 font-medium">
                 · ★ {listing.owner.reputationScore.toFixed(1)}
                 {seal && ` ${seal}`}
