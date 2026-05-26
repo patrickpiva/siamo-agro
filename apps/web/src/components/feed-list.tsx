@@ -10,13 +10,21 @@ import type { FetchListingsQuery, Listing } from '@/lib/api'
 
 const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
 
+// ─── Response shapes ──────────────────────────────────────────────────────────
+
 interface FeedListResponse {
   data: Listing[]
   meta: { nextCursor: string | null; limit: number }
   error: null
 }
 
-async function fetchPage(
+interface MatchesFeedResponse extends FeedListResponse {
+  computing: boolean
+}
+
+// ─── Fetchers ─────────────────────────────────────────────────────────────────
+
+async function fetchListingsPage(
   query: FetchListingsQuery & { cursor?: string },
 ): Promise<FeedListResponse> {
   const params = new URLSearchParams()
@@ -28,6 +36,36 @@ async function fetchPage(
   return res.json() as Promise<FeedListResponse>
 }
 
+async function fetchMatchesPage(cursor?: string): Promise<MatchesFeedResponse> {
+  const params = new URLSearchParams()
+  params.set('limit', '20')
+  if (cursor) params.set('cursor', cursor)
+  const res = await fetch(`/api/proxy/me/feed/matches?${params.toString()}`, {
+    credentials: 'include',
+  })
+  if (res.status === 401) {
+    return { data: [], meta: { nextCursor: null, limit: 20 }, computing: false, error: null }
+  }
+  if (!res.ok) throw new Error('Erro ao buscar matches')
+  return res.json() as Promise<MatchesFeedResponse>
+}
+
+async function fetchSavedPage(cursor?: string): Promise<FeedListResponse> {
+  const params = new URLSearchParams()
+  params.set('limit', '20')
+  if (cursor) params.set('cursor', cursor)
+  const res = await fetch(`/api/proxy/saved-listings?${params.toString()}`, {
+    credentials: 'include',
+  })
+  if (res.status === 401) {
+    return { data: [], meta: { nextCursor: null, limit: 20 }, error: null }
+  }
+  if (!res.ok) throw new Error('Erro ao buscar anúncios salvos')
+  return res.json() as Promise<FeedListResponse>
+}
+
+// ─── Shape normaliser ─────────────────────────────────────────────────────────
+
 function toFeedCardData(listing: Listing): FeedCardListing {
   return {
     id: listing.id,
@@ -37,30 +75,55 @@ function toFeedCardData(listing: Listing): FeedCardListing {
     price: listing.price,
     thumbnail: listing.photos?.[0]?.url ?? null,
     location: { city: listing.profile.city ?? null, state: listing.profile.state ?? null },
-    distanceKm: null,
+    distanceKm: listing.distanceKm ?? null,
     publishedAt: new Date(listing.createdAt),
     owner: {
       name: listing.profile.name,
       reputationScore: listing.profile.rating,
       reputationSeal: listing.profile.badge ?? null,
     },
-    matchScore: undefined,
+    // matchScore stored as 0–1 float; card expects 0–100 integer percentage
+    matchScore: listing.matchScore != null ? Math.round(listing.matchScore * 100) : undefined,
   }
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 interface FeedListProps {
   filters: FetchListingsQuery
+  activeTab?: string
 }
 
-export function FeedList({ filters }: FeedListProps) {
+export function FeedList({ filters, activeTab }: FeedListProps) {
+  const isMatches = activeTab === 'matches'
+  const isSaved = activeTab === 'saved'
+
   const sentinelRef = useRef<HTMLDivElement>(null)
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery({
-    queryKey: ['listings', filters],
-    queryFn: ({ pageParam }) => fetchPage({ ...filters, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.meta.nextCursor ?? undefined,
-  })
+  const { data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+    useInfiniteQuery({
+      queryKey: isMatches ? ['feed-matches'] : isSaved ? ['saved-listings'] : ['listings', filters],
+      queryFn: ({ pageParam }) => {
+        if (isMatches) return fetchMatchesPage(pageParam)
+        if (isSaved) return fetchSavedPage(pageParam)
+        return fetchListingsPage({ ...filters, cursor: pageParam })
+      },
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) => lastPage.meta.nextCursor ?? undefined,
+    })
+
+  // Refetch saved / matches whenever the tab becomes active
+  useEffect(() => {
+    if (isMatches || isSaved) void refetch()
+  }, [isMatches, isSaved])
+
+  // Listen for same-page unsave events (saved tab only)
+  useEffect(() => {
+    if (!isSaved) return
+    const handler = () => void refetch()
+    window.addEventListener('agrolink:bookmark-toggled', handler)
+    return () => window.removeEventListener('agrolink:bookmark-toggled', handler)
+  }, [isSaved, refetch])
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) void fetchNextPage()
@@ -99,7 +162,47 @@ export function FeedList({ filters }: FeedListProps) {
 
   const listings = data.pages.flatMap((p) => p.data)
 
+  // Check if first page has computing:true (matches tab only)
+  const isComputing =
+    isMatches && listings.length === 0 && (data.pages[0] as MatchesFeedResponse)?.computing
+
   if (listings.length === 0) {
+    if (isComputing) {
+      return (
+        <div className="flex flex-col items-center gap-3 px-6 py-16">
+          <div className="border-primary h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
+          <p className="text-muted-foreground text-center text-[13px] leading-relaxed">
+            Calculando seus matches…
+            <br />
+            Volte em alguns instantes.
+          </p>
+        </div>
+      )
+    }
+
+    if (isMatches) {
+      return (
+        <EmptyState
+          icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+          iconVariant="muted"
+          title="Sem matches ainda"
+          description="Publique um anúncio ativo para começar a aparecer nos matches de outras pessoas."
+          actions={[{ label: 'Publicar anúncio', variant: 'primary', href: '/anuncio/novo' }]}
+        />
+      )
+    }
+
+    if (isSaved) {
+      return (
+        <EmptyState
+          icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+          iconVariant="muted"
+          title="Nenhum anúncio salvo"
+          description="Toque no ícone de favorito em qualquer anúncio para salvá-lo aqui."
+        />
+      )
+    }
+
     return (
       <EmptyState
         icon={<CoffeeBean size={40} strokeWidth={1.2} />}

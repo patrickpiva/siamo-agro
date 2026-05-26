@@ -408,7 +408,7 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ## 11. ESTADO IMPLEMENTADO
 
-> Atualizado: 2026-05-22. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
+> Atualizado: 2026-05-26. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
 
 ### Branches
 
@@ -452,32 +452,44 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ### API endpoints (`apps/api` — prefixo `/api/v1`)
 
-| Método | Rota                         | Auth | Status                     |
-| ------ | ---------------------------- | ---- | -------------------------- |
-| POST   | `/auth/otp/request`          | ❌   | ✅                         |
-| POST   | `/auth/otp/verify`           | ❌   | ✅                         |
-| POST   | `/auth/refresh`              | ❌   | ✅                         |
-| POST   | `/auth/logout`               | ✅   | ✅                         |
-| POST   | `/profiles`                  | ✅   | ✅                         |
-| GET    | `/profiles/:id`              | ❌   | ✅                         |
-| PATCH  | `/profiles/:id`              | ✅   | ✅                         |
-| POST   | `/privacy/consent`           | ✅   | ✅ idempotente             |
-| POST   | `/listings`                  | ✅   | ✅                         |
-| GET    | `/listings`                  | ❌   | ✅ cursor-based, PostGIS   |
-| GET    | `/listings/:id`              | ❌   | ✅                         |
-| PATCH  | `/listings/:id`              | ✅   | ✅                         |
-| DELETE | `/listings/:id`              | ✅   | ✅ soft delete             |
-| POST   | `/listings/:id/pause`        | ✅   | ✅                         |
-| POST   | `/listings/:id/resume`       | ✅   | ✅                         |
-| GET    | `/listings/:id/matches`      | ✅   | ✅                         |
-| POST   | `/uploads/presigned`         | ✅   | ✅                         |
-| GET    | `/notifications`             | ✅   | ✅ cursor-based            |
-| PATCH  | `/notifications/:id/read`    | ✅   | ✅                         |
-| POST   | `/notifications/read-all`    | ✅   | ✅                         |
-| POST   | `/notifications/push`        | ✅   | ⚠️ stub — sem persistência |
-| GET    | `/transactions`              | ✅   | ✅                         |
-| GET    | `/transactions/:id`          | ✅   | ✅                         |
-| POST   | `/transactions/:id/messages` | ✅   | ✅                         |
+| Método | Rota                           | Auth | Status                                |
+| ------ | ------------------------------ | ---- | ------------------------------------- |
+| POST   | `/auth/otp/request`            | ❌   | ✅                                    |
+| POST   | `/auth/otp/verify`             | ❌   | ✅                                    |
+| POST   | `/auth/refresh`                | ❌   | ✅                                    |
+| POST   | `/auth/logout`                 | ✅   | ✅                                    |
+| POST   | `/profiles`                    | ✅   | ✅                                    |
+| GET    | `/profiles/:id`                | ❌   | ✅                                    |
+| PATCH  | `/profiles/:id`                | ✅   | ✅                                    |
+| POST   | `/privacy/consent`             | ✅   | ✅ idempotente                        |
+| POST   | `/listings`                    | ✅   | ✅                                    |
+| GET    | `/listings`                    | ❌   | ✅ cursor-based, PostGIS              |
+| GET    | `/listings/:id`                | ❌   | ✅                                    |
+| PATCH  | `/listings/:id`                | ✅   | ✅                                    |
+| DELETE | `/listings/:id`                | ✅   | ✅ soft delete                        |
+| POST   | `/listings/:id/pause`          | ✅   | ✅                                    |
+| POST   | `/listings/:id/resume`         | ✅   | ✅                                    |
+| GET    | `/listings/:id/matches`        | ✅   | ✅                                    |
+| POST   | `/uploads/presigned`           | ✅   | ✅                                    |
+| GET    | `/notifications`               | ✅   | ✅ cursor-based                       |
+| PATCH  | `/notifications/:id/read`      | ✅   | ✅                                    |
+| POST   | `/notifications/read-all`      | ✅   | ✅                                    |
+| POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência            |
+| GET    | `/transactions`                | ✅   | ✅                                    |
+| GET    | `/transactions/:id`            | ✅   | ✅                                    |
+| POST   | `/transactions/:id/messages`   | ✅   | ✅                                    |
+| GET    | `/me`                          | ✅   | ✅                                    |
+| PATCH  | `/me`                          | ✅   | ✅                                    |
+| GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`  |
+| GET    | `/me/notification-preferences` | ✅   | ✅                                    |
+| PATCH  | `/me/notification-preferences` | ✅   | ✅                                    |
+| GET    | `/me/consents`                 | ✅   | ✅                                    |
+| PATCH  | `/me/consents`                 | ✅   | ✅                                    |
+| POST   | `/me/data-export`              | ✅   | ✅ LGPD — audit trail via notificação |
+| DELETE | `/me`                          | ✅   | ✅ soft delete; remoção física em 30d |
+| POST   | `/saved-listings/:listingId`   | ✅   | ✅ toggle — salva ou desalva          |
+| GET    | `/saved-listings/:listingId`   | ✅   | ✅ status de salvamento do anúncio    |
+| GET    | `/saved-listings`              | ✅   | ✅ cursor-based                       |
 
 Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Authorization: Bearer` a partir do cookie `access_token`.
 
@@ -507,6 +519,10 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                  |
 | Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                         |
 | 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                   |
+| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agrolink:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                             |
+| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agrolink:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                    |
+| Feed tab "Matches"        | `components/feed-list.tsx` + `GET /me/feed/matches`                     | `computing: true` exibe spinner; `matchScore` 0–1 convertido p/ 0–100 no `FeedCard`; `distanceKm` repassado ao card                                 |
+| Bell unread count         | `app/feed/page.tsx`                                                     | Query paralela no servidor (`Promise.all`); ponto vermelho renderizado somente quando `unreadCount > 0`                                             |
 
 ---
 
@@ -528,5 +544,154 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
 - [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
 - [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
-- [ ] Integrar `matches-calculating.tsx` com status real de job
+- [ ] Aplicar migration `migrations/manual/002_saved_listings.sql` no Supabase SQL Editor e rodar `pnpm db:generate`
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
+
+---
+
+## 12. ALGORITMO DE MATCHMAKING
+
+> Implementado em `apps/api/src/modules/matchmaking/algorithm.ts` e `apps/api/src/workers/matchmaking/processor.ts`.
+> Score mínimo para persistência: **0.20**. Pares abaixo disso são descartados silenciosamente.
+
+---
+
+### Fórmula geral
+
+```
+score_final =
+  0.40 × distScore  +
+  0.25 × compatScore +
+  0.20 × repScore    +
+  0.15 × respScore
+```
+
+Todos os sub-scores são normalizados para **[0, 1]**. O resultado final também fica em [0, 1] e é armazenado em `match_scores.score`.
+
+---
+
+### Sub-scores
+
+#### Distância — peso 0.40
+
+Decaimento **logarítmico** até `MAX_DISTANCE_KM = 500`:
+
+```ts
+distScore = Math.max(0, 1 - Math.log(1 + d) / Math.log(1 + 500))
+```
+
+Penaliza distâncias longas de forma mais suave do que o decaimento linear anterior e valoriza mais os matches de curta distância.
+
+#### Compatibilidade — peso 0.25
+
+Avaliada par-a-par entre os anúncios ativos do candidato e o anúncio-alvo. Condições:
+
+1. **`kind` complementar** (OFFER ↔ DEMAND): obrigatório — bônus 0 se ambos forem iguais.
+2. **Bônus de categoria**:
+
+| Condição                       | Bônus |
+| ------------------------------ | ----- |
+| Mesma `category` (exact match) | +0.30 |
+| Mesma categoria cluster        | +0.15 |
+| Sem cluster em comum           | +0.00 |
+
+**Clusters de categoria:**
+
+| Cluster         | Categorias                                        |
+| --------------- | ------------------------------------------------- |
+| GRAINS          | SOJA, MILHO, ARROZ, TRIGO, FEIJAO                 |
+| LIVESTOCK       | GADO, SUINOS, AVES, LEITE, PESCA                  |
+| HORTICULTURE    | FRUTAS, LEGUMES, CAFE, CANA, ALGODAO, HORTIFRUTI  |
+| AGRO_SERVICES   | AGRONOMIA, VETERINARIA, CONSULTORIA, CERTIFICACAO |
+| MECHANICAL      | MAQUINAS, IMPLEMENTOS, PECAS, MANUTENCAO          |
+| INFRASTRUCTURE  | IRRIGACAO, ARMAZENAMENTO, ENERGIA, CONSTRUCAO     |
+| LABOR_TRANSPORT | MAO_DE_OBRA, TRANSPORTE, LOGISTICA                |
+
+O `compatScore` final é a **média dos pares** candidato–alvo, tomando o par de maior bônus de categoria.
+
+#### Reputação — peso 0.20
+
+Lida **ao vivo** via LEFT JOIN na query PostGIS — nunca do campo desnormalizado `profile.current_rating`:
+
+```ts
+repScore = avgRating / 5.0 // AVG(ratings.score) do candidato
+repScore = 0.5 // prior neutro quando sem avaliações
+```
+
+#### Responsividade — peso 0.15
+
+Tempo médio de resposta em transações ativas (query em `transactions` + `transaction_messages`):
+
+```ts
+respScore = Math.max(0, 1 - avgResponseHours / 72)
+respScore = 0.5 // prior neutro quando sem histórico
+```
+
+---
+
+### Busca de candidatos (PostGIS)
+
+Executada em `processor.ts` via query SQL raw. Seleciona todos os perfis em raio de 500 km com anúncios ativos que **não pertencem ao dono** do anúncio-alvo:
+
+```sql
+SELECT
+  p.id, p.user_id AS "userId", p.name, p.badge,
+  ST_Distance(target_geo, p_geo)::float / 1000 AS distance_km,
+  r_agg.avg_score,
+  r_agg.cnt
+FROM profiles p
+JOIN locations loc ON loc.profile_id = p.id
+LEFT JOIN (
+  SELECT ratee_id,
+         AVG(score)::float AS avg_score,
+         COUNT(*)::int     AS cnt
+  FROM   ratings
+  GROUP BY ratee_id
+) r_agg ON r_agg.ratee_id = p.user_id
+WHERE p.id != :ownerProfileId
+  AND ST_DWithin(
+        loc.coordinates::geography,
+        ST_MakePoint(:lng, :lat)::geography,
+        500000   -- metros
+      )
+```
+
+---
+
+### Persistência
+
+Resultado salvo via upsert em `match_scores`. A recomputação sobrescreve o score anterior para o mesmo par `(listingId, candidateProfileId)`:
+
+```prisma
+model MatchScore {
+  id                 String  @id @default(cuid())
+  listingId          String
+  candidateProfileId String
+  score              Float
+  distanceKm         Float?
+
+  @@unique([listingId, candidateProfileId])
+}
+```
+
+---
+
+### Ciclo de vida dos jobs (BullMQ)
+
+| Evento                                                        | Job disparado                             | Efeito                                                           |
+| ------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
+| `POST /listings` (criação de anúncio)                         | `compute-matches` para o novo listing     | Descobre candidatos imediatamente                                |
+| `GET /me/feed/matches` sem scores + usuário tem listing ativo | `compute-matches` para cada listing ativo | Popula o feed "Matches para mim" na primeira visita              |
+| `compute-matches` finaliza com score ≥ 0.20                   | `notify-match` por par                    | Notificação push/WhatsApp ao perfil candidato                    |
+| `notify-match` enfileirado fora do horário comercial BRT      | delay automático até 08:00–20:00 BRT      | Evita notificações em madrugada sem esgotar tentativas do BullMQ |
+
+O delay é calculado em `msUntilNextBusinessHours()` em `queue.ts` e aplicado como `delay` no job — sem `throw` nem retry loop.
+
+---
+
+### Frontend — fluxo de dados
+
+1. `FeedList` com `activeTab === 'matches'` chama `fetchMatchesPage()` → `GET /api/proxy/me/feed/matches`.
+2. `toFeedCardData()` converte `matchScore` de float 0–1 para inteiro 0–100 antes de passar ao `FeedCard`.
+3. Se `computing: true` (primeira visita sem scores), exibe spinner animado em vez de `EmptyState`.
+4. `distanceKm` é repassado diretamente ao `FeedCard` para exibição de distância.
