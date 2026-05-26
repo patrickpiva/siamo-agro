@@ -695,3 +695,62 @@ O delay é calculado em `msUntilNextBusinessHours()` em `queue.ts` e aplicado co
 2. `toFeedCardData()` converte `matchScore` de float 0–1 para inteiro 0–100 antes de passar ao `FeedCard`.
 3. Se `computing: true` (primeira visita sem scores), exibe spinner animado em vez de `EmptyState`.
 4. `distanceKm` é repassado diretamente ao `FeedCard` para exibição de distância.
+
+---
+
+## 13. CONTAS DEMO
+
+> Implementado em `apps/api/src/modules/auth/service.ts` — métodos `isDemoPhone()`, `demoOtp` e `issueSessionForPhone()`.
+
+### Problema resolvido
+
+O fluxo de autenticação do AgroLink usa OTP via WhatsApp (Twilio). Em ambientes de desenvolvimento, QA e demonstrações não é desejável enviar mensagens reais — seja por custo, dependência de conectividade ou por expor números de telefone reais de testadores.
+
+### Solução
+
+Duas variáveis de ambiente definem um conjunto de contas que ignoram completamente o fluxo de OTP normal:
+
+```
+DEMO_PHONES="+5511999990001,+5511999990002,+5511999990003"
+DEMO_OTP="123456"
+```
+
+Quando um número listado em `DEMO_PHONES` solicita OTP:
+
+- Nenhuma entrada é criada na tabela `otp_codes`
+- Nenhuma mensagem é enviada via WhatsApp
+- O rate limit é ignorado
+- A API retorna `{ expiresIn: 300 }` normalmente (o cliente não percebe diferença)
+
+Quando esse número verifica o OTP:
+
+- Se o código enviado bate com `DEMO_OTP` → sessão emitida normalmente (access token + refresh token)
+- Se o código não bate → `OTP_INVALID` (mesmo comportamento do fluxo real)
+- Se `DEMO_OTP` estiver vazio → bypass desabilitado, mesmo para números listados
+
+### Usuários seed correspondentes
+
+| Telefone       | ID no banco |
+| -------------- | ----------- |
+| +5511999990001 | user-a-seed |
+| +5511999990002 | user-b-seed |
+| +5511999990003 | user-c-seed |
+
+Esses usuários são criados pelo seed (`pnpm db:seed`). O lookup é por telefone, então o ID customizado não causa conflito com o fluxo de `findOrCreate`.
+
+### Segurança
+
+- Se `DEMO_PHONES` não está definido (ou é string vazia), o bypass está **completamente desativado** — sem fallback, sem código condicional por ambiente
+- `DEMO_OTP` deve ser tratado como senha: não commitar o valor real, rotacionar periodicamente em produção
+- Os logs diferenciam logins demo: `[auth] Login demo para user <id>` vs `[auth] Login bem-sucedido para user <id>`
+- Em produção, usar um código não-óbvio (não `123456`) e restringir acesso à variável ao time de produto/QA
+
+### Como ativar por ambiente
+
+| Ambiente    | `DEMO_PHONES`         | `DEMO_OTP`               |
+| ----------- | --------------------- | ------------------------ |
+| Local (dev) | todos os três números | `123456`                 |
+| Staging     | todos os três números | valor forte              |
+| Produção    | todos os três números | valor forte, rotacionado |
+
+Definir as variáveis no painel do Railway (API service) ou no `.env` local. Nunca commitar valores reais.
