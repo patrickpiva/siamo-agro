@@ -17,11 +17,12 @@ export type MatchmakingJobData = ComputeMatchesJobData | NotifyMatchJobData
 // ─── Internal processing types ────────────────────────────────────────────────
 
 export interface CandidateRow {
-  id: string
-  currentRating: number
-  ratingCount: number
+  id: string // profileId
+  userId: string // userId — needed for live ratings + response-time queries
   badge: string
   latitude: number
   longitude: number
   distanceKm: number
+  currentRating: number // live avg from ratings table (not stale profile column)
+  ratingCount: number // live count from ratings table
 }

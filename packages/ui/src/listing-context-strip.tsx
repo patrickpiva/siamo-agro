@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { cn, formatBRL } from './lib/utils'
 
 interface ListingContextStripProps {
@@ -36,9 +35,18 @@ export function ListingContextStrip({
       )}
     >
       {/* Thumb */}
-      <div className="relative size-[52px] shrink-0 overflow-hidden rounded-[8px] bg-[#D4B896] dark:bg-[#3d2817]">
+      <div
+        className="shrink-0 overflow-hidden rounded-[8px] bg-[#D4B896] dark:bg-[#3d2817]"
+        style={{ width: 52, height: 52, minWidth: 52 }}
+      >
         {thumbnail && (
-          <Image src={thumbnail} alt={title} fill className="object-cover" sizes="52px" />
+          <img
+            src={thumbnail}
+            alt={title}
+            width={52}
+            height={52}
+            className="h-full w-full object-cover"
+          />
         )}
       </div>
 

@@ -111,8 +111,53 @@ export const ErrorResponseSchema = z.object({
   error: z.object({ code: z.string(), message: z.string() }),
 })
 
+// ─── GET /me/feed/matches ─────────────────────────────────────────────────────
+
+export const FeedMatchesQuerySchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+})
+
+const FeedMatchListingSchema = z.object({
+  id: z.string(),
+  kind: z.enum(['OFFER', 'DEMAND', 'SERVICE', 'EQUIPMENT']),
+  category: z.string(),
+  title: z.string(),
+  description: z.string(),
+  price: z.number().nullable(),
+  negotiable: z.boolean(),
+  status: z.enum(['ACTIVE', 'PAUSED', 'CLOSED']),
+  viewCount: z.number().int(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  matchScore: z.number(),
+  distanceKm: z.number().nullable(),
+  photos: z.array(z.object({ id: z.string(), url: z.string(), order: z.number() })),
+  profile: z.object({
+    id: z.string(),
+    userId: z.string(),
+    name: z.string(),
+    photo: z.string().nullable(),
+    rating: z.number(),
+    badge: z.enum(['NONE', 'BRONZE', 'SILVER', 'GOLD']),
+    city: z.string().nullable(),
+    state: z.string().nullable(),
+  }),
+})
+
+export const FeedMatchesResponseSchema = z.object({
+  data: z.array(FeedMatchListingSchema),
+  meta: z.object({
+    nextCursor: z.string().nullable(),
+    limit: z.number(),
+  }),
+  computing: z.boolean(),
+  error: z.null(),
+})
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type UpdateMeBody = z.infer<typeof UpdateMeBodySchema>
 export type UpdateNotificationPrefsBody = z.infer<typeof UpdateNotificationPrefsBodySchema>
 export type UpdateConsentsBody = z.infer<typeof UpdateConsentsBodySchema>
+export type FeedMatchesQuery = z.infer<typeof FeedMatchesQuerySchema>

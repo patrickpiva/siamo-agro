@@ -83,7 +83,7 @@ export default async function PropostaEnviadaPage({ searchParams }: Props) {
       {/* CTAs */}
       <div className="border-border bg-card flex flex-col gap-2 border-t px-5 py-4">
         <Link
-          href={{ pathname: '/propostas', query: { role: 'sent' } }}
+          href="/transacoes"
           className="bg-muted border-border flex w-full items-center justify-center rounded-[12px] border py-[15px] text-[15px] font-medium transition-opacity active:opacity-70"
         >
           Ver minhas propostas enviadas

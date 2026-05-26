@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Bell, Search } from '@agrolink/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
+import { prisma } from '@agrolink/db'
 import { FeedTabs } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
 import { ListingCardSkeleton } from '@agrolink/ui'
@@ -46,7 +47,22 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   }
 
   const greeting = getDayGreeting()
-  const firstName = session ? 'João' : 'Visitante' // TODO: fetch from profile
+
+  let firstName = 'Visitante'
+  let unreadCount = 0
+  if (session) {
+    const [profile, notifCount] = await Promise.all([
+      prisma.profile.findUnique({
+        where: { userId: session.userId },
+        select: { name: true },
+      }),
+      prisma.notification.count({
+        where: { userId: session.userId, read: false },
+      }),
+    ])
+    firstName = profile?.name.split(' ')[0] ?? 'Visitante'
+    unreadCount = notifCount
+  }
 
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
@@ -69,7 +85,9 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
               className="bg-muted relative flex size-12 items-center justify-center rounded-full"
             >
               <Bell size={18} strokeWidth={1.8} />
-              <span className="border-background absolute right-[9px] top-[9px] size-2 rounded-full border-2 bg-red-500" />
+              {unreadCount > 0 && (
+                <span className="border-background absolute right-[9px] top-[9px] size-2 rounded-full border-2 bg-red-500" />
+              )}
             </Link>
             {/* Search shortcut */}
             <Link
@@ -99,7 +117,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             </div>
           }
         >
-          <FeedList filters={filters} />
+          <FeedList filters={filters} activeTab={activeTab} />
         </Suspense>
       </main>
     </div>

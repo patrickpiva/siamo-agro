@@ -20,14 +20,7 @@ export function ChatInput({
   maxLength = 1000,
   className,
 }: ChatInputProps) {
-  const ref = useRef<HTMLTextAreaElement>(null)
-
-  function autoResize() {
-    const el = ref.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.min(el.scrollHeight, 80)}px`
-  }
+  const ref = useRef<HTMLInputElement>(null)
 
   function send() {
     const el = ref.current
@@ -36,11 +29,10 @@ export function ChatInput({
     if (!text || disabled) return
     onSend(text)
     el.value = ''
-    el.style.height = 'auto'
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
       e.preventDefault()
       send()
     }
@@ -54,22 +46,19 @@ export function ChatInput({
           <span className="text-[12px]">Mensagens enviadas serão entregues ao reconectar</span>
         </div>
       )}
-      <div className="flex items-end gap-[10px] px-4 py-[10px]">
-        <textarea
+      <div className="flex items-center gap-[10px] px-4 py-[10px]">
+        <input
           ref={ref}
+          type="text"
           disabled={disabled}
           maxLength={maxLength}
-          onInput={autoResize}
           onKeyDown={handleKeyDown}
           placeholder="Mensagem..."
           aria-label="Mensagem"
-          aria-keyshortcuts="Enter"
-          rows={1}
+          style={{ paddingLeft: 20, paddingRight: 16 }}
           className={cn(
-            'bg-muted flex-1 resize-none rounded-[20px] px-[14px] py-[10px] text-[14px] leading-[1.4] outline-none',
-            'border-border border',
+            'bg-muted h-10 flex-1 rounded-full text-[14px] outline-none',
             'placeholder:text-muted-foreground',
-            'max-h-[80px] min-h-[40px]',
             disabled && 'opacity-50',
           )}
         />

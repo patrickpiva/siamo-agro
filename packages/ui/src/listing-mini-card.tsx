@@ -2,6 +2,28 @@ import { cn } from './lib/utils'
 import { KindBadge } from './kind-badge'
 import { StatusBadge } from './status-badge'
 
+// Simple placeholder icon (wheat/grain) as SVG inline — avoids external import
+function PlaceholderIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <path d="M12 22V12" />
+      <path d="M9 7c0 2.8 1.3 4 3 5 1.7-1 3-2.2 3-5a3 3 0 0 0-6 0z" />
+      <path d="M6 12c0 2.8 1.3 4 3 4.5" />
+      <path d="M18 12c0 2.8-1.3 4-3 4.5" />
+    </svg>
+  )
+}
+
 type ListingKind = 'OFFER' | 'DEMAND' | 'SERVICE' | 'EQUIPMENT'
 type ListingStatus = 'ACTIVE' | 'PAUSED' | 'CLOSED'
 
@@ -32,7 +54,9 @@ export function ListingMiniCard({ listing, className }: ListingMiniCardProps) {
         {listing.thumbnail ? (
           <img src={listing.thumbnail} alt={listing.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="h-full w-full" />
+          <div className="flex h-full w-full items-center justify-center">
+            <PlaceholderIcon className="text-muted-foreground size-5 opacity-50" />
+          </div>
         )}
       </div>
 

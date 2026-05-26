@@ -13,22 +13,8 @@ const MAX_CANDIDATES = 500
 const MAX_RADIUS_M = 200_000 // 200 km in metres
 const BATCH_SIZE = 50
 const TOP_MATCHES = 50
-const MIN_SCORE = 0.3
+const MIN_SCORE = 0.2 // lowered from 0.30 — with live reputation active more matches survive
 const HIGH_SCORE_THRESHOLD = 0.7
-
-// ─── Business hours check (Brasília UTC-3) ────────────────────────────────────
-
-function isBusinessHours(): boolean {
-  const hour = parseInt(
-    new Intl.DateTimeFormat('pt-BR', {
-      timeZone: 'America/Sao_Paulo',
-      hour: 'numeric',
-      hour12: false,
-    }).format(new Date()),
-    10,
-  )
-  return hour >= 8 && hour < 20
-}
 
 // ─── compute-matches-for-listing ──────────────────────────────────────────────
 
@@ -63,18 +49,26 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
   const sourceProfileId = listing.profile.id
   const listingOwnerUserId = listing.profile.user.id
 
-  // 2. Fetch up to MAX_CANDIDATES nearby profiles with at least one active listing
+  // 2. Fetch up to MAX_CANDIDATES nearby profiles.
+  //    Live rating counts are computed via LEFT JOIN on the ratings table so we
+  //    never read stale denormalized values from the profiles columns.
   const candidateRows = await prisma.$queryRaw<CandidateRow[]>`
     SELECT
       p.id,
-      p.current_rating                                                             AS "currentRating",
-      p.rating_count                                                               AS "ratingCount",
+      p.user_id                                                                    AS "userId",
       p.badge,
       loc.latitude,
       loc.longitude,
-      ST_Distance(loc.geog, ST_MakePoint(${lng}, ${lat})::geography) / 1000.0     AS "distanceKm"
+      ST_Distance(loc.geog, ST_MakePoint(${lng}, ${lat})::geography) / 1000.0     AS "distanceKm",
+      COALESCE(r_agg.avg_score, 0)::float                                          AS "currentRating",
+      COALESCE(r_agg.cnt, 0)::int                                                  AS "ratingCount"
     FROM profiles p
     JOIN locations loc ON loc.profile_id = p.id
+    LEFT JOIN (
+      SELECT ratee_id, AVG(score)::float AS avg_score, COUNT(*)::int AS cnt
+      FROM ratings
+      GROUP BY ratee_id
+    ) r_agg ON r_agg.ratee_id = p.user_id
     WHERE
       p.id != ${sourceProfileId}
       AND loc.geog IS NOT NULL
@@ -93,9 +87,11 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
   }
 
   // 3. Load active listings for all candidates (single query)
-  const candidateIds = candidateRows.map((r) => r.id)
+  const candidateProfileIds = candidateRows.map((r) => r.id)
+  const candidateUserIds = candidateRows.map((r) => r.userId)
+
   const candidateListings = await prisma.listing.findMany({
-    where: { profileId: { in: candidateIds }, status: 'ACTIVE' },
+    where: { profileId: { in: candidateProfileIds }, status: 'ACTIVE' },
     select: { profileId: true, kind: true, category: true, status: true },
   })
 
@@ -106,13 +102,41 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
     listingsByProfile.set(l.profileId, arr)
   }
 
-  // 4. Build CandidateProfile objects
+  // 4. Compute average first-response time per seller from transaction history.
+  //    Measured as: time from PROPOSED to first message in the transaction thread.
+  //    Only considers transactions that progressed past the proposal stage.
+  type ResponseRow = { userId: string; avgResponseHours: number }
+  const responseRows =
+    candidateUserIds.length > 0
+      ? await prisma.$queryRaw<ResponseRow[]>`
+          SELECT
+            t.seller_id                                                             AS "userId",
+            AVG(
+              EXTRACT(EPOCH FROM (first_msg.min_created_at - t.created_at)) / 3600.0
+            )::float                                                                AS "avgResponseHours"
+          FROM transactions t
+          JOIN (
+            SELECT transaction_id, MIN(created_at) AS min_created_at
+            FROM transaction_messages
+            GROUP BY transaction_id
+          ) first_msg ON first_msg.transaction_id = t.id
+          WHERE t.seller_id = ANY(${candidateUserIds})
+            AND t.status IN ('ACCEPTED', 'IN_PROGRESS', 'COMPLETED')
+          GROUP BY t.seller_id
+        `
+      : []
+
+  const responseMap = new Map<string, number>(
+    responseRows.map((r) => [r.userId, Number(r.avgResponseHours)]),
+  )
+
+  // 5. Build CandidateProfile objects with live reputation and response data
   const candidates: CandidateProfile[] = candidateRows.map((row) => ({
     id: row.id,
     currentRating: Number(row.currentRating),
     ratingCount: Number(row.ratingCount),
     badge: row.badge as BadgeTier,
-    avgResponseHours: null, // Phase 2: derive from transaction history
+    avgResponseHours: responseMap.get(row.userId) ?? null,
     location: { latitude: Number(row.latitude), longitude: Number(row.longitude) },
     listings: (listingsByProfile.get(row.id) ?? []).map((l) => ({
       kind: l.kind,
@@ -135,7 +159,7 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
     },
   }
 
-  // 5. Compute scores in batches of BATCH_SIZE
+  // 6. Compute scores in batches of BATCH_SIZE
   const allResults: { candidate: CandidateProfile; score: number; distanceKm: number }[] = []
 
   for (let i = 0; i < candidates.length; i += BATCH_SIZE) {
@@ -149,13 +173,13 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
     allResults.push(...batchResults)
   }
 
-  // 6. Keep top TOP_MATCHES above MIN_SCORE
+  // 7. Keep top TOP_MATCHES above MIN_SCORE
   const topMatches = allResults
     .filter((r) => r.score >= MIN_SCORE)
     .sort((a, b) => b.score - a.score)
     .slice(0, TOP_MATCHES)
 
-  // 7. Persist — delete stale records then insert fresh ones
+  // 8. Persist — delete stale records then insert fresh ones (single transaction)
   const now = new Date()
   const created = await prisma.$transaction(async (tx) => {
     await tx.matchScore.deleteMany({ where: { listingId } })
@@ -174,7 +198,8 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
     )
   })
 
-  // 8. Trigger notifications for high-quality matches
+  // 9. Trigger notifications for high-quality matches.
+  //    addNotifyMatchJob already schedules for next business hours if needed.
   const highQuality = created.filter((ms) => ms.score >= HIGH_SCORE_THRESHOLD)
   await Promise.all(highQuality.map((ms) => addNotifyMatchJob(ms.id, listingOwnerUserId)))
 
@@ -222,13 +247,9 @@ export async function processNotifyMatchJob(job: Job<NotifyMatchJobData>): Promi
     return
   }
 
-  // 2. Business hours gate
-  if (!isBusinessHours()) {
-    // Delay re-check — throw so BullMQ retries with backoff until business hours
-    throw new Error('Fora do horário comercial — será reprocessado')
-  }
+  // Note: business-hours scheduling is now handled at enqueue time (queue.ts),
+  // so this processor fires only during the correct window. No retry loop needed.
 
-  // 3. Send notification (daily dedup is handled by the jobId in queue.ts)
   const adapter = createWhatsAppAdapter()
   await adapter.sendNotification(phone, 'new_match', {
     listing: match.listing.title,
@@ -260,10 +281,7 @@ export function createMatchmakingWorker() {
         await processNotifyMatchJob(job as Job<NotifyMatchJobData>)
       }
     },
-    {
-      connection,
-      concurrency: 10,
-    },
+    { connection, concurrency: 10 },
   )
 
   return worker

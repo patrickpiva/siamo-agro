@@ -1,6 +1,12 @@
 import type { PrismaClient } from '@agrolink/db'
 import { AppError, NotFoundError } from '@agrolink/shared'
-import type { UpdateMeBody, UpdateNotificationPrefsBody, UpdateConsentsBody } from './schema.js'
+import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
+import type {
+  UpdateMeBody,
+  UpdateNotificationPrefsBody,
+  UpdateConsentsBody,
+  FeedMatchesQuery,
+} from './schema.js'
 
 export class MeService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -130,6 +136,121 @@ export class MeService {
       },
     })
     return { requested: true as const }
+  }
+
+  /**
+   * Returns listings where the authenticated user's profile appears as a
+   * high-scoring match candidate, ordered by match score descending.
+   *
+   * If no match scores exist yet AND the user has active listings, a background
+   * job is dispatched to compute them and `computing: true` is returned so the
+   * frontend can show an appropriate loading state.
+   */
+  async getFeedMatches(userId: string, query: FeedMatchesQuery) {
+    const { cursor, limit } = query
+
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: {
+        id: true,
+        _count: { select: { listings: { where: { status: 'ACTIVE' } } } },
+      },
+    })
+
+    if (!profile) {
+      return { data: [], meta: { nextCursor: null, limit }, computing: false }
+    }
+
+    // Cursor: stored as "matchScoreId" so we can do score-based ordering
+    let cursorScore: number | undefined
+    if (cursor) {
+      const cursorRow = await this.prisma.matchScore.findUnique({
+        where: { id: cursor },
+        select: { score: true },
+      })
+      cursorScore = cursorRow?.score
+    }
+
+    const matchRows = await this.prisma.matchScore.findMany({
+      where: {
+        candidateProfileId: profile.id,
+        listing: { status: 'ACTIVE' },
+        ...(cursor !== undefined && cursorScore !== undefined
+          ? {
+              OR: [{ score: { lt: cursorScore } }, { score: cursorScore, id: { lt: cursor } }],
+            }
+          : {}),
+      },
+      take: limit + 1,
+      orderBy: [{ score: 'desc' }, { id: 'desc' }],
+      include: {
+        listing: {
+          include: {
+            photos: { orderBy: { order: 'asc' } },
+            profile: { include: { location: true } },
+          },
+        },
+      },
+    })
+
+    // No matches yet — check if we should trigger computation
+    if (matchRows.length === 0 && !cursor) {
+      const hasActiveListings = profile._count.listings > 0
+      if (hasActiveListings) {
+        // Dispatch compute jobs for all of the user's active listings so that
+        // OTHER listings can discover them as candidates, populating this feed.
+        const myListings = await this.prisma.listing.findMany({
+          where: { profileId: profile.id, status: 'ACTIVE' },
+          select: { id: true },
+        })
+        for (const l of myListings) {
+          addComputeMatchesJob(l.id).catch((err: unknown) =>
+            console.error('[me/feed/matches] erro ao despachar job:', err),
+          )
+        }
+        return { data: [], meta: { nextCursor: null, limit }, computing: true }
+      }
+      return { data: [], meta: { nextCursor: null, limit }, computing: false }
+    }
+
+    const hasMore = matchRows.length > limit
+    const page = hasMore ? matchRows.slice(0, limit) : matchRows
+
+    const data = page.map((ms) => {
+      const l = ms.listing
+      return {
+        id: l.id,
+        kind: l.kind,
+        category: l.category,
+        title: l.title,
+        description: l.description,
+        price: l.price ? Number(l.price) : null,
+        negotiable: l.negotiable,
+        status: l.status,
+        viewCount: l.viewCount,
+        createdAt: l.createdAt.toISOString(),
+        updatedAt: l.updatedAt.toISOString(),
+        matchScore: ms.score,
+        distanceKm: ms.distanceKm ?? null,
+        photos: l.photos.map((p) => ({ id: p.id, url: p.url, order: p.order })),
+        profile: {
+          id: l.profile.id,
+          userId: l.profile.userId,
+          name: l.profile.name,
+          photo: l.profile.photo ?? null,
+          rating: l.profile.currentRating,
+          badge: l.profile.badge,
+          city: l.profile.location?.city ?? null,
+          state: l.profile.location?.state ?? null,
+        },
+      }
+    })
+
+    return {
+      data,
+      meta: { nextCursor: hasMore ? (page.at(-1)?.id ?? null) : null, limit },
+      computing: false,
+    }
   }
 
   async deleteAccount(userId: string) {

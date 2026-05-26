@@ -26,7 +26,7 @@ export class MatchmakingService {
     if (!listing) throw new MatchesListingNotFoundError(listingId)
     if (!profile || listing.profileId !== profile.id) throw new MatchesForbiddenError()
 
-    // 2. Check if fresh matches exist (computed within TTL)
+    // 2. Check freshness — trigger async job if stale
     const freshestMatch = await this.prisma.matchScore.findFirst({
       where: { listingId },
       orderBy: { computedAt: 'desc' },
@@ -41,45 +41,24 @@ export class MatchmakingService {
       return { processing: true }
     }
 
-    // 3. Cursor pagination
+    // 3. Cursor pagination — fetch cursor record once, use in query
     const { cursor, limit } = query
-    let cursorComputedAt: Date | undefined
+
+    let cursorScore: number | undefined
     if (cursor) {
-      const ms = await this.prisma.matchScore.findUnique({
+      const cursorRow = await this.prisma.matchScore.findUnique({
         where: { id: cursor },
-        select: { computedAt: true, score: true },
+        select: { score: true },
       })
-      cursorComputedAt = ms?.computedAt
+      cursorScore = cursorRow?.score
     }
 
     const matches = await this.prisma.matchScore.findMany({
       where: {
         listingId,
-        ...(cursor && cursorComputedAt
+        ...(cursor !== undefined && cursorScore !== undefined
           ? {
-              OR: [
-                {
-                  score: {
-                    lt:
-                      (
-                        await this.prisma.matchScore.findUnique({
-                          where: { id: cursor },
-                          select: { score: true },
-                        })
-                      )?.score ?? 0,
-                  },
-                },
-                {
-                  score:
-                    (
-                      await this.prisma.matchScore.findUnique({
-                        where: { id: cursor },
-                        select: { score: true },
-                      })
-                    )?.score ?? 0,
-                  id: { lt: cursor },
-                },
-              ],
+              OR: [{ score: { lt: cursorScore } }, { score: cursorScore, id: { lt: cursor } }],
             }
           : {}),
       },
@@ -102,7 +81,6 @@ export class MatchmakingService {
     const page = hasMore ? matches.slice(0, limit) : matches
 
     const data: MatchResult[] = page.map((ms) => {
-      // Pick the best candidate listing using our compatibility pair scorer
       let bestListing: MatchResult['bestListing'] = null
       let bestScore = -1
       for (const cl of ms.candidateProfile.listings) {
@@ -133,10 +111,7 @@ export class MatchmakingService {
 
     return {
       data,
-      meta: {
-        nextCursor: hasMore ? (page.at(-1)?.id ?? null) : null,
-        limit,
-      },
+      meta: { nextCursor: hasMore ? (page.at(-1)?.id ?? null) : null, limit },
     }
   }
 }

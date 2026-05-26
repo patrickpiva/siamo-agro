@@ -33,6 +33,32 @@ export function getMatchmakingQueue(): Queue<MatchmakingJobData> | null {
   return _queue
 }
 
+// ─── Business hours helpers ───────────────────────────────────────────────────
+
+/**
+ * Returns the number of milliseconds until the next 08:00 Brasília time.
+ * Returns 0 if we are currently within business hours (08:00–20:00 BRT).
+ *
+ * Used to delay notification jobs so they fire at a reasonable hour rather
+ * than waking up users or exhausting retry budgets overnight.
+ */
+export function msUntilNextBusinessHours(): number {
+  const brtHour = parseInt(
+    new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: 'numeric',
+      hour12: false,
+    }).format(new Date()),
+    10,
+  )
+
+  if (brtHour >= 8 && brtHour < 20) return 0
+
+  // Hours remaining until 08:00 next business window
+  const hoursUntil = brtHour < 8 ? 8 - brtHour : 32 - brtHour // (24 - h) + 8
+  return (hoursUntil * 60 + 10) * 60 * 1000 // +10 min buffer
+}
+
 // ─── Job helpers ──────────────────────────────────────────────────────────────
 
 export async function addComputeMatchesJob(listingId: string): Promise<void> {
@@ -60,13 +86,18 @@ export async function addNotifyMatchJob(
   if (!queue) return
 
   const today = new Date().toISOString().slice(0, 10) // YYYY-MM-DD
+  const delay = msUntilNextBusinessHours()
+
   await queue.add(
     'notify-match',
     { type: 'notify-match', matchScoreId, listingOwnerUserId },
     {
       jobId: `notify-match:${listingOwnerUserId}:${today}`,
+      // Schedule for next business window if currently outside 08:00–20:00 BRT.
+      // This avoids exhausting retries with exponential backoff overnight.
+      ...(delay > 0 ? { delay } : {}),
       // Keep completed notify jobs for 25h so the jobId dedup window covers the full day.
-      removeOnComplete: { age: 90000 },
+      removeOnComplete: { age: 90_000 },
       removeOnFail: false,
     },
   )

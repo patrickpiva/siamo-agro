@@ -44,18 +44,20 @@ export function SellerCard({ profile }: SellerCardProps) {
           <div className="min-w-0 flex-1">
             <div className="mb-[3px] flex items-center gap-2">
               <span className="truncate text-[13px] font-medium">{profile.name}</span>
-              {profile.badge && (
+              {profile.badge && profile.badge !== 'NONE' && (
                 <span className="bg-accent text-accent-foreground rounded-[4px] px-[7px] py-[2px] font-mono text-[9px] font-medium tracking-[0.4px]">
                   {BADGE_LABELS[profile.badge] ?? profile.badge}
                 </span>
               )}
             </div>
-            {profile.rating !== undefined && profile.rating !== null && (
+            {profile.rating !== undefined && profile.rating !== null && profile.rating > 0 && (
               <div className="text-fg-secondary flex items-center gap-[6px] text-[11px]">
                 <Star size={11} strokeWidth={0} fill="currentColor" className="text-accent" />
                 <span>{profile.rating.toFixed(1)}</span>
-                {profile.reviewCount !== undefined && (
-                  <span>· {profile.reviewCount} avaliações</span>
+                {profile.reviewCount !== undefined && profile.reviewCount > 0 && (
+                  <span>
+                    · {profile.reviewCount} {profile.reviewCount === 1 ? 'avaliação' : 'avaliações'}
+                  </span>
                 )}
               </div>
             )}

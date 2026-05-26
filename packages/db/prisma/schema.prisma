@@ -61,6 +61,14 @@ enum TransactionStatus {
   CANCELLED
 }
 
+enum CancellationReason {
+  NO_RESPONSE
+  PRICE_DISAGREEMENT
+  QUALITY_ISSUE
+  CHANGED_MIND
+  OTHER
+}
+
 enum NotificationType {
   PROPOSAL_RECEIVED
   PROPOSAL_ACCEPTED
@@ -89,6 +97,7 @@ model User {
   sellerTransactions Transaction[]        @relation("SellerTransactions")
   sentMessages       TransactionMessage[] @relation("SentMessages")
   notifications      Notification[]
+  savedListings      SavedListing[]
 
   @@map("users")
 }
@@ -164,6 +173,7 @@ model Listing {
   photos       ListingPhoto[]
   transactions Transaction[]
   matchScores  MatchScore[]
+  savedBy      SavedListing[]
 
   @@index([profileId])
   @@index([kind, status])
@@ -190,11 +200,29 @@ model ListingPhoto {
 
 model Transaction {
   id        String            @id @default(cuid())
+  shortId   Int               @unique @default(autoincrement()) @map("short_id")
   listingId String            @map("listing_id")
   buyerId   String            @map("buyer_id")
   sellerId  String            @map("seller_id")
   amount    Decimal           @map("amount") @db.Decimal(12, 2)
   status    TransactionStatus @default(PROPOSED) @map("status")
+
+  // Dual-party confirmation for start (ACCEPTED → IN_PROGRESS)
+  buyerConfirmedStart  Boolean  @default(false) @map("buyer_confirmed_start")
+  sellerConfirmedStart Boolean  @default(false) @map("seller_confirmed_start")
+
+  // Dual-party confirmation for completion (IN_PROGRESS → COMPLETED)
+  buyerConfirmedEnd  Boolean  @default(false) @map("buyer_confirmed_end")
+  sellerConfirmedEnd Boolean  @default(false) @map("seller_confirmed_end")
+
+  // Cancellation tracking
+  cancelledById      String?            @map("cancelled_by_id")
+  cancellationReason CancellationReason? @map("cancellation_reason")
+  cancelledAt        DateTime?          @map("cancelled_at")
+
+  // 72h completion timer: set when first party confirms completion
+  completionFirstConfirmedAt DateTime? @map("completion_first_confirmed_at")
+
   createdAt DateTime          @default(now()) @map("created_at")
   updatedAt DateTime          @updatedAt @map("updated_at")
 
@@ -203,7 +231,7 @@ model Transaction {
   buyer    User                 @relation("BuyerTransactions", fields: [buyerId], references: [id], onDelete: Restrict)
   seller   User                 @relation("SellerTransactions", fields: [sellerId], references: [id], onDelete: Restrict)
   messages TransactionMessage[]
-  rating   Rating?
+  ratings  Rating[]
 
   @@index([listingId])
   @@index([buyerId])
@@ -232,16 +260,23 @@ model TransactionMessage {
 // ─── Rating ───────────────────────────────────────────────────────────────────
 
 model Rating {
-  id            String   @id @default(cuid())
-  transactionId String   @unique @map("transaction_id") // uma avaliação por transação
-  score         Int      @map("score") // 1–5; CHECK constraint aplicado via 001_postgis.sql
-  comment       String?  @map("comment")
-  weight        Float    @default(1.0) @map("weight")
+  id            String  @id @default(cuid())
+  transactionId String  @map("transaction_id")
+  raterId       String  @map("rater_id")   // userId de quem avalia
+  rateeId       String  @map("ratee_id")   // userId de quem é avaliado
+  score         Int     @map("score")       // 1–5
+  comment       String? @map("comment")
+  reliability   Int?    @map("reliability")   // 1–5 ou null
+  communication Int?    @map("communication") // 1–5 ou null
+  quality       Int?    @map("quality")       // 1–5 ou null
+  weight        Float   @default(1.0) @map("weight")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
 
+  @@unique([transactionId, raterId]) // uma avaliação por rater por transação
+  @@index([rateeId])
   @@map("ratings")
 }
 
@@ -314,6 +349,23 @@ model Notification {
   @@index([userId])
   @@index([userId, read])
   @@map("notifications")
+}
+
+// ─── SavedListing ─────────────────────────────────────────────────────────────
+
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  listingId String   @map("listing_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId])
+  @@map("saved_listings")
 }
 
 // ─── NotificationPreference ───────────────────────────────────────────────────

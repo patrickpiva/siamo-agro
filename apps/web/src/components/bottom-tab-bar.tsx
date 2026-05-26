@@ -21,7 +21,6 @@ export function BottomTabBar() {
     pathname.startsWith('/entrar') ||
     pathname.startsWith('/cadastro') ||
     pathname.startsWith('/anuncio/') ||
-    pathname.startsWith('/perfil/') ||
     pathname.includes('/proposta') ||
     pathname.startsWith('/transacao')
 

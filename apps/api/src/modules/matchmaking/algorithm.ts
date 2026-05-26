@@ -2,8 +2,6 @@ import type { BadgeTier, ListingKind, ListingStatus } from '@agrolink/db'
 
 // ─── Weights ──────────────────────────────────────────────────────────────────
 //
-// Rationale for each weight:
-//
 //   DISTANCE (0.40) — in rural Brazil, logistics cost is the primary friction.
 //     A great match 400 km away is rarely actionable. Distance dominates.
 //
@@ -69,9 +67,10 @@ export interface CandidateProfile {
   ratingCount: number
   badge: BadgeTier
   /**
-   * Pre-fetched average first-response time in hours from completed transactions.
-   * Pass `null` or `undefined` when the candidate has no transaction history —
-   * the score will fall back to the neutral 0.5 value.
+   * Pre-fetched average first-response time in hours derived from the candidate's
+   * transaction history (time from PROPOSED to first message).
+   * Pass `null` when the candidate has no transaction history — the score falls
+   * back to the neutral 0.5 value so new users are not penalised.
    */
   avgResponseHours?: number | null
   location: { latitude: number; longitude: number }
@@ -113,11 +112,27 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
 }
 
 /**
- * score_distancia: linear decay from 1.0 at 0 km to 0.0 at MAX_DISTANCE_KM.
- * Formula: max(0, 1 - km / MAX_DISTANCE_KM)
+ * score_distancia: logarithmic decay from 1.0 at 0 km to 0.0 at MAX_DISTANCE_KM.
+ *
+ * Formula: max(0, 1 - log(1 + km) / log(1 + MAX_KM))
+ *
+ * Why logarithmic instead of linear?
+ *   In rural Brazil the difference between 5 km and 50 km is far more meaningful
+ *   than between 150 km and 195 km (both are long-haul, rarely actionable).
+ *   The log curve rewards genuinely local matches with a steep bonus in the 0–30 km
+ *   range, then decays gradually for medium distances, preserving relative ordering
+ *   at the long tail without artificially excluding viable far matches.
+ *
+ * Comparison at selected distances (MAX=200 km):
+ *   0 km  → 1.00  (same for both)
+ *   10 km → linear 0.95 / log 0.78  ← log rewards closeness more
+ *   50 km → linear 0.75 / log 0.56
+ *   100km → linear 0.50 / log 0.37
+ *   150km → linear 0.25 / log 0.20
+ *   200km → 0.00  (same for both)
  */
 export function scoreDistance(distanceKm: number): number {
-  return Math.max(0, 1 - distanceKm / MAX_DISTANCE_KM)
+  return Math.max(0, 1 - Math.log(1 + distanceKm) / Math.log(1 + MAX_DISTANCE_KM))
 }
 
 // ─── Reputation ───────────────────────────────────────────────────────────────
@@ -138,6 +153,10 @@ const BADGE_BONUS: Record<BadgeTier, number> = {
  *
  * Badge bonus: platform-awarded tiers add up to 0.10. Applied after clamping
  * so it can rescue a mid-range score but cannot push a poor score to 1.0.
+ *
+ * IMPORTANT: callers must supply LIVE rating counts from the ratings table,
+ * NOT the denormalized `profile.currentRating` / `profile.ratingCount` columns
+ * which are only updated by the async recompute worker and may be stale.
  */
 export function scoreReputation(
   currentRating: number,
@@ -166,7 +185,6 @@ export function scoreReputation(
  *   SERVICE ↔ EQUIPMENT — service provider might need equipment
  *
  * Same kind always earns 0.0 — competitors do not benefit each other.
- * EQUIPMENT is intentionally flexible (can match any non-same kind).
  */
 const KIND_COMPAT: Record<ListingKind, Record<ListingKind, number>> = {
   OFFER: { OFFER: 0.0, DEMAND: 0.7, SERVICE: 0.4, EQUIPMENT: 0.4 },
@@ -176,8 +194,54 @@ const KIND_COMPAT: Record<ListingKind, Record<ListingKind, number>> = {
 }
 
 /**
+ * Category semantic clusters — groups of categories that are commercially
+ * related and frequently appear together in the same transactions.
+ *
+ * Exact category match → +0.30 bonus
+ * Same cluster match   → +0.15 bonus
+ * Different cluster    → +0.00
+ *
+ * 'OTHER' cluster never receives cluster bonus to avoid false positives.
+ */
+const CATEGORY_CLUSTER: Record<string, string> = {
+  // Commodity crops
+  COFFEE: 'GRAINS',
+  CORN: 'GRAINS',
+  SOY: 'GRAINS',
+  GRAINS: 'GRAINS',
+  // Animal products
+  LIVESTOCK: 'LIVESTOCK',
+  DAIRY: 'LIVESTOCK',
+  // Perishables
+  FRUITS: 'HORTICULTURE',
+  VEGETABLES: 'HORTICULTURE',
+  // Professional services
+  AGRONOMY: 'AGRO_SERVICES',
+  VETERINARY: 'AGRO_SERVICES',
+  CONSULTING: 'AGRO_SERVICES',
+  // Machinery
+  MECHANICS: 'MECHANICAL',
+  TRACTOR: 'MECHANICAL',
+  HARVESTER: 'MECHANICAL',
+  // Farm infrastructure
+  IRRIGATION: 'INFRASTRUCTURE',
+  IRRIGATION_SYSTEM: 'INFRASTRUCTURE',
+  STORAGE: 'INFRASTRUCTURE',
+  // Labour & logistics
+  LABOR: 'LABOR_TRANSPORT',
+  TRANSPORT: 'LABOR_TRANSPORT',
+}
+
+function categoryBonus(cat1: string, cat2: string): number {
+  if (cat1 === cat2) return 0.3
+  const c1 = CATEGORY_CLUSTER[cat1] ?? 'OTHER'
+  const c2 = CATEGORY_CLUSTER[cat2] ?? 'OTHER'
+  return c1 !== 'OTHER' && c1 === c2 ? 0.15 : 0
+}
+
+/**
  * score_compatibilidade for a single listing pair.
- * Base score from kind matrix + 0.3 bonus when categories match exactly.
+ * Base score from kind matrix + tiered category bonus.
  * Returns 0.0 when kind base is 0 (no bonus can rescue incompatible kinds).
  */
 export function scoreCompatibilityPair(
@@ -188,8 +252,7 @@ export function scoreCompatibilityPair(
 ): number {
   const base = KIND_COMPAT[listingKind][candidateKind]
   if (base === 0) return 0
-  const categoryBonus = listingCategory === candidateCategory ? 0.3 : 0
-  return Math.min(1, base + categoryBonus)
+  return Math.min(1, base + categoryBonus(listingCategory, candidateCategory))
 }
 
 /**
@@ -247,15 +310,12 @@ export function scoreResponsiveness(avgResponseHours: number | null | undefined)
 /**
  * Computes a match score between a source listing and a candidate profile.
  *
- * The function is intentionally pure (no DB side effects). Callers are
- * responsible for pre-fetching all required data, including `avgResponseHours`
- * from the candidate's transaction history.
+ * Pure function — no DB side effects. Callers must pre-fetch LIVE rating data
+ * from the ratings table (not stale denormalized profile columns) and the
+ * candidate's avgResponseHours from transaction history.
  *
- * The function is async to accommodate future extensions (e.g., calling an
- * ML inference endpoint) without breaking the call sites.
- *
- * @returns score clamped to [0, 1], per-component breakdown for debugging/tuning,
- *   raw distance in km, and the specific candidate listing that drove compatibility.
+ * @returns score clamped to [0, 1], per-component breakdown, raw distance in km,
+ *   and the specific candidate listing that drove the compatibility sub-score.
  */
 export async function computeMatchScore(
   listing: MatchListing,
