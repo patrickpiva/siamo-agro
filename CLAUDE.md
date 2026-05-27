@@ -408,14 +408,15 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ## 11. ESTADO IMPLEMENTADO
 
-> Atualizado: 2026-05-26. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
+> Atualizado: 2026-05-27. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
 
 ### Branches
 
-| Branch                  | Status             | Conteúdo                                 |
-| ----------------------- | ------------------ | ---------------------------------------- |
-| `main`                  | produção           | Sprints 0–3 + Design Hardening mergeados |
-| `feat/design-hardening` | em desenvolvimento | Lote 5 + Lote 6 (estados especiais)      |
+| Branch             | Deploy automático              | Conteúdo                                 |
+| ------------------ | ------------------------------ | ---------------------------------------- |
+| `main`             | → Production (app.agra.ia.br)  | Sprints 0–3 + Design Hardening mergeados |
+| `staging`          | → Staging (staging.agra.ia.br) | Integração pré-release; espelha `main`   |
+| `feat/*` / `fix/*` | PR preview (Vercel)            | Features em desenvolvimento              |
 
 ---
 
@@ -539,12 +540,43 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 ---
 
+### Infraestrutura de deploy
+
+| Arquivo                         | Finalidade                                                     |
+| ------------------------------- | -------------------------------------------------------------- |
+| `railway.toml`                  | Build config Railway (nixpacks) + start command do serviço API |
+| `nixpacks.toml`                 | Força Node 22 + pnpm, evita ambiguidade de detecção            |
+| `.github/workflows/ci.yml`      | CI — lint + typecheck + test em todo PR para `main`            |
+| `apps/api/src/index.ts`         | Entry point **API** — HTTP Fastify apenas (sem worker)         |
+| `apps/api/src/worker.ts`        | Entry point **Worker** — BullMQ apenas (sem HTTP)              |
+| `apps/api/package.json` scripts | `start` → `index.js` · `start:worker` → `worker.js`            |
+
+**Plataformas e ambientes:**
+
+| Plataforma | Ambiente   | Serviço / Domínio                     | Notas                                            |
+| ---------- | ---------- | ------------------------------------- | ------------------------------------------------ |
+| Railway    | production | `api` → `api.agra.ia.br`              | Start: `node apps/api/dist/index.js`; Pro plan   |
+| Railway    | production | `worker`                              | Start: `node apps/api/dist/worker.js`; sem porta |
+| Railway    | production | Redis plugin                          | Injeta `REDIS_URL`                               |
+| Railway    | staging    | `api` → `api-staging.agra.ia.br`      | Mesmo build, vars de staging                     |
+| Railway    | staging    | `worker`                              | Idem, sem porta                                  |
+| Railway    | staging    | Redis plugin                          | Redis isolado de produção                        |
+| Vercel     | production | `app.agra.ia.br`                      | Branch `main`; root dir `apps/web`               |
+| Vercel     | staging    | `staging.agra.ia.br`                  | Branch `staging`; mesma config de build          |
+| Supabase   | production | projeto `agraia-production`           | Migrations manuais; ver §4                       |
+| Supabase   | staging    | projeto `agraia-staging`              | Cópia do schema; dados de teste                  |
+| Cloudflare | —          | DNS proxy para todos os 4 subdomínios | `app`, `staging`, `api`, `api-staging`           |
+
+---
+
 ### TODOs pendentes (não implementado ainda)
 
+- [ ] Configurar serviços no Railway (API + Worker + Redis) e Vercel — ver guia abaixo
 - [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
 - [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
 - [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
 - [ ] Aplicar migration `migrations/manual/002_saved_listings.sql` no Supabase SQL Editor e rodar `pnpm db:generate`
+- [ ] Aplicar migrations `003`, `004`, `005` no Supabase SQL Editor (matchmaking + RLS + security)
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
 
 ---

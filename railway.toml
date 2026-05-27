@@ -1,0 +1,28 @@
+# Railway deployment configuration
+# https://docs.railway.app/reference/config-as-code
+#
+# Two services share this repo — configure each in the Railway dashboard:
+#
+#   Service "api"
+#     Start command : node apps/api/dist/index.js
+#     Health check  : /health
+#
+#   Service "worker"
+#     Start command : node apps/api/dist/worker.js
+#     (no HTTP port — Railway does not healthcheck worker services)
+#
+# Both services use the same build below.
+
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm build"
+
+# ─── API service (default) ────────────────────────────────────────────────────
+# Override startCommand to "node apps/api/dist/worker.js" on the worker service.
+
+[deploy]
+startCommand = "node apps/api/dist/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5
