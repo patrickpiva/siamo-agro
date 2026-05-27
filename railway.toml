@@ -14,7 +14,7 @@
 # Both services use the same build below.
 
 [build]
-builder = "nixpacks"
+builder = "RAILPACK"
 buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm build"
 
 # ─── API service (default) ────────────────────────────────────────────────────
