@@ -4,12 +4,20 @@ import { msUntilNextBusinessHours } from './queue.js'
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Mock the Intl.DateTimeFormat.prototype.format to return a specific BRT hour.
- * The function under test calls `new Intl.DateTimeFormat(...).format(new Date())`
- * and parses the result as an integer hour.
+ * Mock the Intl.DateTimeFormat constructor to return a specific BRT hour.
+ * Spying on Intl.DateTimeFormat.prototype.format directly fails on Node ≥ 22
+ * because `format` is a getter accessor that requires an actual DateTimeFormat
+ * instance as its receiver ("UnwrapDateTimeFormat incompatible receiver").
+ * Mocking the constructor is the correct approach.
  */
 function mockBRTHour(hour: number) {
-  vi.spyOn(Intl.DateTimeFormat.prototype, 'format').mockReturnValue(String(hour))
+  vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => ({
+    format: () => String(hour),
+    resolvedOptions: () => ({}) as Intl.ResolvedDateTimeFormatOptions,
+    formatToParts: () => [],
+    formatRange: () => String(hour),
+    formatRangeToParts: () => [],
+  }))
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
