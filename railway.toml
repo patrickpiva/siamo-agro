@@ -13,11 +13,9 @@
 #
 # Both services use the same build below.
 
-[build]
-builder = "DOCKERFILE"
-
 # ─── API service (default) ────────────────────────────────────────────────────
 # Override startCommand to "node apps/api/dist/worker.js" on the worker service.
+# Build is handled by GitHub Actions (deploy.yml) — Railway runs the pre-built image.
 
 [deploy]
 startCommand = "node apps/api/dist/index.js"
