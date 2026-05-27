@@ -63,8 +63,8 @@ describe('msUntilNextBusinessHours', () => {
 
   it('calculates correct delay for 06:00 BRT → 08:00 (2 h + 10 min buffer)', () => {
     mockBRTHour(6)
-    // hoursUntil = 8 - 6 = 2 → (2 * 60 + 10) * 60 * 1000 = 8_400_000 ms
-    expect(msUntilNextBusinessHours()).toBe(8_400_000)
+    // hoursUntil = 8 - 6 = 2 → (2 * 60 + 10) * 60 * 1000 = 7_800_000 ms
+    expect(msUntilNextBusinessHours()).toBe(7_800_000)
   })
 
   it('calculates correct delay for 07:00 BRT → 08:00 (1 h + 10 min buffer)', () => {

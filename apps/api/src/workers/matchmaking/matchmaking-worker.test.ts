@@ -363,7 +363,10 @@ describe('processNotifyMatchJob', () => {
     expect(mockSendNotification).not.toHaveBeenCalled()
   })
 
-  it('throws outside business hours so BullMQ retries later', async () => {
+  it('sends notification regardless of current hour (delay is handled at enqueue time, not process time)', async () => {
+    // Business-hours enforcement moved to addNotifyMatchJob (queue.ts), which
+    // applies a BullMQ delay so the job only executes during 08:00–20:00 BRT.
+    // The processor itself has no hour guard — it always sends when it runs.
     vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(
       () =>
         ({
@@ -384,17 +387,21 @@ describe('processNotifyMatchJob', () => {
         profile: { user: { phone: '+5511999999999' } },
       },
     })
+    mockSendNotification.mockResolvedValue(undefined)
 
-    await expect(
-      processNotifyMatchJob(
-        makeJob<NotifyMatchJobData>({
-          type: 'notify-match',
-          matchScoreId: 'ms-1',
-          listingOwnerUserId: 'user-1',
-        }),
-      ),
-    ).rejects.toThrow('Fora do horário comercial')
-    expect(mockSendNotification).not.toHaveBeenCalled()
+    await processNotifyMatchJob(
+      makeJob<NotifyMatchJobData>({
+        type: 'notify-match',
+        matchScoreId: 'ms-1',
+        listingOwnerUserId: 'user-1',
+      }),
+    )
+
+    expect(mockSendNotification).toHaveBeenCalledWith(
+      '+5511999999999',
+      'new_match',
+      expect.objectContaining({ listing: 'Soja SP' }),
+    )
   })
 })
 
