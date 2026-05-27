@@ -14,8 +14,7 @@
 # Both services use the same build below.
 
 [build]
-builder = "RAILPACK"
-buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm build"
+builder = "DOCKERFILE"
 
 # ─── API service (default) ────────────────────────────────────────────────────
 # Override startCommand to "node apps/api/dist/worker.js" on the worker service.
