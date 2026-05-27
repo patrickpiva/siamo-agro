@@ -10,7 +10,7 @@ const TABS = [
   { href: '/busca', label: 'BUSCA', Icon: Search },
   { href: '/anuncio/novo', label: 'PUBLICAR', Icon: Plus, cta: true },
   { href: '/transacoes', label: 'NEGÓCIOS', Icon: MessageCircle },
-  { href: '/perfil', label: 'PERFIL', Icon: User },
+  { href: '/meu-perfil', label: 'PERFIL', Icon: User },
 ] as const
 
 export function BottomTabBar() {
@@ -22,7 +22,9 @@ export function BottomTabBar() {
     pathname.startsWith('/cadastro') ||
     pathname.startsWith('/anuncio/') ||
     pathname.includes('/proposta') ||
-    pathname.startsWith('/transacao')
+    pathname.startsWith('/transacao') ||
+    // Public profile pages — own profile lives at /meu-perfil; /perfil/[id] is a focused view
+    pathname.startsWith('/perfil/')
 
   if (isHidden) return null
 
@@ -41,8 +43,8 @@ export function BottomTabBar() {
           const isActive =
             href === '/feed'
               ? pathname === '/feed'
-              : href === '/perfil'
-                ? pathname.startsWith('/perfil')
+              : href === '/meu-perfil'
+                ? pathname === '/meu-perfil' || pathname.startsWith('/meu-perfil/')
                 : href === '/busca'
                   ? pathname.startsWith('/busca')
                   : pathname.startsWith(href)

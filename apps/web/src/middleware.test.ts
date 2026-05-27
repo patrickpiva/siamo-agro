@@ -35,8 +35,9 @@ const expiringToken = () => makeJwt(nowSec() + 10)
 const expiredToken = () => makeJwt(nowSec() - 60)
 
 /** Mock NextRequest with the given cookie map */
-function mockRequest(cookies: Record<string, string>) {
+function mockRequest(cookies: Record<string, string>, pathname = '/feed') {
   return {
+    nextUrl: { pathname },
     cookies: {
       get: (name: string) => {
         const value = cookies[name]
