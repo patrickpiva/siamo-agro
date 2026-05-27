@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import type { Route } from 'next'
 import { ChatBubble, ChatInput } from '@agraia/ui'
 import { CheckCircle } from '@agraia/ui/icons'
 import { getSupabase } from '@/lib/supabase-client'
@@ -217,7 +216,7 @@ export function ChatView({
       {/* "Marcar como concluída" CTA — shown above input for IN_PROGRESS */}
       {completionHref && !readOnly && (
         <div className="px-4 pb-1 pt-2">
-          <Link href={completionHref as unknown as Route}>
+          <Link href={completionHref}>
             <div className="flex w-full items-center justify-center gap-2 rounded-[12px] border border-[#c6e845] bg-[rgba(198,232,69,0.08)] py-[14px] dark:bg-[rgba(198,232,69,0.06)]">
               <CheckCircle size={16} strokeWidth={2} className="text-accent dark:text-primary" />
               <span className="text-accent dark:text-primary text-[14px] font-medium">

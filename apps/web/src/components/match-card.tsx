@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Route } from 'next'
 import { MatchScoreBadge } from '@agraia/ui'
 import type { MatchResult } from '@/lib/matches-api'
 
@@ -21,7 +20,7 @@ export function MatchCard({ match, className }: MatchCardProps) {
 
   return (
     <Link
-      href={`/perfil/${candidate.id}` as Route}
+      href={`/perfil/${candidate.id}`}
       className={[
         'border-border bg-card hover:bg-muted flex flex-col gap-3 rounded-xl border p-4 transition-colors',
         className ?? '',

@@ -22,7 +22,7 @@ export function ScreenHeader({ backHref, onBack, title, right, className }: Scre
   return (
     <div className={cn('flex flex-shrink-0 items-center justify-between px-4 py-3', className)}>
       {backHref ? (
-        <Link href={backHref as never} aria-label="Voltar" className={backButtonClass}>
+        <Link href={backHref} aria-label="Voltar" className={backButtonClass}>
           <ArrowLeft size={18} strokeWidth={1.8} />
         </Link>
       ) : (

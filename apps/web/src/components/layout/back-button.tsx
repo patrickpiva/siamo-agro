@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import type { Route } from 'next'
 import { ArrowLeft } from '@agraia/ui/icons'
 import { cn } from '@agraia/ui'
 
@@ -22,7 +21,7 @@ export function BackButton({ fallbackHref = '/feed', className }: BackButtonProp
     if (window.history.length > 1) {
       router.back()
     } else {
-      router.push(fallbackHref as Route<string>)
+      router.push(fallbackHref)
     }
   }
 

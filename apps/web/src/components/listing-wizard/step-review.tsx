@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Route } from 'next'
 import { CATEGORIES } from '@agraia/shared'
 import { useWizardStore } from './use-wizard-store'
 import type { ListingKindKey } from '@agraia/shared'
@@ -72,7 +71,7 @@ export function StepReview() {
 
       const json = (await res.json()) as { data: { id: string } }
       reset()
-      router.push(`/anuncio/${json.data.id}` as Route)
+      router.push(`/anuncio/${json.data.id}`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro inesperado.')
       setSubmitting(false)

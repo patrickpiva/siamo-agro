@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import type { Route } from 'next'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { ProfileRating } from './ProfileRating'
@@ -49,7 +48,7 @@ export function ProfileTabs({ profile, isOwn }: ProfileTabsProps) {
             {profile.listings.map((listing) => (
               <li key={listing.id}>
                 <Link
-                  href={`/anuncio/${listing.id}` as Route}
+                  href={`/anuncio/${listing.id}`}
                   className="bg-card hover:bg-muted flex items-start justify-between gap-2 rounded-xl border p-4 transition-colors"
                 >
                   <div className="min-w-0">

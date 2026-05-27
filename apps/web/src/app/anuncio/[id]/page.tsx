@@ -287,7 +287,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
               Pausar
             </button>
             <Link
-              href={`/anuncio/${id}/propostas` as never}
+              href={`/anuncio/${id}/propostas`}
               className="bg-cta-bg text-cta-fg flex min-w-0 flex-[2] items-center justify-center rounded-[12px] py-[13px] text-[15px] font-medium"
             >
               Ver todas as propostas

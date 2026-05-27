@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import type { Route } from 'next'
 
 interface OwnerActionsProps {
   listingId: string
@@ -31,7 +30,7 @@ export function OwnerActions({ listingId, status }: OwnerActionsProps) {
   return (
     <div className="flex flex-wrap gap-2">
       <Link
-        href={`/anuncio/${listingId}/editar` as Route}
+        href={`/anuncio/${listingId}/editar`}
         className="border-border hover:bg-muted rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
       >
         Editar
