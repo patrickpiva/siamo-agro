@@ -134,7 +134,7 @@ export function FeedCard({ listing }: { listing: FeedCardListing }) {
         {listing.distanceKm != null && (
           <span className="absolute right-[10px] top-[10px] flex items-center gap-1 rounded-[5px] bg-black/75 px-2 py-1 font-mono text-[11px] text-white">
             <MapPin size={10} strokeWidth={2} />
-            {listing.distanceKm} km
+            {Math.round(listing.distanceKm)} km
           </span>
         )}
 
