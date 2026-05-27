@@ -10,7 +10,7 @@ import type { MatchmakingJobData } from './types.js'
 import type { Job } from 'bullmq'
 
 const MAX_CANDIDATES = 500
-const MAX_RADIUS_M = 200_000 // 200 km in metres
+const MAX_RADIUS_M = 500_000 // 500 km in metres
 const BATCH_SIZE = 50
 const TOP_MATCHES = 50
 const MIN_SCORE = 0.2 // lowered from 0.30 — with live reputation active more matches survive
@@ -83,6 +83,10 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
 
   if (candidateRows.length === 0) {
     console.info('[matchmaking] sem candidatos no raio', { listingId, lat, lng })
+    await prisma.listing.update({
+      where: { id: listingId },
+      data: { matchesComputedAt: new Date() },
+    })
     return
   }
 
@@ -196,6 +200,11 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
         }),
       ),
     )
+  })
+
+  await prisma.listing.update({
+    where: { id: listingId },
+    data: { matchesComputedAt: now },
   })
 
   // 9. Trigger notifications for high-quality matches.

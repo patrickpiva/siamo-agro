@@ -196,21 +196,55 @@ export class MeService {
     // No matches yet — check if we should trigger computation
     if (matchRows.length === 0 && !cursor) {
       const hasActiveListings = profile._count.listings > 0
-      if (hasActiveListings) {
-        // Dispatch compute jobs for all of the user's active listings so that
-        // OTHER listings can discover them as candidates, populating this feed.
-        const myListings = await this.prisma.listing.findMany({
-          where: { profileId: profile.id, status: 'ACTIVE' },
-          select: { id: true },
-        })
-        for (const l of myListings) {
+      if (!hasActiveListings) {
+        return { data: [], meta: { nextCursor: null, limit }, computing: false }
+      }
+
+      const myListings = await this.prisma.listing.findMany({
+        where: { profileId: profile.id, status: 'ACTIVE' },
+        select: { id: true, matchesComputedAt: true },
+      })
+
+      // Dispatch compute for own listings that haven't been processed yet.
+      // This creates match scores where other profiles are candidates — populating
+      // those users' feeds, which eventually drives them to contact us.
+      const uncomputed = myListings.filter((l) => !l.matchesComputedAt)
+      for (const l of uncomputed) {
+        addComputeMatchesJob(l.id).catch((err: unknown) =>
+          console.error('[me/feed/matches] erro ao despachar job próprio:', err),
+        )
+      }
+
+      // Also dispatch compute for nearby OTHER users' listings so they can
+      // discover us as a candidate — which directly populates this feed.
+      const profileWithLoc = await this.prisma.profile.findUnique({
+        where: { id: profile.id },
+        include: { location: true },
+      })
+      if (profileWithLoc?.location) {
+        const { latitude: lat, longitude: lng } = profileWithLoc.location
+        const nearbyOthers = await this.prisma.$queryRaw<{ id: string }[]>`
+          SELECT l.id FROM listings l
+          JOIN locations loc ON loc.profile_id = l.profile_id
+          WHERE l.status = 'ACTIVE'
+            AND l.profile_id != ${profile.id}
+            AND loc.geog IS NOT NULL
+            AND ST_DWithin(loc.geog, ST_MakePoint(${lng}, ${lat})::geography, 500000)
+          LIMIT 30
+        `
+        for (const l of nearbyOthers) {
           addComputeMatchesJob(l.id).catch((err: unknown) =>
-            console.error('[me/feed/matches] erro ao despachar job:', err),
+            console.error('[me/feed/matches] erro ao despachar job vizinho:', err),
           )
         }
-        return { data: [], meta: { nextCursor: null, limit }, computing: true }
       }
-      return { data: [], meta: { nextCursor: null, limit }, computing: false }
+
+      // Once all own listings have been computed, the worker has had a chance to
+      // run. If there are still no scores the area is genuinely sparse → empty state.
+      if (uncomputed.length === 0) {
+        return { data: [], meta: { nextCursor: null, limit }, computing: false }
+      }
+      return { data: [], meta: { nextCursor: null, limit }, computing: true }
     }
 
     const hasMore = matchRows.length > limit
