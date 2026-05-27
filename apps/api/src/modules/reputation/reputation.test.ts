@@ -351,7 +351,9 @@ describe('ReputationService', () => {
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             currentRating: expect.any(Number),
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             badge: expect.any(String),
           }),
         }),
