@@ -15,7 +15,7 @@
 
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install --frozen-lockfile && pnpm build"
+buildCommand = "corepack enable && pnpm install --frozen-lockfile && pnpm build"
 
 # ─── API service (default) ────────────────────────────────────────────────────
 # Override startCommand to "node apps/api/dist/worker.js" on the worker service.

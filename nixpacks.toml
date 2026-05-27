@@ -1,15 +1,10 @@
 # Nixpacks configuration for Railway
-# Tells Nixpacks to use pnpm + Node 22, matching local dev.
+# Only pins the Node.js version — install and build are handled by
+# railway.toml's buildCommand to avoid duplicate phase conflicts.
 # https://nixpacks.com/docs/configuration/file
 
 [phases.setup]
 nixPkgs = ["nodejs_22"]
-
-[phases.install]
-cmds = ["corepack enable && pnpm install --frozen-lockfile"]
-
-[phases.build]
-cmds = ["pnpm build"]
 
 [variables]
 NODE_ENV = "production"
