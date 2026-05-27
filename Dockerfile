@@ -6,7 +6,7 @@ RUN corepack enable
 
 # Copy workspace manifests first — Docker caches this layer until any
 # package.json or lockfile changes, skipping the expensive pnpm install.
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml .npmrc ./
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 COPY packages/db/package.json ./packages/db/
