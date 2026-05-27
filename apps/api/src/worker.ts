@@ -6,7 +6,7 @@
  * enqueues jobs.
  *
  * Start command (Railway / production):
- *   node dist/worker.js
+ *   node apps/api/dist/worker.js
  *
  * Start command (local dev, second terminal):
  *   pnpm dev:worker
