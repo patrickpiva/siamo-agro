@@ -7,7 +7,7 @@ import type { BadgeContext } from './algorithm.js'
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('../../workers/reputation/queue.js', () => ({
-  addReputationRecomputeJob: vi.fn(),
+  addReputationRecomputeJob: vi.fn().mockResolvedValue(undefined),
 }))
 
 const noCtx: BadgeContext = {
@@ -300,6 +300,7 @@ describe('ReputationService', () => {
         ratingCount: 3,
         badge: 'BRONZE',
       })
+      mockPrisma.profile.findMany.mockResolvedValue([])
       const now = new Date()
       mockPrisma.rating.findMany.mockResolvedValue([
         {

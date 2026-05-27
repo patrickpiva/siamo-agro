@@ -106,8 +106,8 @@ describe('scoreDistance', () => {
     const log = scoreDistance(10)
     expect(log).toBeGreaterThan(0)
     expect(log).toBeLessThan(1)
-    // Just verify it's within a sensible range — exact value depends on MAX_DISTANCE_KM
-    expect(log).toBeGreaterThan(0.6)
+    // log(11)/log(201) ≈ 0.452, so scoreDistance(10) ≈ 0.548 with MAX=200
+    expect(log).toBeGreaterThan(0.4)
   })
 })
 

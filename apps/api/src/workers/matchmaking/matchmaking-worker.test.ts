@@ -11,6 +11,7 @@ const {
   mockMatchScoreFindUnique,
   mockListingFindUnique,
   mockListingFindMany,
+  mockListingUpdate,
   mockProfileFindUnique,
   mockQueryRaw,
   mockTransaction,
@@ -23,6 +24,7 @@ const {
   mockMatchScoreFindUnique: vi.fn(),
   mockListingFindUnique: vi.fn(),
   mockListingFindMany: vi.fn(),
+  mockListingUpdate: vi.fn().mockResolvedValue({}),
   mockProfileFindUnique: vi.fn(),
   mockQueryRaw: vi.fn(),
   mockTransaction: vi.fn(),
@@ -32,7 +34,11 @@ const {
 
 vi.mock('@agraia/db', () => ({
   prisma: {
-    listing: { findUnique: mockListingFindUnique, findMany: mockListingFindMany },
+    listing: {
+      findUnique: mockListingFindUnique,
+      findMany: mockListingFindMany,
+      update: mockListingUpdate,
+    },
     matchScore: {
       create: mockMatchScoreCreate,
       deleteMany: mockMatchScoreDeleteMany,

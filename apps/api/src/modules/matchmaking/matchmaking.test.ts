@@ -73,8 +73,10 @@ describe('scoreDistance', () => {
     expect(scoreDistance(0)).toBe(1.0)
   })
 
-  it('returns 0.5 at 100 km (half of 200 km max)', () => {
-    expect(scoreDistance(100)).toBeCloseTo(0.5)
+  // Logarithmic decay: 1 - log(1 + d) / log(1 + 200)
+  // At 100 km: 1 - log(101)/log(201) ≈ 0.13
+  it('returns ~0.13 at 100 km (log decay, MAX=200)', () => {
+    expect(scoreDistance(100)).toBeCloseTo(0.13, 1)
   })
 
   it('returns 0.0 at exactly 200 km', () => {
@@ -86,8 +88,9 @@ describe('scoreDistance', () => {
     expect(scoreDistance(1000)).toBe(0.0)
   })
 
-  it('returns strictly positive value at 50 km', () => {
-    expect(scoreDistance(50)).toBeCloseTo(0.75)
+  // At 50 km: 1 - log(51)/log(201) ≈ 0.26
+  it('returns ~0.26 at 50 km (log decay, MAX=200)', () => {
+    expect(scoreDistance(50)).toBeCloseTo(0.26, 1)
   })
 })
 
@@ -262,8 +265,9 @@ describe('computeMatchScore', () => {
       listings: [{ kind: 'DEMAND', category: 'GRAINS', status: 'ACTIVE' }],
     })
     const result = await computeMatchScore(listing, candidate)
-    expect(result.score).toBeGreaterThan(0.8)
-    expect(result.breakdown.distance).toBeGreaterThan(0.9)
+    // With log decay at ~7 km / 200 km max: distScore ≈ 0.60. Overall score ≈ 0.84.
+    expect(result.score).toBeGreaterThan(0.7)
+    expect(result.breakdown.distance).toBeGreaterThan(0.5)
     expect(result.breakdown.compatibility).toBe(1.0)
   })
 
