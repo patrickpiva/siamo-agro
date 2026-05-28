@@ -27,12 +27,5 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/feed.png",
-      "sizes": "360x780",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "screenshots": []
 }
