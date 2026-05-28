@@ -96,7 +96,7 @@ function HeroIllustration() {
         strokeDasharray="2 3"
       />
 
-      {/* Nó topo — CoffeeBean: white bg (light) / lime-tint (dark) */}
+      {/* Nó topo — CoffeeBean */}
       <circle
         cx="100"
         cy="56"
@@ -113,11 +113,11 @@ function HeroIllustration() {
         strokeLinejoin="round"
         className="text-accent-forest dark:text-accent-lime"
       >
-        <ellipse cx="12" cy="12" rx="5" ry="8.5" />
-        <path d="M12 4c-1.2 3-1.2 13 0 16" />
+        <path d="M4.05 19.95a11.24 8.585 135 0 0 15.9-15.9 11.24 8.585 135 0 0-15.9 15.9" />
+        <path d="M19.8 4.2C20 14 4 10 4.2 19.8" />
       </g>
 
-      {/* Nó esq — Tractor */}
+      {/* Nó esq — Farm */}
       <circle
         cx="56"
         cy="138"
@@ -134,15 +134,13 @@ function HeroIllustration() {
         strokeLinejoin="round"
         className="text-accent-forest dark:text-accent-lime"
       >
-        <circle cx="7" cy="17" r="3" />
-        <circle cx="7" cy="17" r="0.8" fill="currentColor" stroke="none" />
-        <circle cx="17" cy="17" r="2.2" />
-        <circle cx="17" cy="17" r="0.6" fill="currentColor" stroke="none" />
-        <path d="M2 14h4V9h5l3 5h5v3" />
-        <path d="M11 9V6h2v3" />
+        <path d="M22 12H2l2-6 8-4 8 4Z" />
+        <rect x="10" y="8" width="4" height="4" />
+        <path d="m7 22 10-10v10L7 12Z" />
+        <path d="M21 12v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8" />
       </g>
 
-      {/* Nó dir — Cattle */}
+      {/* Nó dir — Tractor */}
       <circle
         cx="144"
         cy="138"
@@ -159,10 +157,15 @@ function HeroIllustration() {
         strokeLinejoin="round"
         className="text-accent-forest dark:text-accent-lime"
       >
-        <path d="M5 8c0-2 1-3 3-3l1.5 2.5L12 6l2.5 1.5L16 5c2 0 3 1 3 3v3c0 4-3 7-7 7s-7-3-7-7V8z" />
-        <circle cx="9.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
-        <circle cx="14.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
-        <path d="M10.5 15.5c.4.6 1 1 1.5 1s1.1-.4 1.5-1" />
+        <path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20" />
+        <path d="M16 18h-5" />
+        <path d="M18 5a1 1 0 0 0-1 1v5.573" />
+        <path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246" />
+        <path d="M4 11V4" />
+        <path d="M7 15h.01" />
+        <path d="M8 10.1V4" />
+        <circle cx="18" cy="18" r="2" />
+        <circle cx="7" cy="15" r="5" />
       </g>
     </svg>
   )
