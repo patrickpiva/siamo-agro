@@ -149,6 +149,9 @@ export {
   WifiOff,
   Signal,
   Battery,
+
+  // Loading
+  Loader2,
 } from 'lucide-react'
 
 // ============================================================
