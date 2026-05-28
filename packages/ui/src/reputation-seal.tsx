@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react'
+import { Star } from './icons/index'
 import { cn } from './lib/utils'
 
 type SealTier = 'GOLD' | 'SILVER' | 'BRONZE'
@@ -26,7 +26,7 @@ export function ReputationSeal({ tier, className }: ReputationSealProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-[6px] rounded-[20px] border px-3 py-1',
+        'inline-flex items-center gap-[6px] rounded-full border px-3 py-1',
         TIER_CLASS[tier],
         className,
       )}
