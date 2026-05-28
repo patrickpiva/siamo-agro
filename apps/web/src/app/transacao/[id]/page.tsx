@@ -1,11 +1,11 @@
 'use client'
 
-import type { Route } from 'next'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { StateBanner, ChatBubble, ChatInput } from '@agraia/ui'
 import { TransactionStrip } from '@/components/transactions/transaction-strip'
 import { ScreenHeader } from '@/components/layout/screen-header'
+import { route } from '@/lib/route'
 
 // Mock — Sprint 4: GET /api/v1/transactions/:id
 const MOCK = {
@@ -84,7 +84,7 @@ export default function TransacaoPage({ params: _params }: TransacaoPageProps) {
   }
 
   function handleMarkComplete() {
-    router.push(`/transacao/${MOCK.transactionId}/concluir` as Route)
+    router.push(route(`/transacao/${MOCK.transactionId}/concluir`))
   }
 
   return (

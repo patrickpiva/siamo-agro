@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import type { Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
+import { route } from '@/lib/route'
 import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
 import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@agraia/ui'
@@ -194,7 +194,7 @@ export default async function TransacaoDetailPage({ params }: PageProps) {
           }}
           showOnlineStrip={false}
           systemEvent={{ label: systemEventLabel, date: systemEventDate }}
-          completionHref={`/transacoes/${tx.id}/concluir` as Route}
+          completionHref={route(`/transacoes/${tx.id}/concluir`)}
         />
       </div>
     )

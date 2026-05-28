@@ -1,10 +1,10 @@
 'use client'
 
-import type { Route } from 'next'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@agraia/ui'
 import { ScreenHeader } from '@/components/layout/screen-header'
+import { route } from '@/lib/route'
 
 // Mock — Sprint 4: GET /api/v1/transactions/:id
 const MOCK = {
@@ -41,7 +41,7 @@ export default function AvaliarPage({ params: _params }: AvaliarPageProps) {
       <StateBanner variant="completed">TRANSAÇÃO CONCLUÍDA</StateBanner>
 
       <ScreenHeader
-        backHref={`/transacao/${MOCK.transactionId}` as Route}
+        backHref={route(`/transacao/${MOCK.transactionId}`)}
         title={<span className="text-[15px] font-medium">Avaliar negociação</span>}
       />
 

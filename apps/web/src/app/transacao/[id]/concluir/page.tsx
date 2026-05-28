@@ -1,12 +1,12 @@
 'use client'
 
-import type { Route } from 'next'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Clock } from '@agraia/ui/icons'
 import { StateBanner, ListingContextStrip, BottomCTA, Button } from '@agraia/ui'
 import { CompletionConfirmSplit } from '@/components/transactions/completion-confirm-split'
 import { ScreenHeader } from '@/components/layout/screen-header'
+import { route } from '@/lib/route'
 
 // Mock — Sprint 4: GET /api/v1/transactions/:id
 const MOCK = {
@@ -35,7 +35,7 @@ export default function ConcluirPage({ params: _params }: ConcluirPageProps) {
     setSubmitting(true)
     // Sprint 4: PATCH /api/v1/transactions/:id/complete
     await new Promise((r) => setTimeout(r, 600))
-    router.push(`/transacao/${MOCK.transactionId}/avaliar` as Route)
+    router.push(route(`/transacao/${MOCK.transactionId}/avaliar`))
   }
 
   const parties: [typeof MOCK.seller, typeof MOCK.buyer] = [MOCK.seller, MOCK.buyer]
@@ -45,7 +45,7 @@ export default function ConcluirPage({ params: _params }: ConcluirPageProps) {
       <StateBanner variant="in-progress">EM NEGOCIAÇÃO</StateBanner>
 
       <ScreenHeader
-        backHref={`/transacao/${MOCK.transactionId}` as Route}
+        backHref={route(`/transacao/${MOCK.transactionId}`)}
         title={<span className="text-[15px] font-medium">Concluir negociação</span>}
       />
 

@@ -1,6 +1,5 @@
 'use client'
 
-import type { Route } from 'next'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ProgressIndicator, BottomCTA, Button, KindBadge } from '@agraia/ui'
@@ -8,6 +7,7 @@ import { ReviewCard } from '@/components/listings/review-card'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'
 import { getUserLocation } from '@/actions/profile'
+import { route } from '@/lib/route'
 
 function formatBRL(cents: number): string {
   return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -105,7 +105,7 @@ export default function WizardStep5() {
       reset()
 
       if (isEditMode) {
-        router.push(`/anuncio/${json.data.id}` as Route)
+        router.push(route(`/anuncio/${json.data.id}`))
       } else {
         router.push(`/anuncio/novo/sucesso?id=${json.data.id}`)
       }
