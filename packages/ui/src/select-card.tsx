@@ -47,7 +47,7 @@ export function SelectCard({
           className={cn(
             'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[12px] transition-colors',
             selected
-              ? 'bg-accent-lime text-foreground dark:bg-accent-lime/15 dark:text-accent-lime'
+              ? 'bg-accent-lime dark:text-accent-lime text-[#0A0A0A] dark:bg-[rgba(198,232,69,0.12)]'
               : 'bg-bg-elevated text-foreground',
           )}
         >
