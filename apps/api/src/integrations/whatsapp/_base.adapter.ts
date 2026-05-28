@@ -21,6 +21,29 @@ export abstract class BaseWhatsAppAdapter implements WhatsAppAdapter {
   // ── Interface pública ──────────────────────────────────────────────────────
 
   async sendOtp(phone: string, code: string): Promise<void> {
+    // Subclasses podem sobrescrever sendOtpDirect para usar APIs especializadas
+    // (ex: Twilio Content Templates). O caminho padrão usa Body livre via doSend.
+    if (this.sendOtpDirect) {
+      try {
+        await this.sendOtpDirect(phone, code)
+        this.log('info', 'send_success', { phone: this.maskPhone(phone), method: 'sendOtp' })
+      } catch (err) {
+        const error = err instanceof Error ? err.message : String(err)
+        this.log('error', 'send_failed', { phone: this.maskPhone(phone), method: 'sendOtp', error })
+        await enqueueDlq({
+          provider: this.provider,
+          phone,
+          method: 'sendOtp',
+          payload: { template: 'otp' },
+          error,
+          attemptsMade: 1,
+          failedAt: new Date().toISOString(),
+        })
+        throw err
+      }
+      return
+    }
+
     const body = renderTemplate('otp', { code })
     await this.dispatch(phone, body, {
       method: 'sendOtp',
@@ -28,6 +51,9 @@ export abstract class BaseWhatsAppAdapter implements WhatsAppAdapter {
       payload: { template: 'otp' },
     })
   }
+
+  /** Subclasses podem sobrescrever para controlar o envio de OTP diretamente. */
+  protected sendOtpDirect?: (phone: string, code: string) => Promise<void>
 
   async sendNotification<T extends WhatsAppTemplateName>(
     phone: string,
