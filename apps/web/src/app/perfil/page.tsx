@@ -15,5 +15,6 @@ export default async function PerfilRootPage() {
 
   if (!profile) redirect('/cadastro/perfil')
 
-  redirect(`/perfil/${profile.id}`)
+  // Own profile always lives at /meu-perfil so the bottom tab bar stays visible.
+  redirect('/meu-perfil')
 }

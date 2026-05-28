@@ -24,7 +24,7 @@ export default async function EditarPerfilPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3">
         <Link
-          href="/perfil"
+          href="/meu-perfil"
           aria-label="Voltar"
           className="bg-muted flex size-12 items-center justify-center rounded-full"
         >

@@ -3,10 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ListingMiniCard } from '@agraia/ui'
-import { Share2, Settings } from '@agraia/ui/icons'
 import { BackButton } from '@/components/layout/back-button'
 import { prisma } from '@agraia/db'
-import { getServerSession } from '@/lib/server-auth'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
 import { ReviewItem } from '@/components/profile/review-item'
@@ -105,17 +103,14 @@ function ProfileSkeleton() {
   )
 }
 
+// /perfil/[id] is always the public/focused view — tab bar is hidden here.
+// Own profile lives at /meu-perfil where the tab bar stays visible.
 async function ProfileContent({ id }: { id: string }) {
-  const [profile, session] = await Promise.all([getProfile(id), getServerSession()])
-  const reputation = profile ? await getReputation(profile.id) : null
-
+  const profile = await getProfile(id)
   if (!profile) notFound()
 
-  const isOwn = session?.userId === profile.userId
+  const reputation = await getReputation(profile.id)
 
-  // Use the live ratingCount from the reputation API (fresh query) because the
-  // stored profile.ratingCount is only updated by the async recompute worker
-  // and may lag behind actual ratings.
   const effectiveRatingCount = reputation?.ratingCount ?? profile.ratingCount
   const effectiveCurrentRating = reputation?.currentRating ?? profile.currentRating
 
@@ -127,39 +122,14 @@ async function ProfileContent({ id }: { id: string }) {
   })
 
   return (
-    <div className="bg-background flex flex-col" style={{ paddingBottom: 320 }}>
-      {/* Header */}
+    <div className="bg-background flex flex-col pb-36">
+      {/* Header — always back button + centered title */}
       <header className="bg-background/80 sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm">
         <BackButton fallbackHref="/feed" />
-
-        {isOwn ? (
-          // Own profile: back left, actions right — edit is the bottom CTA
-          <div className="flex gap-2">
-            <button
-              type="button"
-              aria-label="Compartilhar perfil"
-              className="bg-muted flex size-12 items-center justify-center rounded-full"
-            >
-              <Share2 size={18} strokeWidth={1.8} />
-            </button>
-            <Link
-              href="/configuracoes"
-              aria-label="Configurações"
-              className="bg-muted flex size-12 items-center justify-center rounded-full"
-            >
-              <Settings size={18} strokeWidth={1.8} />
-            </Link>
-          </div>
-        ) : (
-          // Public profile: centered title + right spacer to balance back button
-          <>
-            <span className="text-[15px] font-medium">Perfil</span>
-            <div className="w-9" />
-          </>
-        )}
+        <span className="text-[15px] font-medium">Perfil</span>
+        <div className="w-12" />
       </header>
 
-      {/* Profile hero */}
       <ProfileHero
         name={profile.name}
         photo={profile.photo}
@@ -172,12 +142,11 @@ async function ProfileContent({ id }: { id: string }) {
         stats={{
           transactions: transactionCount,
           ratings: effectiveRatingCount,
-          responseTime: isOwn ? '< 2h' : '—',
+          responseTime: '—',
         }}
-        showEditOverlay={isOwn}
+        showEditOverlay={false}
       />
 
-      {/* Reputation breakdown */}
       {effectiveRatingCount > 0 && (
         <ReputationBreakdown
           reliability={reputation?.categoryAverages.reliability ?? effectiveCurrentRating}
@@ -186,15 +155,12 @@ async function ProfileContent({ id }: { id: string }) {
         />
       )}
 
-      {/* Listings */}
       <div className="pb-4">
         <p className="text-muted-foreground px-5 pb-3 pt-2 font-mono text-[11px] tracking-[0.4px]">
-          {isOwn ? '[MEUS ANÚNCIOS ATIVOS]' : `[ANÚNCIOS ATIVOS · ${profile.listings.length}]`}
+          {`[ANÚNCIOS ATIVOS · ${profile.listings.length}]`}
         </p>
         {profile.listings.length === 0 ? (
-          <p className="text-muted-foreground px-5 text-[13px]">
-            {isOwn ? 'Nenhum anúncio ativo ainda.' : 'Nenhum anúncio ativo.'}
-          </p>
+          <p className="text-muted-foreground px-5 text-[13px]">Nenhum anúncio ativo.</p>
         ) : (
           <div className="flex flex-col gap-3 px-4">
             {profile.listings.map((listing) => (
@@ -217,7 +183,6 @@ async function ProfileContent({ id }: { id: string }) {
         )}
       </div>
 
-      {/* Reviews */}
       <div className="border-border mx-5 mb-3 mt-2 border-t" />
       <div className="mb-3 px-5">
         <p className="text-muted-foreground font-mono text-[11px] tracking-[0.4px]">
@@ -249,26 +214,15 @@ async function ProfileContent({ id }: { id: string }) {
         <p className="text-muted-foreground px-5 pb-6 text-[13px]">Ainda sem avaliações.</p>
       )}
 
-      {/* Fixed bottom CTA */}
-      {isOwn ? (
-        <div className="border-border bg-background fixed bottom-[64px] left-0 right-0 border-t px-5 pb-4 pt-4">
-          <Link
-            href="/perfil/editar"
-            className="bg-cta-bg text-cta-fg block w-full rounded-[12px] py-[15px] text-center text-[15px] font-medium"
-          >
-            Editar meu perfil
-          </Link>
-        </div>
-      ) : (
-        <div className="border-border bg-background fixed bottom-[64px] left-0 right-0 border-t px-5 pb-4 pt-4">
-          <Link
-            href={`/busca?sellerId=${profile.userId}`}
-            className="bg-cta-bg text-cta-fg block w-full rounded-[12px] py-[15px] text-center text-[15px] font-medium"
-          >
-            Ver anúncios de {profile.name.split(' ')[0]}
-          </Link>
-        </div>
-      )}
+      {/* CTA — no tab bar here, sits at bottom-0 */}
+      <div className="border-border bg-background fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4">
+        <Link
+          href={`/busca?sellerId=${profile.userId}`}
+          className="bg-cta-bg text-cta-fg block w-full rounded-[12px] py-[15px] text-center text-[15px] font-medium"
+        >
+          Ver anúncios de {profile.name.split(' ')[0]}
+        </Link>
+      </div>
     </div>
   )
 }
