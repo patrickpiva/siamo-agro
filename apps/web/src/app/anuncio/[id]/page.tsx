@@ -12,6 +12,7 @@ import { ListingHero } from '@/components/listings/listing-hero'
 import { SellerCard } from '@/components/listings/seller-card'
 import { OwnerBanner } from '@/components/listings/owner-banner'
 import { OwnerStats } from '@/components/listings/owner-stats'
+import { OwnerActions } from '@/components/listings/owner-actions'
 import { ProposalsList } from '@/components/listings/proposals-list'
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
@@ -279,20 +280,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       {/* ── Fixed CTA bar ───────────────────────────────────────── */}
       <div className="border-border bg-card fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4">
         {isOwner ? (
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="bg-card border-border min-w-0 flex-[1] rounded-[12px] border py-[13px] text-[13px] font-medium"
-            >
-              Pausar
-            </button>
-            <Link
-              href={`/anuncio/${id}/propostas`}
-              className="bg-cta-bg text-cta-fg flex min-w-0 flex-[2] items-center justify-center rounded-[12px] py-[13px] text-[15px] font-medium"
-            >
-              Ver todas as propostas
-            </Link>
-          </div>
+          <OwnerActions listingId={id} status={listing.status} />
         ) : (
           <div className="flex gap-[10px]">
             <a
