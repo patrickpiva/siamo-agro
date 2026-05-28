@@ -53,7 +53,7 @@ export abstract class BaseWhatsAppAdapter implements WhatsAppAdapter {
   }
 
   /** Subclasses podem sobrescrever para controlar o envio de OTP diretamente. */
-  protected sendOtpDirect?: (phone: string, code: string) => Promise<void>
+  protected sendOtpDirect?(phone: string, code: string): Promise<void>
 
   async sendNotification<T extends WhatsAppTemplateName>(
     phone: string,

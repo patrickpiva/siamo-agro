@@ -43,7 +43,7 @@ export class TwilioAdapter extends BaseWhatsAppAdapter {
    * OTP usa Content Template aprovado pela Meta quando TWILIO_CONTENT_SID_OTP
    * está definido. Caso contrário usa Body livre (válido apenas no sandbox).
    */
-  async sendOtpDirect(phone: string, code: string): Promise<void> {
+  protected override async sendOtpDirect(phone: string, code: string): Promise<void> {
     if (this.isStub) {
       this.log('warn', 'stub_send', {
         phone: this.maskPhone(phone),
