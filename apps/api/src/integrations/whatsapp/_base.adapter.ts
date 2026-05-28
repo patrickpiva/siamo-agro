@@ -24,19 +24,30 @@ export abstract class BaseWhatsAppAdapter implements WhatsAppAdapter {
     // Subclasses podem sobrescrever sendOtpDirect para usar APIs especializadas
     // (ex: Twilio Content Templates). O caminho padrão usa Body livre via doSend.
     if (this.sendOtpDirect) {
+      // Bind para manter o contexto correto dentro do callback do withRetry.
+      const sendDirect = this.sendOtpDirect.bind(this)
+      let attemptsMade = 0
       try {
-        await this.sendOtpDirect(phone, code)
+        await withRetry(async () => {
+          attemptsMade++
+          await sendDirect(phone, code)
+        })
         this.log('info', 'send_success', { phone: this.maskPhone(phone), method: 'sendOtp' })
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err)
-        this.log('error', 'send_failed', { phone: this.maskPhone(phone), method: 'sendOtp', error })
+        this.log('error', 'send_failed', {
+          phone: this.maskPhone(phone),
+          method: 'sendOtp',
+          attemptsMade,
+          error,
+        })
         await enqueueDlq({
           provider: this.provider,
           phone,
           method: 'sendOtp',
           payload: { template: 'otp' },
           error,
-          attemptsMade: 1,
+          attemptsMade,
           failedAt: new Date().toISOString(),
         })
         throw err
