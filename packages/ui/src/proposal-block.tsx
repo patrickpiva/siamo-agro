@@ -55,8 +55,7 @@ export function ProposalBlock({
         <p
           className={cn(
             'text-foreground/70 mt-[10px] rounded-[8px] px-3 py-[10px] text-[13px] italic leading-[1.5]',
-            'border border-[#e0e0d8] bg-white/70',
-            'dark:bg-white/4 dark:border-transparent',
+            'bg-card border-border border',
           )}
         >
           &ldquo;{message}&rdquo;
