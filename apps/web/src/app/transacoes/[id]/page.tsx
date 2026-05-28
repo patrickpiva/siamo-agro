@@ -1,11 +1,12 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import type { Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
 import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@agraia/ui'
 import { MoreVertical } from '@agraia/ui/icons'
-import { ChatView } from '@/components/transactions/chat-view'
+import { LazyChatView as ChatView } from '@/components/transactions/lazy-chat-view'
 import {
   TransactionActionButton,
   CancelButton,
@@ -193,7 +194,7 @@ export default async function TransacaoDetailPage({ params }: PageProps) {
           }}
           showOnlineStrip={false}
           systemEvent={{ label: systemEventLabel, date: systemEventDate }}
-          completionHref={`/transacoes/${tx.id}/concluir`}
+          completionHref={`/transacoes/${tx.id}/concluir` as Route}
         />
       </div>
     )

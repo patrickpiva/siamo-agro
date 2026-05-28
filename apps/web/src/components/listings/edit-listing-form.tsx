@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Camera, Trash2 } from '@agraia/ui/icons'
@@ -183,7 +184,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
         throw new Error(json.error?.message ?? 'Erro ao salvar.')
       }
 
-      router.push(`/anuncio/${listing.id}`)
+      router.push(`/anuncio/${listing.id}` as Route)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro inesperado. Tente novamente.')
       setSubmitting(false)
@@ -196,7 +197,7 @@ export function EditListingForm({ listing }: EditListingFormProps) {
     <div className="bg-background flex min-h-screen flex-col">
       <WizardHeader
         title="Editar anúncio"
-        onBack={() => router.push(`/anuncio/${listing.id}`)}
+        onBack={() => router.push(`/anuncio/${listing.id}` as Route)}
         rightSlot={
           <button
             type="button"

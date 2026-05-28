@@ -575,8 +575,7 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
 - [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
 - [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
-- [ ] Aplicar migration `migrations/manual/002_saved_listings.sql` no Supabase SQL Editor e rodar `pnpm db:generate`
-- [ ] Aplicar migrations `003`, `004`, `005` no Supabase SQL Editor (matchmaking + RLS + security)
+- [ ] Escrever e aplicar migrations manuais para RLS policies e segurança (matchmaking, RLS, security) — 003, 004, 005 ainda não existem como arquivos
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
 
 ---

@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import type { Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { prisma } from '@agraia/db'
 import { formatBRL } from '@agraia/ui'
@@ -60,7 +61,7 @@ export default async function AvaliarPage({ params }: PageProps) {
 
       {/* Page header */}
       <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={`/transacoes/${id}`} />
+        <BackButton fallbackHref={`/transacoes/${id}` as Route} />
         <span className="text-[15px] font-medium">Avaliar negociação</span>
         <div className="w-9" />
       </header>

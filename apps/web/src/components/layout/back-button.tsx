@@ -1,11 +1,12 @@
 'use client'
 
+import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from '@agraia/ui/icons'
 import { cn } from '@agraia/ui'
 
 interface BackButtonProps {
-  fallbackHref?: string
+  fallbackHref?: Route
   className?: string
 }
 

@@ -1,11 +1,12 @@
 'use client'
 
+import type { Route } from 'next'
 import Link from 'next/link'
 import { ArrowLeft } from '@agraia/ui/icons'
 import { cn } from '@agraia/ui'
 
 interface ScreenHeaderProps {
-  backHref?: string
+  backHref?: Route
   onBack?: () => void
   title?: React.ReactNode
   right?: React.ReactNode

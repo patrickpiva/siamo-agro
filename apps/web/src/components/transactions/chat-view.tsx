@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChatBubble, ChatInput } from '@agraia/ui'
@@ -32,7 +33,7 @@ interface ChatViewProps {
   /** System event shown as a centered info bubble before the first message */
   systemEvent?: { label: string; date: string }
   /** When set, renders "Marcar como concluída" button above the input */
-  completionHref?: string
+  completionHref?: Route
 }
 
 export function ChatView({

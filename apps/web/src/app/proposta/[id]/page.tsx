@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { prisma } from '@agraia/db'
 import { StateBanner, ProposalBlock, ListingContextStrip } from '@agraia/ui'
@@ -96,7 +96,7 @@ export default async function PropostaReviewPage({ params }: PageProps) {
 
       {/* Header */}
       <ScreenHeader
-        backHref={`/anuncio/${tx.listing.id}`}
+        backHref={`/anuncio/${tx.listing.id}` as Route}
         title={<span className="text-[15px] font-medium">Nova proposta</span>}
       />
 

@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, staging]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/api
+
+jobs:
+  build-and-deploy:
+    name: Build image · Push · Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      packages: write # push to ghcr.io
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve image tag
+        id: tag
+        # main  → ghcr.io/…/api:main
+        # staging → ghcr.io/…/api:staging
+        run: echo "value=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.tag.outputs.value }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ── Trigger Railway redeploy via deploy hooks ──────────────────────────
+      # Railway pulls the updated image tag automatically on redeploy.
+      # Add each hook URL as a secret in GitHub → Settings → Secrets → Actions.
+
+      - name: Deploy API → production
+        if: github.ref_name == 'main'
+        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_API_PROD }}"
+
+      - name: Deploy Worker → production
+        if: github.ref_name == 'main'
+        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_WORKER_PROD }}"
+
+      - name: Deploy API → staging
+        if: github.ref_name == 'staging'
+        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_API_STAGING }}"
+
+      - name: Deploy Worker → staging
+        if: github.ref_name == 'staging'
+        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_WORKER_STAGING }}"

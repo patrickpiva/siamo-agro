@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
@@ -63,7 +63,7 @@ export default async function PropostasListPage({ params }: PageProps) {
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={`/anuncio/${listingId}`} />
+        <BackButton fallbackHref={`/anuncio/${listingId}` as Route} />
         <span className="text-[15px] font-medium">Propostas recebidas</span>
         <div className="w-9" />
       </header>

@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ProgressIndicator, BottomCTA, Button, KindBadge } from '@agraia/ui'
@@ -104,7 +105,7 @@ export default function WizardStep5() {
       reset()
 
       if (isEditMode) {
-        router.push(`/anuncio/${json.data.id}`)
+        router.push(`/anuncio/${json.data.id}` as Route)
       } else {
         router.push(`/anuncio/novo/sucesso?id=${json.data.id}`)
       }

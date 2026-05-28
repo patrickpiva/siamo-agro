@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { StateBanner, ChatBubble, ChatInput } from '@agraia/ui'
@@ -83,7 +84,7 @@ export default function TransacaoPage({ params: _params }: TransacaoPageProps) {
   }
 
   function handleMarkComplete() {
-    router.push(`/transacao/${MOCK.transactionId}/concluir`)
+    router.push(`/transacao/${MOCK.transactionId}/concluir` as Route)
   }
 
   return (

@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import type { Route } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { prisma } from '@agraia/db'
 import { BackButton } from '@/components/layout/back-button'
@@ -137,7 +138,7 @@ export default async function ConcluirPage({ params }: PageProps) {
     <div className="bg-background flex min-h-screen flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={`/transacoes/${id}`} />
+        <BackButton fallbackHref={`/transacoes/${id}` as Route} />
         <span className="text-[15px] font-medium">Concluir transação</span>
         <div className="w-9" />
       </header>

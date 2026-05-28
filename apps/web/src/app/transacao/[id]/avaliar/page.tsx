@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@agraia/ui'
@@ -40,7 +41,7 @@ export default function AvaliarPage({ params: _params }: AvaliarPageProps) {
       <StateBanner variant="completed">TRANSAÇÃO CONCLUÍDA</StateBanner>
 
       <ScreenHeader
-        backHref={`/transacao/${MOCK.transactionId}`}
+        backHref={`/transacao/${MOCK.transactionId}` as Route}
         title={<span className="text-[15px] font-medium">Avaliar negociação</span>}
       />
 
