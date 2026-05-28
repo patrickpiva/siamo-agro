@@ -12,7 +12,7 @@ import { shouldShowInstallPrompt, recordVisit } from '@/lib/pwa'
 // ─── PWA install controller ───────────────────────────────────────────────────
 
 function PWAInstallController() {
-  const { canInstall } = usePWAInstall()
+  const { canInstall, triggerInstall, dismiss } = usePWAInstall()
   const [showSheet, setShowSheet] = useState(false)
 
   useEffect(() => {
@@ -23,7 +23,13 @@ function PWAInstallController() {
   }, [canInstall])
 
   if (!showSheet) return null
-  return <PWAInstallSheet onClose={() => setShowSheet(false)} />
+  return (
+    <PWAInstallSheet
+      onClose={() => setShowSheet(false)}
+      onInstall={triggerInstall}
+      onDismiss={dismiss}
+    />
+  )
 }
 
 // ─── Push permission controller ──────────────────────────────────────────────

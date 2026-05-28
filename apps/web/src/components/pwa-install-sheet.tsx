@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from 'react'
 import { WifiOff, Bell, Zap } from 'lucide-react'
-import { usePWAInstall } from '@/hooks/use-pwa-install'
 import { cn } from '@agraia/ui'
 
 interface PWAInstallSheetProps {
   onClose: () => void
+  /** Passed down from PWAInstallController which already holds the deferred event */
+  onInstall: () => Promise<void>
+  onDismiss: () => void
 }
 
 function PWAAppIcon() {
@@ -35,8 +37,7 @@ function PWAAppIcon() {
   )
 }
 
-export function PWAInstallSheet({ onClose }: PWAInstallSheetProps) {
-  const { triggerInstall, dismiss } = usePWAInstall()
+export function PWAInstallSheet({ onClose, onInstall, onDismiss }: PWAInstallSheetProps) {
   const firstFocusRef = useRef<HTMLButtonElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
 
@@ -52,12 +53,12 @@ export function PWAInstallSheet({ onClose }: PWAInstallSheetProps) {
   }, [onClose])
 
   async function handleInstall() {
-    await triggerInstall()
+    await onInstall()
     onClose()
   }
 
   function handleDismiss() {
-    dismiss()
+    onDismiss()
     onClose()
   }
 

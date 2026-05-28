@@ -38,6 +38,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
   }, [id])
 
   const totalCents = priceCents * qty
+  const canSubmit = priceCents > 0
 
   const ERROR_MESSAGES: Record<string, string> = {
     TRANSACTION_CONFLICT: 'Você já tem uma proposta ativa para este anúncio.',
@@ -199,8 +200,8 @@ export default function PropostaPage({ params }: PropostaPageProps) {
           </div>
         )}
         <Button
-          variant={submitting ? 'cta-disabled' : 'cta'}
-          disabled={submitting}
+          variant={submitting || !canSubmit ? 'cta-disabled' : 'cta'}
+          disabled={submitting || !canSubmit}
           onClick={() => void handleSubmit()}
         >
           {submitting ? 'Enviando...' : 'Enviar proposta'}
