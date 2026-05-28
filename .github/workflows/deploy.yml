@@ -51,22 +51,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ── Trigger Railway redeploy via deploy hooks ──────────────────────────
-      # Railway pulls the updated image tag automatically on redeploy.
-      # Add each hook URL as a secret in GitHub → Settings → Secrets → Actions.
-
-      - name: Deploy API → production
-        if: github.ref_name == 'main'
-        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_API_PROD }}"
-
-      - name: Deploy Worker → production
-        if: github.ref_name == 'main'
-        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_WORKER_PROD }}"
-
-      - name: Deploy API → staging
-        if: github.ref_name == 'staging'
-        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_API_STAGING }}"
-
-      - name: Deploy Worker → staging
-        if: github.ref_name == 'staging'
-        run: curl -fsSL -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK_WORKER_STAGING }}"
+      # Railway detects pushes to connected branches and redeploys automatically
+      # via its native GitHub integration — no explicit trigger needed here.
