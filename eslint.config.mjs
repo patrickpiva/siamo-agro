@@ -52,6 +52,9 @@ export default [
       ...tsRulesBase,
       // Mock adapters implementam interfaces async sem precisar de await real.
       '@typescript-eslint/require-await': 'off',
+      // The base rule does not understand TypeScript overloads; the TS version
+      // (included via recommended-type-checked) handles them correctly.
+      'no-redeclare': 'off',
     },
   },
 
@@ -88,6 +91,9 @@ export default [
       'no-undef': 'off',
       // Async event handlers sem await são comuns em React (e.preventDefault + sync logic).
       '@typescript-eslint/require-await': 'off',
+      // The base rule does not understand TypeScript overloads; the TS version
+      // (included via recommended-type-checked) handles them correctly.
+      'no-redeclare': 'off',
     },
   },
 
