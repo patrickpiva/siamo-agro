@@ -68,7 +68,9 @@ export const TransactionParamsSchema = z.object({
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export const CreateTransactionBodySchema = z.object({
-  listingId: z.string().cuid(),
+  // z.string().cuid() would reject seed / legacy IDs; DB foreign-key handles
+  // referential integrity, so any non-empty string is acceptable here.
+  listingId: z.string().min(1),
   amount: z.number().positive(),
   message: z.string().min(1).max(1000),
 })
