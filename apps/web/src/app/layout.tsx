@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
 import { OfflineBanner } from '@/components/offline-banner'
 import { SplashScreen } from '@/components/splash-screen'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const inter = Inter({
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <div className="lg:contents [&>*]:pb-20 lg:[&>*]:pb-0">{children}</div>
           <BottomTabBar />
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
