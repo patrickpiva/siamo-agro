@@ -2,6 +2,23 @@
 
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import {
+  DndContext,
+  closestCenter,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Camera, Image, Plus, Trash2 } from '@agraia/ui/icons'
 import { ProgressIndicator, BottomCTA, Button, cn } from '@agraia/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
@@ -13,8 +30,25 @@ export default function WizardStep4() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
-  const { kind, category, photos, addPhoto, removePhoto, setPhotoUploaded, setPhotoError, reset } =
-    useListingDraftStore()
+  const {
+    kind,
+    category,
+    photos,
+    addPhoto,
+    removePhoto,
+    reorderPhotos,
+    setPhotoUploaded,
+    setPhotoError,
+    reset,
+  } = useListingDraftStore()
+
+  // Mobile-first sensors: press-and-hold to drag on touch (so the page still
+  // scrolls normally), 8px threshold on mouse, arrow keys for accessibility.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
 
   useEffect(() => {
     if (!kind || !category) router.replace('/anuncio/novo/categoria')
@@ -52,6 +86,14 @@ export default function WizardStep4() {
     }
   }
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const fromIndex = photos.findIndex((p) => p.id === active.id)
+    const toIndex = photos.findIndex((p) => p.id === over.id)
+    if (fromIndex !== -1 && toIndex !== -1) reorderPhotos(fromIndex, toIndex)
+  }
+
   function handleClose() {
     if (!window.confirm('Descartar anúncio? Seu rascunho será perdido.')) return
     reset()
@@ -80,29 +122,33 @@ export default function WizardStep4() {
           Anúncios com fotos recebem 6× mais propostas. Até 8 fotos. A primeira é a principal.
         </p>
 
-        {/* Photo grid */}
-        <div className="mb-5 grid grid-cols-3 gap-2">
-          {filledSlots.map((photo, idx) => (
-            <PhotoSlot
-              key={photo.id}
-              photo={photo}
-              isMain={idx === 0}
-              onRemove={() => removePhoto(photo.id)}
-            />
-          ))}
-          {/* Empty slots */}
-          {emptyCount > 0 &&
-            Array.from({ length: emptyCount }).map((_, i) => (
-              <button
-                key={`empty-${i}`}
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="border-border bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-[10px] border border-dashed"
-              >
-                <Plus size={24} strokeWidth={1.5} />
-              </button>
-            ))}
-        </div>
+        {/* Photo grid — drag to reorder */}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={filledSlots.map((p) => p.id)} strategy={rectSortingStrategy}>
+            <div className="mb-5 grid grid-cols-3 gap-2">
+              {filledSlots.map((photo, idx) => (
+                <PhotoSlot
+                  key={photo.id}
+                  photo={photo}
+                  isMain={idx === 0}
+                  onRemove={() => removePhoto(photo.id)}
+                />
+              ))}
+              {/* Empty slots — not sortable */}
+              {emptyCount > 0 &&
+                Array.from({ length: emptyCount }).map((_, i) => (
+                  <button
+                    key={`empty-${i}`}
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-border bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-[10px] border border-dashed"
+                  >
+                    <Plus size={24} strokeWidth={1.5} />
+                  </button>
+                ))}
+            </div>
+          </SortableContext>
+        </DndContext>
 
         {/* Add buttons */}
         {photos.length < maxSlots && (
@@ -127,7 +173,7 @@ export default function WizardStep4() {
         )}
 
         <p className="text-muted-foreground text-[11px] leading-relaxed">
-          Arraste para reordenar · A primeira foto é exibida como capa do anúncio
+          Toque e segure para reordenar · A primeira foto é exibida como capa do anúncio
         </p>
 
         {hasError && (
@@ -180,17 +226,36 @@ function PhotoSlot({
   isMain: boolean
   onRemove: () => void
 }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: photo.id,
+  })
+
   const uploading =
     photo.uploadProgress !== undefined && photo.uploadProgress < 100 && !photo.uploadError
 
   return (
     <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        zIndex: isDragging ? 20 : undefined,
+      }}
       className={cn(
-        'bg-muted relative overflow-hidden rounded-[10px]',
+        'bg-muted relative select-none overflow-hidden rounded-[10px]',
         isMain ? 'col-span-2 row-span-2 aspect-square' : 'aspect-square',
+        isDragging && 'ring-accent-lime ring-2',
       )}
+      {...attributes}
+      {...listeners}
     >
-      <img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
+      <img
+        src={photo.previewUrl}
+        alt=""
+        draggable={false}
+        className="pointer-events-none h-full w-full object-cover"
+      />
 
       {/* Main label */}
       {isMain && (
@@ -218,10 +283,14 @@ function PhotoSlot({
         </div>
       )}
 
-      {/* Remove button */}
+      {/* Remove button — stop propagation so a tap never starts a drag */}
       <button
         type="button"
-        onClick={onRemove}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          onRemove()
+        }}
         aria-label="Remover foto"
         className="absolute right-[6px] top-[6px] flex size-[22px] items-center justify-center rounded-full bg-black/70 text-white"
       >
