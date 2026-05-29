@@ -1,13 +1,6 @@
 import { defaultCache } from '@serwist/next/worker'
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist'
-import {
-  Serwist,
-  StaleWhileRevalidate,
-  NetworkFirst,
-  NetworkOnly,
-  CacheFirst,
-  ExpirationPlugin,
-} from 'serwist'
+import { Serwist, StaleWhileRevalidate, NetworkFirst, NetworkOnly, ExpirationPlugin } from 'serwist'
 
 declare global {
   interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
@@ -83,6 +76,3 @@ const serwist = new Serwist({
 })
 
 serwist.addEventListeners()
-
-// Suppress unused import warning — CacheFirst is re-exported for completeness
-void CacheFirst
