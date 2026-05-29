@@ -118,19 +118,29 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       ])
     : [0, 0, []]
 
-  // Seller stats for the SellerCard (visitors only)
+  // Seller stats + saved status run in parallel (both independent of each other)
   const sellerProfileId = listing.profile.id
-  const [sellerReputation, sellerProfile] =
+  const [[sellerReputation, sellerProfile], savedRecord] = await Promise.all([
     !isOwner && sellerProfileId
-      ? await Promise.all([
+      ? Promise.all([
           getSellerReputation(sellerProfileId),
           prisma.profile.findUnique({
             where: { id: sellerProfileId },
             select: { userId: true, createdAt: true },
           }),
         ])
-      : [null, null]
+      : Promise.resolve([null, null] as [null, null]),
+    session && !isOwner
+      ? prisma.savedListing.findUnique({
+          where: { userId_listingId: { userId: session.userId, listingId: id } },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+  ])
 
+  const isSaved = savedRecord !== null
+
+  // Transaction count requires sellerProfile.userId — still sequential but only one hop
   const sellerTransactionCount =
     !isOwner && sellerProfile
       ? await prisma.transaction.count({
@@ -144,15 +154,6 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
   const sellerYearsActive = sellerProfile
     ? Math.floor((Date.now() - sellerProfile.createdAt.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
     : 0
-
-  // Check whether the current user has saved this listing
-  const isSaved =
-    session && !isOwner
-      ? (await prisma.savedListing.findUnique({
-          where: { userId_listingId: { userId: session.userId, listingId: id } },
-          select: { id: true },
-        })) !== null
-      : false
 
   const photos = [...listing.photos].sort((a, b) => a.order - b.order).map((p) => ({ url: p.url }))
 
