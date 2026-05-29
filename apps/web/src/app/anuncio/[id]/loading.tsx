@@ -15,7 +15,7 @@ export default function ListingLoading() {
       </div>
 
       {/* Hero */}
-      <Bone className="mx-4 rounded-[14px]" style={{ height: 220 }} />
+      <Bone className="mx-4 h-[220px] rounded-[14px]" />
 
       {/* Content */}
       <div className="px-5 pt-4">
