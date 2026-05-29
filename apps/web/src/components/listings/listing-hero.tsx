@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import { KindBadge } from '@agraia/ui'
 import { cn } from '@agraia/ui'
@@ -39,7 +40,14 @@ export function ListingHero({ photos, kind, height = 220, className }: ListingHe
         <div className="flex h-full">
           {photos.map((photo, i) => (
             <div key={i} className="relative h-full min-w-full flex-shrink-0">
-              <img src={photo.url} alt={photo.alt ?? ''} className="h-full w-full object-cover" />
+              <Image
+                src={photo.url}
+                alt={photo.alt ?? ''}
+                fill
+                sizes="(max-width: 480px) 100vw, 448px"
+                className="object-cover"
+                priority={i === 0}
+              />
             </div>
           ))}
         </div>
