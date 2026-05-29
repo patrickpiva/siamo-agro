@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@/lib/theme'
 import { PWAInstallSheet } from '@/components/pwa-install-sheet'
@@ -63,12 +64,18 @@ export function Providers({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('agraia:reconnected', handleReconnected)
   }, [queryClient])
 
+  const pathname = usePathname()
+  // Skip PWA/push controllers during the signup funnel: they register listeners
+  // and effects on mount, and prompting a brand-new user mid-onboarding is poor UX.
+  const inOnboarding =
+    pathname === '/' || pathname.startsWith('/entrar') || pathname.startsWith('/cadastro')
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         {children}
-        <PWAInstallController />
-        <PushPermissionController />
+        {!inOnboarding && <PWAInstallController />}
+        {!inOnboarding && <PushPermissionController />}
       </ThemeProvider>
     </QueryClientProvider>
   )
