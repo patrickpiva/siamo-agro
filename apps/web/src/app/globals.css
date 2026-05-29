@@ -1039,5 +1039,8 @@
   select,
   textarea {
     min-height: var(--tap-target);
+    /* iOS Safari zooms the viewport when focused input font-size < 16px.
+       max() keeps designed sizes ≥ 16px intact and only lifts smaller ones. */
+    font-size: max(16px, 1em);
   }
 }

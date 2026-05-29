@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Providers } from './providers'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
@@ -20,6 +20,15 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
   weight: ['400', '500', '700'],
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  // Keyboard overlays content instead of compressing the layout — native-app behaviour.
+  // Fixed bottom elements (tab bar, CTAs) stay in place; browser scrolls input into view.
+  interactiveWidget: 'resizes-visual',
+}
 
 export const metadata: Metadata = {
   title: {
