@@ -961,7 +961,7 @@
    JS (SplashScreen component) adds [data-dismissed] after hydration to fade out.
    ─────────────────────────────────────────────────────────────────────────── */
 #agraia-splash {
-  display: none;
+  display: none; /* always hidden; inline script reveals it only on first standalone launch */
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -971,12 +971,6 @@
   justify-content: center;
   gap: 20px;
   pointer-events: none;
-}
-
-@media (display-mode: standalone) {
-  #agraia-splash {
-    display: flex;
-  }
 }
 
 #agraia-splash[data-dismissed] {
