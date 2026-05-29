@@ -64,7 +64,7 @@ export function ProfileEditForm({ initialValues, profileType, location }: Profil
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ files: [{ name: file.name, contentType: file.type }] }),
+        body: JSON.stringify({ kind: 'profile', count: 1 }),
       })
       if (!presignedRes.ok) return
       const { data } = (await presignedRes.json()) as {
