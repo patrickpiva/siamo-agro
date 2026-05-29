@@ -956,6 +956,49 @@
   }
 }
 
+/* ─── Splash screen (PWA standalone mode only) ──────────────────────────────
+   Hidden in regular browser; CSS media query reveals it only in standalone.
+   JS (SplashScreen component) adds [data-dismissed] after hydration to fade out.
+   ─────────────────────────────────────────────────────────────────────────── */
+#agraia-splash {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0a0a;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  pointer-events: none;
+}
+
+@media (display-mode: standalone) {
+  #agraia-splash {
+    display: flex;
+  }
+}
+
+#agraia-splash[data-dismissed] {
+  opacity: 0;
+  transition: opacity 350ms ease;
+}
+
+@keyframes splash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.splash-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(198, 232, 69, 0.18);
+  border-top-color: #c6e845;
+  animation: splash-spin 0.75s linear infinite;
+}
+
 /* ─── Base layer ─────────────────────────────────────────────────────────── */
 @layer base {
   *,

@@ -210,7 +210,12 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       )}
 
       {/* ── Hero carousel ───────────────────────────────────────── */}
-      <ListingHero photos={photos} kind={listing.kind} height={isOwner ? 140 : 220} />
+      <ListingHero
+        photos={photos}
+        kind={listing.kind}
+        category={listing.category}
+        height={isOwner ? 140 : 220}
+      />
 
       {/* ── Content ─────────────────────────────────────────────── */}
       <div className="px-5 pt-4">

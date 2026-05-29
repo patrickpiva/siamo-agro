@@ -4,25 +4,46 @@ import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
 import { KindBadge } from '@agraia/ui'
 import { cn } from '@agraia/ui'
+import { CATEGORY_ICONS } from '@agraia/ui/icons'
+
+const CATEGORY_BG: Record<string, string> = {
+  COFFEE: 'bg-[#D4B896] dark:bg-[#3d2817]',
+  CORN: 'bg-[#C8D4B8] dark:bg-[#2d4a2a]',
+  SOY: 'bg-[#C8B888] dark:bg-[#4a4220]',
+  LIVESTOCK: 'bg-[#C8D0B8] dark:bg-[#2d3a1a]',
+  DAIRY: 'bg-[#C8D0B8] dark:bg-[#2d3a1a]',
+  TRACTOR: 'bg-[#D8D8E8] dark:bg-[#2a2a3a]',
+  HARVESTER: 'bg-[#D8D8E8] dark:bg-[#2a2a3a]',
+}
 
 interface ListingHeroProps {
   photos: { url: string; alt?: string }[]
   kind: string
+  category?: string
   height?: number
   className?: string
 }
 
-export function ListingHero({ photos, kind, height = 220, className }: ListingHeroProps) {
+export function ListingHero({ photos, kind, category, height = 220, className }: ListingHeroProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, dragFree: false })
 
   const selectedIndex = typeof emblaApi !== 'undefined' ? (emblaApi.selectedScrollSnap?.() ?? 0) : 0
 
   if (photos.length === 0) {
+    const CategoryIcon = category
+      ? CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS]
+      : undefined
+    const categoryBg = category ? (CATEGORY_BG[category] ?? 'bg-muted') : 'bg-muted'
     return (
       <div
-        className={cn('bg-muted relative mx-4 overflow-hidden rounded-[14px]', className)}
+        className={cn('relative mx-4 overflow-hidden rounded-[14px]', categoryBg, className)}
         style={{ height }}
       >
+        {CategoryIcon && (
+          <div className="absolute inset-0 flex items-center justify-center opacity-40">
+            <CategoryIcon size={64} strokeWidth={1.5} className="text-foreground" />
+          </div>
+        )}
         <div className="absolute left-[14px] top-[14px] flex gap-[6px]">
           <KindBadge kind={kind} />
         </div>

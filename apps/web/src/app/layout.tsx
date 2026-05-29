@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Providers } from './providers'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
 import { OfflineBanner } from '@/components/offline-banner'
+import { SplashScreen } from '@/components/splash-screen'
 import './globals.css'
 
 const inter = Inter({
@@ -45,6 +46,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
+        {/* Splash — hidden in browser; visible via @media (display-mode: standalone) */}
+        <div id="agraia-splash" aria-hidden="true">
+          <span
+            style={{ color: '#c6e845', fontFamily: 'monospace', fontSize: '22px', fontWeight: 500 }}
+          >
+            [AgraIA]
+          </span>
+          <div className="splash-spinner" />
+        </div>
+        <SplashScreen />
         <Providers>
           {/* Offline banner sits above all page content, below status bar */}
           <OfflineBanner />
