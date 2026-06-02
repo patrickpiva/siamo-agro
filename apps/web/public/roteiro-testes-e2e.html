@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Roteiro de Testes E2E · AgraIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ─── Tokens — espelham apps/web/src/app/globals.css (tema dark padrão) ─── */
+      :root {
+        --background: #0a0a0a;
+        --foreground: #f5f5f0;
+        --card: #141412;
+        --primary: #c6e845; /* verde-limão — acento principal */
+        --primary-subtle: #191c0f;
+        --accent: #2a7d54; /* verde-floresta (dark) */
+        --muted: #15150f;
+        --muted-foreground: #8a8a82;
+        --fg-secondary: #b5b5a8;
+        --border: #1f1f1d;
+        --destructive: #d94343;
+        --success: #22c55e;
+        --warning: #eab308;
+        --info: #60a5fa;
+        --radius: 14px;
+        --font-sans: 'Inter', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        font-size: 15px;
+      }
+
+      .page {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+
+      /* ─── Cabeçalho ─────────────────────────────────────────────────────── */
+      header.doc-header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 28px;
+        margin-bottom: 40px;
+      }
+
+      .logo {
+        font-family: var(--font-mono);
+        font-size: 22px;
+        font-weight: 500;
+        color: var(--primary);
+        letter-spacing: -0.5px;
+      }
+
+      h1 {
+        font-size: 30px;
+        font-weight: 600;
+        margin: 18px 0 6px;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: var(--fg-secondary);
+        font-size: 15px;
+        margin: 0 0 20px;
+      }
+
+      .meta-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .meta-chip {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        background: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        color: var(--fg-secondary);
+      }
+      .meta-chip b {
+        color: var(--foreground);
+        font-weight: 500;
+      }
+
+      /* ─── Seções ────────────────────────────────────────────────────────── */
+      section {
+        margin-bottom: 44px;
+      }
+
+      .section-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+        margin-bottom: 8px;
+      }
+
+      h2 {
+        font-size: 21px;
+        font-weight: 600;
+        margin: 0 0 18px;
+        letter-spacing: -0.3px;
+      }
+
+      p.lead {
+        color: var(--fg-secondary);
+        margin: 0 0 16px;
+      }
+
+      /* ─── Cards ─────────────────────────────────────────────────────────── */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px 24px;
+      }
+
+      .scenario {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px 24px;
+        margin-bottom: 16px;
+      }
+
+      .scenario-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+
+      .scenario-num {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--primary);
+        background: var(--primary-subtle);
+        border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+        border-radius: 6px;
+        padding: 3px 9px;
+        flex-shrink: 0;
+      }
+
+      .scenario-title {
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .scenario-goal {
+        color: var(--fg-secondary);
+        font-size: 14px;
+        margin: 6px 0 16px;
+      }
+
+      /* ─── Tabelas ───────────────────────────────────────────────────────── */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 4px 0;
+        font-size: 14px;
+      }
+
+      th {
+        text-align: left;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+        font-weight: 500;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+        color: var(--fg-secondary);
+      }
+      td:first-child {
+        color: var(--foreground);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .step-id {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--primary);
+        white-space: nowrap;
+      }
+
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1px 6px;
+        color: var(--primary);
+      }
+
+      /* ─── Critério "aprovado se" ───────────────────────────────────────── */
+      .approve {
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: var(--primary-subtle);
+        border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: var(--foreground);
+      }
+      .approve b {
+        color: var(--primary);
+      }
+
+      /* ─── Badges de severidade ─────────────────────────────────────────── */
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 2px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+      }
+      .badge-critico {
+        background: color-mix(in srgb, var(--destructive) 14%, transparent);
+        border: 0.5px solid color-mix(in srgb, var(--destructive) 35%, transparent);
+        color: #f87171;
+      }
+      .badge-medio {
+        background: color-mix(in srgb, var(--warning) 12%, transparent);
+        border: 0.5px solid color-mix(in srgb, var(--warning) 30%, transparent);
+        color: var(--warning);
+      }
+      .badge-baixo {
+        background: color-mix(in srgb, var(--success) 12%, transparent);
+        border: 0.5px solid color-mix(in srgb, var(--success) 30%, transparent);
+        color: var(--success);
+      }
+
+      /* ─── Checkbox (registro de resultados) ────────────────────────────── */
+      input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        margin-right: 6px;
+        vertical-align: -2px;
+        cursor: pointer;
+      }
+      label.opt {
+        font-size: 13px;
+        margin-right: 14px;
+        color: var(--fg-secondary);
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .fill {
+        display: inline-block;
+        min-width: 120px;
+        border-bottom: 1px dashed var(--muted-foreground);
+      }
+
+      /* ─── Resumo executivo ─────────────────────────────────────────────── */
+      .summary-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin: 8px 0;
+      }
+      .summary-row > div {
+        flex: 1 1 200px;
+      }
+      .summary-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+        margin-bottom: 6px;
+      }
+
+      footer {
+        margin-top: 56px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        font-size: 12px;
+        color: var(--muted-foreground);
+        font-family: var(--font-mono);
+        letter-spacing: 0.3px;
+      }
+
+      /* ─── Impressão — variante light (regra do app: lime sem contraste no
+           branco → verde-floresta assume títulos/acentos) ─────────────────── */
+      @media print {
+        :root {
+          --background: #ffffff;
+          --foreground: #0a0a0a;
+          --card: #ffffff;
+          --primary: #1f5f3f; /* forest assume o acento em fundo claro */
+          --primary-subtle: #f0f7d9;
+          --muted: #efeee7;
+          --muted-foreground: #6a6a62;
+          --fg-secondary: #2c2c2a;
+          --border: #e0e0d8;
+        }
+        body {
+          font-size: 12px;
+        }
+        .page {
+          padding: 0;
+          max-width: 100%;
+        }
+        .scenario,
+        .card {
+          break-inside: avoid;
+          border: 1px solid var(--border);
+        }
+        .logo {
+          color: #1f5f3f;
+        }
+        a[href]:after {
+          content: '';
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- ─── Cabeçalho ─────────────────────────────────────────────────── -->
+      <header class="doc-header">
+        <div class="logo">[AgraIA]</div>
+        <h1>Roteiro de Testes E2E</h1>
+        <p class="subtitle">Documento para revisão executiva</p>
+        <div class="meta-grid">
+          <span class="meta-chip"><b>Ambiente:</b> staging.agra.ia.br</span>
+          <span class="meta-chip"><b>Versão:</b> ____________</span>
+          <span class="meta-chip"><b>Data:</b> ___/___/______</span>
+          <span class="meta-chip"><b>Responsável:</b> ____________</span>
+        </div>
+      </header>
+
+      <!-- ─── 1. Objetivo ──────────────────────────────────────────────── -->
+      <section>
+        <div class="section-label">[01 · Objetivo]</div>
+        <h2>Objetivo</h2>
+        <p class="lead">
+          Validar, de ponta a ponta, os fluxos críticos de negócio da plataforma AgraIA antes de
+          cada release de produção, garantindo que <b>autenticação, criação de anúncios,
+          matchmaking, transações e reputação</b> funcionem conforme o esperado da perspectiva do
+          usuário final.
+        </p>
+      </section>
+
+      <!-- ─── 2. Escopo ────────────────────────────────────────────────── -->
+      <section>
+        <div class="section-label">[02 · Escopo]</div>
+        <h2>Escopo</h2>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Incluído</th>
+                <th>Excluído</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Login via WhatsApp (OTP)</td>
+                <td>Envio real de SMS/WhatsApp (usa contas demo)</td>
+              </tr>
+              <tr>
+                <td>Onboarding completo</td>
+                <td>Integrações de pagamento (fora do MVP)</td>
+              </tr>
+              <tr>
+                <td>Feed, busca e filtros</td>
+                <td>Testes de carga / performance</td>
+              </tr>
+              <tr>
+                <td>Criação e edição de anúncios</td>
+                <td>Testes de segurança / penetração</td>
+              </tr>
+              <tr>
+                <td>Ciclo de transação completo</td>
+                <td>Painel administrativo</td>
+              </tr>
+              <tr>
+                <td>Perfil e reputação</td>
+                <td>—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── 3. Ambiente ──────────────────────────────────────────────── -->
+      <section>
+        <div class="section-label">[03 · Ambiente e Pré-requisitos]</div>
+        <h2>Ambiente e Pré-requisitos</h2>
+        <div class="card" style="margin-bottom: 16px">
+          <table>
+            <tbody>
+              <tr>
+                <td>Ambiente</td>
+                <td>Staging — <code>https://staging.agra.ia.br</code></td>
+              </tr>
+              <tr>
+                <td>Navegador</td>
+                <td>Chrome / Safari mobile (viewport 375px) e desktop</td>
+              </tr>
+              <tr>
+                <td>Contas de teste</td>
+                <td>Demo (sem envio real de código)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="section-label">Contas demo disponíveis</div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Telefone</th>
+                <th>Código OTP</th>
+                <th>Perfil sugerido</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>+55 11 99999-0001</code></td>
+                <td><code>123456</code></td>
+                <td>Produtor</td>
+              </tr>
+              <tr>
+                <td><code>+55 11 99999-0002</code></td>
+                <td><code>123456</code></td>
+                <td>Prestador</td>
+              </tr>
+              <tr>
+                <td><code>+55 11 99999-0003</code></td>
+                <td><code>123456</code></td>
+                <td>Reserva</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 13px; color: var(--muted-foreground); margin: 14px 0 0">
+            As contas demo ignoram o envio real de mensagens e aceitam o código fixo, permitindo
+            testes repetíveis sem custo.
+          </p>
+        </div>
+      </section>
+
+      <!-- ─── 4. Cenários ──────────────────────────────────────────────── -->
+      <section>
+        <div class="section-label">[04 · Cenários de Teste]</div>
+        <h2>Cenários de Teste</h2>
+
+        <!-- Cenário 1 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">01</span>
+            <span class="scenario-title">Autenticação</span>
+          </div>
+          <p class="scenario-goal">Confirmar que o usuário consegue entrar com WhatsApp.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">1.1</td>
+                <td>Acessar <code>/entrar</code></td>
+                <td>Tela "Entre com seu WhatsApp" exibida</td>
+              </tr>
+              <tr>
+                <td class="step-id">1.2</td>
+                <td>Digitar <code>11999990001</code> e tocar em "Receber código"</td>
+                <td>Redireciona para tela de código</td>
+              </tr>
+              <tr>
+                <td class="step-id">1.3</td>
+                <td>Digitar <code>123456</code></td>
+                <td>Login efetuado, redireciona para <code>/feed</code></td>
+              </tr>
+              <tr>
+                <td class="step-id">1.4</td>
+                <td>Recarregar a página</td>
+                <td>Sessão mantida (não volta ao login)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve"><b>✓ Aprovado se:</b> o feed carrega com a saudação personalizada.</div>
+        </div>
+
+        <!-- Cenário 2 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">02</span>
+            <span class="scenario-title">Onboarding (novo usuário)</span>
+          </div>
+          <p class="scenario-goal">Validar o cadastro completo de um perfil novo.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">2.1</td>
+                <td>Entrar com a conta reserva (sem perfil)</td>
+                <td>Redireciona para <code>/cadastro/perfil</code></td>
+              </tr>
+              <tr>
+                <td class="step-id">2.2</td>
+                <td>Selecionar tipo (Produtor / Prestador)</td>
+                <td>Avança para dados pessoais</td>
+              </tr>
+              <tr>
+                <td class="step-id">2.3</td>
+                <td>Preencher nome, propriedade e bio</td>
+                <td>Avança para localização</td>
+              </tr>
+              <tr>
+                <td class="step-id">2.4</td>
+                <td>Permitir GPS ou informar CEP</td>
+                <td>Cidade/estado preenchidos automaticamente</td>
+              </tr>
+              <tr>
+                <td class="step-id">2.5</td>
+                <td>Enviar foto de perfil</td>
+                <td>Upload concluído, prévia exibida</td>
+              </tr>
+              <tr>
+                <td class="step-id">2.6</td>
+                <td>Aceitar consentimento LGPD</td>
+                <td>Perfil criado, tela "Pronto" exibida</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve"><b>✓ Aprovado se:</b> o perfil é criado e o usuário chega ao feed.</div>
+        </div>
+
+        <!-- Cenário 3 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">03</span>
+            <span class="scenario-title">Criação de anúncio</span>
+          </div>
+          <p class="scenario-goal">Validar o assistente de publicação.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">3.1</td>
+                <td>No feed, tocar em "Publicar"</td>
+                <td>Abre <code>/anuncio/novo</code> (passo 1 de 4)</td>
+              </tr>
+              <tr>
+                <td class="step-id">3.2</td>
+                <td>Escolher o tipo (Oferta/Demanda/Serviço/Equipamento)</td>
+                <td>Avança para detalhes</td>
+              </tr>
+              <tr>
+                <td class="step-id">3.3</td>
+                <td>Preencher categoria, título, preço e descrição</td>
+                <td>Avança para mídia</td>
+              </tr>
+              <tr>
+                <td class="step-id">3.4</td>
+                <td>Adicionar foto (opcional) e revisar</td>
+                <td>Tela de revisão correta</td>
+              </tr>
+              <tr>
+                <td class="step-id">3.5</td>
+                <td>Confirmar publicação</td>
+                <td>Redireciona para o anúncio criado</td>
+              </tr>
+              <tr>
+                <td class="step-id">3.6</td>
+                <td>Verificar miniatura padrão (sem foto)</td>
+                <td>Ícone da categoria + cor exibidos</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve">
+            <b>✓ Aprovado se:</b> o anúncio aparece publicado e visível no feed.
+          </div>
+        </div>
+
+        <!-- Cenário 4 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">04</span>
+            <span class="scenario-title">Matchmaking</span>
+          </div>
+          <p class="scenario-goal">Confirmar que matches são gerados e exibidos.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">4.1</td>
+                <td>Acessar o feed, aba "Matches para mim"</td>
+                <td>Lista de matches ou spinner de cálculo</td>
+              </tr>
+              <tr>
+                <td class="step-id">4.2</td>
+                <td>Aguardar processamento (primeira visita)</td>
+                <td>Matches aparecem com % de compatibilidade</td>
+              </tr>
+              <tr>
+                <td class="step-id">4.3</td>
+                <td>Verificar distância e selo de reputação no card</td>
+                <td>Dados coerentes exibidos</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve">
+            <b>✓ Aprovado se:</b> ao menos um match é exibido com pontuação entre 0–100%.
+          </div>
+        </div>
+
+        <!-- Cenário 5 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">05</span>
+            <span class="scenario-title">Ciclo de transação</span>
+          </div>
+          <p class="scenario-goal">Validar a negociação completa entre dois usuários.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação (usuário)</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">5.1</td>
+                <td>Usuário A faz proposta em anúncio de B</td>
+                <td>Transação criada com status "Proposta"</td>
+              </tr>
+              <tr>
+                <td class="step-id">5.2</td>
+                <td>Usuário B abre a transação e troca mensagens</td>
+                <td>Chat funcional em tempo real</td>
+              </tr>
+              <tr>
+                <td class="step-id">5.3</td>
+                <td>Usuário B aceita a proposta</td>
+                <td>Status muda para "Em andamento"</td>
+              </tr>
+              <tr>
+                <td class="step-id">5.4</td>
+                <td>Ambos confirmam conclusão</td>
+                <td>Status muda para "Concluído"</td>
+              </tr>
+              <tr>
+                <td class="step-id">5.5</td>
+                <td>Cada um avalia o outro</td>
+                <td>Avaliação registrada (nota + comentário)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve">
+            <b>✓ Aprovado se:</b> o status evolui corretamente e as avaliações afetam a reputação.
+          </div>
+        </div>
+
+        <!-- Cenário 6 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">06</span>
+            <span class="scenario-title">Salvar anúncio e notificações</span>
+          </div>
+          <p class="scenario-goal">Validar recursos de engajamento.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">6.1</td>
+                <td>Salvar um anúncio (ícone marcador)</td>
+                <td>Confirmação visual imediata</td>
+              </tr>
+              <tr>
+                <td class="step-id">6.2</td>
+                <td>Abrir feed, aba "Salvos"</td>
+                <td>Anúncio salvo aparece na lista</td>
+              </tr>
+              <tr>
+                <td class="step-id">6.3</td>
+                <td>Abrir <code>/notificacoes</code></td>
+                <td>Notificações agrupadas por dia</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve">
+            <b>✓ Aprovado se:</b> o anúncio salvo persiste e as notificações carregam.
+          </div>
+        </div>
+
+        <!-- Cenário 7 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">07</span>
+            <span class="scenario-title">Perfil e configurações</span>
+          </div>
+          <p class="scenario-goal">Validar gestão de conta.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">7.1</td>
+                <td>Acessar <code>/meu-perfil</code></td>
+                <td>Perfil próprio com reputação e anúncios</td>
+              </tr>
+              <tr>
+                <td class="step-id">7.2</td>
+                <td>Editar perfil (nome, foto, bio)</td>
+                <td>Alterações salvas e refletidas</td>
+              </tr>
+              <tr>
+                <td class="step-id">7.3</td>
+                <td>Acessar <code>/configuracoes</code></td>
+                <td>Grupos de ajustes exibidos</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve"><b>✓ Aprovado se:</b> as alterações de perfil são persistidas.</div>
+        </div>
+
+        <!-- Cenário 8 -->
+        <div class="scenario">
+          <div class="scenario-head">
+            <span class="scenario-num">08</span>
+            <span class="scenario-title">Experiência mobile e offline</span>
+          </div>
+          <p class="scenario-goal">Validar a sensação de aplicativo nativo.</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Passo</th>
+                <th>Ação</th>
+                <th>Resultado esperado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="step-id">8.1</td>
+                <td>Tocar em qualquer campo de texto (iOS)</td>
+                <td>Página <b>não</b> aplica zoom</td>
+              </tr>
+              <tr>
+                <td class="step-id">8.2</td>
+                <td>Navegar entre páginas</td>
+                <td>Skeleton de carregamento exibido (sem tela em branco)</td>
+              </tr>
+              <tr>
+                <td class="step-id">8.3</td>
+                <td>Adicionar à tela inicial e abrir</td>
+                <td>Splash exibido apenas na 1ª abertura</td>
+              </tr>
+              <tr>
+                <td class="step-id">8.4</td>
+                <td>Ativar modo avião e navegar</td>
+                <td>Banner offline + conteúdo em cache</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve">
+            <b>✓ Aprovado se:</b> não há zoom indesejado, há feedback de carregamento e o offline
+            degrada com elegância.
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 5. Critérios de Aceitação ────────────────────────────────── -->
+      <section>
+        <div class="section-label">[05 · Critérios de Aceitação]</div>
+        <h2>Critérios de Aceitação</h2>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Severidade</th>
+                <th>Definição</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-critico">CRÍTICO</span></td>
+                <td>Bloqueia fluxo de negócio (login, transação)</td>
+                <td>Bloqueia o release</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-medio">MÉDIO</span></td>
+                <td>Funciona com contorno</td>
+                <td>Avaliar caso a caso</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-baixo">BAIXO</span></td>
+                <td>Cosmético</td>
+                <td>Backlog</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="approve" style="margin-top: 18px">
+            <b>Release aprovado quando:</b> 100% dos cenários críticos (01, 03, 04, 05) passam e não
+            há defeitos CRÍTICOS abertos.
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── 6. Registro de Resultados ────────────────────────────────── -->
+      <section>
+        <div class="section-label">[06 · Registro de Resultados]</div>
+        <h2>Registro de Resultados</h2>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Cenário</th>
+                <th>Status</th>
+                <th>Severidade</th>
+                <th>Observações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>01 — Autenticação</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>02 — Onboarding</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>03 — Criar anúncio</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>04 — Matchmaking</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>05 — Transação</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>06 — Salvar / Notif.</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>07 — Perfil</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+              <tr>
+                <td>08 — Mobile / Offline</td>
+                <td>
+                  <label class="opt"><input type="checkbox" />Passou</label>
+                  <label class="opt"><input type="checkbox" />Falhou</label>
+                </td>
+                <td>—</td>
+                <td><span class="fill">&nbsp;</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── 7. Resumo Executivo ──────────────────────────────────────── -->
+      <section>
+        <div class="section-label">[07 · Resumo Executivo]</div>
+        <h2>Resumo Executivo</h2>
+        <div class="card">
+          <div class="summary-row">
+            <div>
+              <div class="summary-label">Resultado geral</div>
+              <label class="opt"><input type="checkbox" />Aprovado</label>
+              <label class="opt"><input type="checkbox" />Reprovado</label>
+              <label class="opt"><input type="checkbox" />Com ressalvas</label>
+            </div>
+          </div>
+          <div class="summary-row" style="margin-top: 18px">
+            <div>
+              <div class="summary-label">Cenários executados</div>
+              <span class="fill">&nbsp;</span> / 8
+            </div>
+            <div>
+              <div class="summary-label">Defeitos críticos</div>
+              <span class="fill">&nbsp;</span>
+            </div>
+            <div>
+              <div class="summary-label">Defeitos médios</div>
+              <span class="fill">&nbsp;</span>
+            </div>
+          </div>
+          <div class="summary-row" style="margin-top: 18px">
+            <div style="flex-basis: 100%">
+              <div class="summary-label">Recomendação</div>
+              <span class="fill" style="min-width: 100%; display: block; height: 22px">&nbsp;</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        AgraIA · Marketplace B2B para o agronegócio brasileiro · Documento interno de QA · Gerado a
+        partir do roteiro de testes E2E
+      </footer>
+    </div>
+  </body>
+</html>
