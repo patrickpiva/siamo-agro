@@ -586,7 +586,10 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
 - [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
 - [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
-- [ ] Escrever e aplicar migrations manuais para RLS policies e segurança (matchmaking, RLS, security) — 003, 004, 005 ainda não existem como arquivos
+- [x] RLS: `migrations/manual/004_rls.sql` — RLS habilitado nas 14 tabelas públicas; aplicado em staging e produção (2026-06-02)
+- [x] PostGIS: `migrations/manual/001_postgis.sql` — setup canônico (extensão no schema `extensions`, coluna `geog`, trigger de sync, índice GiST). Produção já está nesse padrão.
+- [ ] Alinhar staging ao PostGIS de produção (schema `extensions`) — one-off em `migrations/manual/oneoff_staging_postgis_to_extensions.sql` (opcional; o app funciona com PostGIS em `public` também)
+- [ ] Migrations manuais ainda não escritas: matchmaking (003) e segurança adicional (005), se necessárias
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
 
 ---
@@ -692,7 +695,7 @@ LEFT JOIN (
 ) r_agg ON r_agg.ratee_id = p.user_id
 WHERE p.id != :ownerProfileId
   AND ST_DWithin(
-        loc.coordinates::geography,
+        loc.geog,
         ST_MakePoint(:lng, :lat)::geography,
         500000   -- metros
       )
