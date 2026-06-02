@@ -5,6 +5,14 @@
 -- (recomendação Supabase — mantém `public` limpo e evita o falso-positivo
 -- rls_disabled_in_public em `spatial_ref_sys`).
 --
+-- ⚠️ PRÉ-REQUISITO (Supabase): habilite PostGIS PELO DASHBOARD primeiro —
+--    Database → Extensions → postgis → Enable (schema = `extensions`).
+--    Motivo: rodar `CREATE EXTENSION ... WITH SCHEMA extensions` aqui no SQL
+--    Editor (role `postgres`) deixa a tabela `spatial_ref_sys` em `public`
+--    (gera o falso-positivo do linter). O toggle do Dashboard roda como
+--    `supabase_admin` e instala TUDO em `extensions`, inclusive spatial_ref_sys.
+--    Feito isso, o `CREATE EXTENSION IF NOT EXISTS` abaixo vira no-op.
+--
 -- Aplicar UMA vez por ambiente novo, no SQL Editor do Supabase, logo após a
 -- migração inicial do schema (ver CLAUDE.md §4).
 --
@@ -27,6 +35,8 @@
 -- ============================================================================
 
 -- 1. PostGIS no schema extensions
+--    ⚠️ Prefira habilitar pelo Dashboard ANTES de rodar isto (ver cabeçalho).
+--    Se já habilitado via Dashboard, as duas linhas abaixo são no-op.
 CREATE SCHEMA IF NOT EXISTS extensions;
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA extensions;
 
