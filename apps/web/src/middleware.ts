@@ -106,5 +106,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 // The token-refresh fetch goes directly to localhost:3001, so no infinite loop risk.
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico).*)'],
+  // Exclude Next internals, favicon, and any static .html in /public (docs, etc.)
+  // so Edge middleware never sits in front of plain static assets.
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|.*\\.html).*)'],
 }
