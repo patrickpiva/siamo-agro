@@ -15,23 +15,32 @@ import { OwnerStats } from '@/components/listings/owner-stats'
 import { OwnerActions } from '@/components/listings/owner-actions'
 import { ProposalsList } from '@/components/listings/proposals-list'
 
-const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
-
 interface SellerReputation {
   currentRating: number
   ratingCount: number
 }
 
+/**
+ * Direct Prisma (Vercel → Supabase, co-located) — replaces the old fetch to the
+ * Railway API, removing a second cross-region hop on the hot listing-detail page.
+ * Computes the live rating average + count, matching the reputation endpoint.
+ */
 async function getSellerReputation(profileId: string): Promise<SellerReputation | null> {
-  try {
-    const res = await fetch(`${API_URL}/api/v1/profiles/${profileId}/reputation`, {
-      cache: 'no-store',
-    })
-    if (!res.ok) return null
-    const json = (await res.json()) as { data: SellerReputation }
-    return json.data
-  } catch {
-    return null
+  const profile = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { userId: true },
+  })
+  if (!profile) return null
+
+  const agg = await prisma.rating.aggregate({
+    where: { rateeId: profile.userId },
+    _avg: { score: true },
+    _count: true,
+  })
+
+  return {
+    currentRating: agg._avg.score ?? 0,
+    ratingCount: agg._count,
   }
 }
 

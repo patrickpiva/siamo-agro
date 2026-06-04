@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { prisma } from '@agraia/db'
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
 
@@ -67,14 +68,55 @@ async function authHeader(): Promise<Record<string, string>> {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+/**
+ * Direct Prisma read (Vercel → Supabase, co-located) — replaces the old fetch to
+ * the Railway API, which detoured cross-region (US-East) for data sitting right
+ * next to the Vercel function. Mirrors the API's `ListingsService.findById`.
+ */
 export async function fetchListing(id: string): Promise<Listing | null> {
-  const res = await fetch(`${API_URL}/api/v1/listings/${id}`, {
-    cache: 'no-store',
-    headers: await authHeader(),
+  const listing = await prisma.listing.findUnique({
+    where: { id },
+    include: {
+      profile: { include: { location: true } },
+      photos: { orderBy: { order: 'asc' } },
+    },
   })
-  if (!res.ok) return null
-  const json = (await res.json()) as ListingResponse
-  return json.data
+  if (!listing) return null
+
+  // Fire-and-forget view-count increment — matches the API behaviour, non-blocking.
+  void prisma.listing
+    .update({ where: { id }, data: { viewCount: { increment: 1 } } })
+    .catch(() => {})
+
+  return {
+    id: listing.id,
+    kind: listing.kind,
+    category: listing.category,
+    title: listing.title,
+    description: listing.description,
+    price: listing.price !== null ? Number(listing.price) : null,
+    negotiable: listing.negotiable,
+    status: listing.status,
+    profileId: listing.profileId,
+    viewCount: listing.viewCount,
+    // Not used by the detail page (it recomputes these via Prisma when owner);
+    // kept for type compatibility with the API response shape.
+    proposalCount: 0,
+    matchCount: 0,
+    createdAt: listing.createdAt.toISOString(),
+    updatedAt: listing.updatedAt.toISOString(),
+    photos: listing.photos.map((p) => ({ id: p.id, url: p.url, order: p.order })),
+    profile: {
+      id: listing.profile.id,
+      userId: listing.profile.userId,
+      name: listing.profile.name,
+      photo: listing.profile.photo ?? null,
+      rating: listing.profile.currentRating,
+      badge: listing.profile.badge,
+      city: listing.profile.location?.city ?? null,
+      state: listing.profile.location?.state ?? null,
+    },
+  }
 }
 
 export interface FetchListingsQuery {
