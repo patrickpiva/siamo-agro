@@ -12,6 +12,12 @@
 #     (no HTTP port — Railway does not healthcheck worker services)
 #
 # Both services use the same build below.
+#
+# ⚠️ App Sleeping: the [deploy] block sets sleepApplication=false for the API, but
+#    the worker is configured in the dashboard and may not inherit it. Confirm
+#    "App Sleeping" is OFF on BOTH services (Settings → App Sleeping), in BOTH
+#    environments. Production must never sleep; a sleeping worker also delays
+#    matchmaking jobs until it wakes.
 
 [build]
 builder = "DOCKERFILE"
@@ -25,3 +31,8 @@ healthcheckPath = "/health"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 5
+# Keep the service always warm — no scale-to-zero. App Sleeping is what caused the
+# ~3.3 s cold-start spikes on login + first-matches (Railway sleeps the idle service
+# and cold-starts Node + a fresh Prisma connection on the next request).
+numReplicas = 1
+sleepApplication = false
