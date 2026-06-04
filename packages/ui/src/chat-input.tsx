@@ -57,7 +57,7 @@ export function ChatInput({
           aria-label="Mensagem"
           style={{ paddingLeft: 20, paddingRight: 16 }}
           className={cn(
-            'bg-muted h-10 flex-1 rounded-full text-[14px] outline-none',
+            'bg-muted h-10 flex-1 rounded-full text-base outline-none',
             'placeholder:text-muted-foreground',
             disabled && 'opacity-50',
           )}

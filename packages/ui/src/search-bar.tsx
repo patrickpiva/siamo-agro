@@ -49,7 +49,7 @@ export function SearchBar({
         onKeyDown={(e) => e.key === 'Enter' && onSubmit(value)}
         placeholder={placeholder}
         className={cn(
-          'min-h-0 flex-1 bg-transparent text-[14px] leading-none outline-none',
+          'min-h-0 flex-1 bg-transparent text-base leading-none outline-none',
           'placeholder:text-muted-foreground',
           focused ? 'text-accent dark:text-primary font-medium' : 'text-foreground',
         )}
