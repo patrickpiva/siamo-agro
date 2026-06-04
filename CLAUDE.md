@@ -387,6 +387,18 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ---
 
+### Por que reads críticos via Prisma direto (Vercel→Supabase) em vez de proxy à API Railway?
+
+**Decisão**: Server Components de páginas de leitura críticas (ex.: detalhe do anúncio) consultam o banco **direto via Prisma** (Vercel → Supabase), em vez de `fetch` → API Railway → Supabase.
+
+**Contexto**: Após co-localizar a infra perto dos usuários (BR), as funções Vercel ficam em São Paulo (`gru1`) e o Supabase em São Paulo (`sa-east-1`). O Railway **não tem região no Brasil** (mais perto: US-East). Logo, um read via `Vercel(SP) → Railway(US-East) → Supabase(SP)` faz desvio cross-region (~240 ms+) para buscar dado que está ao lado da função Vercel. O detalhe do anúncio levava 2,6–6 s.
+
+**Razões**: read co-localizado via Prisma direto custa ~2 ms; o detalhe do anúncio caiu para ~300 ms (~15×). `fetchListing` (em `apps/web/src/lib/api.ts`) e `getSellerReputation` (na página `anuncio/[id]`) agora são Prisma direto, espelhando `ListingsService.findById`/reputação da API.
+
+**Consequência**: O Railway permanece para **escritas, auth e worker** (cross-region tolerável fora do caminho de navegação). Reads do **feed/matches** ainda passam por `client → /api/proxy → Railway` porque `FeedList` é Client Component (não pode usar Prisma direto) — removê-los exigiria Route Handlers na Vercel; **adiado**. Há agora **duas fontes** de lógica de leitura (API e web): ao mudar o shape de um listing, atualize **ambos** (`ListingsService.mapToDetail` ↔ `lib/api.ts` `fetchListing`).
+
+---
+
 ## 10. O QUE NÃO FAZER
 
 | Proibido                                             | Alternativa correta                                   |
@@ -408,7 +420,7 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ## 11. ESTADO IMPLEMENTADO
 
-> Atualizado: 2026-05-28. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
+> Atualizado: 2026-06-04. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
 
 ### Branches
 
@@ -566,6 +578,12 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | Supabase    | production | projeto `agraia-production`        | Migrations manuais; ver §4                       |
 | Supabase    | staging    | projeto `agraia-staging`           | Cópia do schema; dados de teste                  |
 | registro.br | —          | DNS autoritativo para `agra.ia.br` | Ver registros abaixo; **sem** proxy Cloudflare   |
+
+**Região e cold starts (decisão de latência — 2026-06-04):**
+
+- **Co-localização BR**: funções Vercel em **São Paulo (`gru1`)**; Supabase **staging e produção em São Paulo (`sa-east-1`)**. A produção foi **migrada de West US → São Paulo** (runbook executado via `pg_dump --data-only`; reaplicados `migrations/manual/001_postgis.sql` + `004_rls.sql` no projeto novo). Reads co-localizados caíram de ~120–180 ms para ~2 ms/query.
+- **Railway permanece em US-East** (sem região no Brasil) → mantido **fora do caminho de leitura quente** (ver ADR §9 "reads via Prisma direto"). Atende escritas, auth e worker.
+- **App Sleeping OFF**: `railway.toml` define `sleepApplication = false` + `numReplicas = 1` para a API. O **worker** é configurado no dashboard — confirmar App Sleeping OFF nos **dois serviços** e **ambos os ambientes**. Motivo: cold-starts de ~3,3 s no login e no primeiro carregamento de matches. Custo: serviços always-on cobram compute contínuo (aceitável em produção; trade-off em staging).
 
 **Registros DNS (registro.br):**
 
