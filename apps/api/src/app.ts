@@ -4,7 +4,9 @@ import { AppError } from '@agraia/shared'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwtPlugin from '@fastify/jwt'
+import rateLimit from '@fastify/rate-limit'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
+import { getJwtSecret } from './config.js'
 import { authenticate } from './middlewares/auth.js'
 import { authRoutes } from './modules/auth/routes.js'
 import { listingsRoutes } from './modules/listings/routes.js'
@@ -21,6 +23,9 @@ import { savedListingsRoutes } from './modules/saved-listings/routes.js'
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
+    // Atrás do proxy da Railway (e do /api/proxy da Vercel) — sem isso request.ip
+    // seria o IP do hop e o rate limit por IP agruparia todos os clientes juntos
+    trustProxy: true,
     logger: {
       level: process.env['NODE_ENV'] === 'production' ? 'warn' : 'info',
     },
@@ -36,9 +41,21 @@ export async function buildApp(): Promise<FastifyInstance> {
     origin: process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000',
   })
 
+  // ── Rate limit ──────────────────────────────────────────────────────────────
+  // global: false — tráfego legítimo chega agregado pelos IPs de egress da Vercel;
+  // um limite global por IP derrubaria usuários reais. Apenas rotas sensíveis
+  // (OTP) declaram limites via config.rateLimit, usando o X-Forwarded-For do cliente.
+  await app.register(rateLimit, {
+    global: false,
+    // O retorno é tratado como ERRO (passa pelo errorHandler global), não como
+    // body — um AppError sai como envelope { data, error } com status 429
+    errorResponseBuilder: () =>
+      new AppError('Muitas requisições. Tente novamente em alguns minutos.', 'RATE_LIMITED', 429),
+  })
+
   // ── JWT ─────────────────────────────────────────────────────────────────────
   await app.register(jwtPlugin, {
-    secret: process.env['JWT_SECRET'] ?? 'dev-secret-change-in-production',
+    secret: getJwtSecret(),
   })
 
   // Decora a instância com o middleware de autenticação para uso nas rotas
