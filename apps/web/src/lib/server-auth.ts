@@ -1,6 +1,7 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
+import { AppError } from '@agraia/shared'
 
 export interface ServerSession {
   userId: string
@@ -27,6 +28,6 @@ export async function getServerSession(): Promise<ServerSession | null> {
 
 export async function requireSession(): Promise<ServerSession> {
   const session = await getServerSession()
-  if (!session) throw new Error('Unauthenticated')
+  if (!session) throw new AppError('Não autenticado', 'UNAUTHENTICATED', 401)
   return session
 }

@@ -8,8 +8,6 @@ import { FeedCard } from '@/components/feed/feed-card'
 import type { FeedCardListing } from '@/components/feed/feed-card'
 import type { FetchListingsQuery, Listing } from '@/lib/api'
 
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
-
 // ─── Response shapes ──────────────────────────────────────────────────────────
 
 interface FeedListResponse {
@@ -31,7 +29,7 @@ async function fetchListingsPage(
   for (const [k, v] of Object.entries(query)) {
     if (v !== undefined && v !== '') params.set(k, String(v))
   }
-  const res = await fetch(`${API_URL}/api/v1/listings?${params.toString()}`)
+  const res = await fetch(`/api/proxy/listings?${params.toString()}`)
   if (!res.ok) throw new Error('Erro ao buscar anúncios')
   return res.json() as Promise<FeedListResponse>
 }

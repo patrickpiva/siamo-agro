@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from './lib/utils'
+import { KindBadge } from './kind-badge'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,22 +26,6 @@ export interface ListingCardData {
   isCached?: boolean
 }
 
-// ─── Kind badge ───────────────────────────────────────────────────────────────
-
-const KIND_LABELS: Record<string, string> = {
-  OFFER: 'Oferta',
-  DEMAND: 'Demanda',
-  SERVICE: 'Serviço',
-  EQUIPMENT: 'Equipamento',
-}
-
-const KIND_BADGE_CLASS: Record<string, string> = {
-  OFFER: 'bg-green-100 text-green-800',
-  DEMAND: 'bg-blue-100 text-blue-800',
-  SERVICE: 'bg-orange-100 text-orange-800',
-  EQUIPMENT: 'bg-purple-100 text-purple-800',
-}
-
 function relativeDate(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const minutes = Math.floor(diff / 60_000)
@@ -58,9 +43,7 @@ function formatBRL(value: number): string {
 // ─── ListingCard ──────────────────────────────────────────────────────────────
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
-  const photo = (listing.photos ?? []).sort((a, b) => a.order - b.order)[0]
-  const badgeClass = KIND_BADGE_CLASS[listing.kind] ?? 'bg-gray-100 text-gray-800'
-  const kindLabel = KIND_LABELS[listing.kind] ?? listing.kind
+  const photo = [...(listing.photos ?? [])].sort((a, b) => a.order - b.order)[0]
   const { isCached } = listing
 
   return (
@@ -89,14 +72,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             🌾
           </div>
         )}
-        <span
-          className={cn(
-            'absolute left-2 top-2 rounded-full px-2 py-0.5 text-xs font-semibold',
-            badgeClass,
-          )}
-        >
-          {kindLabel}
-        </span>
+        <KindBadge kind={listing.kind} className="absolute left-2 top-2" />
         {isCached && (
           <span className="cache-badge absolute right-2 top-2 rounded-[4px] px-[6px] py-[2px] font-mono text-[8px] font-medium">
             CACHE
@@ -141,7 +117,7 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             </span>
           )}
           {listing.profile.badge && (
-            <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">
+            <span className="bg-primary-subtle text-accent shrink-0 rounded-full px-1.5 py-0.5 text-xs">
               {listing.profile.badge}
             </span>
           )}

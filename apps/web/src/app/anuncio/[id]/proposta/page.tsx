@@ -175,7 +175,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
 
         {/* Total estimado */}
         {listing.price !== null && (
-          <div className="mb-6 rounded-[10px] border border-[#c6e845] bg-[#f0f7d9] px-[14px] py-3 dark:border-[rgba(198,232,69,0.2)] dark:bg-[rgba(198,232,69,0.06)]">
+          <div className="border-primary bg-primary-subtle mb-6 rounded-[10px] border px-[14px] py-3">
             <p className="text-foreground/70 text-[11px] leading-[1.55]">
               <span className="text-foreground font-medium">Total estimado: </span>
               <span className="text-accent dark:text-primary font-mono font-medium">
