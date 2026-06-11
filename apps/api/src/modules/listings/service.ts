@@ -2,6 +2,7 @@ import { Prisma } from '@agraia/db'
 import type { PrismaClient } from '@agraia/db'
 import { isCategoryValidForKind } from '@agraia/shared'
 import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
+import { isOwnedListingPhotoUrl } from './photo-ownership.js'
 import {
   ListingNotFoundError,
   ListingForbiddenError,
@@ -67,9 +68,8 @@ export class ListingsService {
     const profile = await this.prisma.profile.findUnique({ where: { userId } })
     if (!profile) throw new ListingProfileNotFoundError()
 
-    if (body.photoUrls.length > 0) {
-      const invalid = body.photoUrls.filter((url) => !url.includes(userId))
-      if (invalid.length > 0) throw new ListingPhotoOwnershipError()
+    if (body.photoUrls.some((url) => !isOwnedListingPhotoUrl(url, userId))) {
+      throw new ListingPhotoOwnershipError()
     }
 
     const listing = await this.prisma.$transaction(async (tx) => {
@@ -297,6 +297,11 @@ export class ListingsService {
 
     if (body.category && !isCategoryValidForKind(body.category, listing.kind)) {
       throw new ListingInvalidCategoryError(body.category, listing.kind)
+    }
+
+    // update aceitava qualquer photoUrl sem checar dono — mesma regra do create
+    if (body.photoUrls?.some((url) => !isOwnedListingPhotoUrl(url, userId))) {
+      throw new ListingPhotoOwnershipError()
     }
 
     const updated = await this.prisma.$transaction(async (tx) => {

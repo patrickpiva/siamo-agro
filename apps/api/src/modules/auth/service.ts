@@ -1,7 +1,7 @@
-import { randomBytes, randomInt } from 'node:crypto'
+import { randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import type { PrismaClient } from '@agraia/db'
+import type { Prisma, PrismaClient } from '@agraia/db'
 import type { WhatsAppAdapter } from '../../adapters/whatsapp/index.js'
 import {
   OtpRateLimitError,
@@ -20,6 +20,10 @@ const OTP_MAX_ATTEMPTS = 5
 const BCRYPT_ROUNDS = 10
 const ACCESS_TOKEN_TTL = '15m'
 const REFRESH_TOKEN_EXPIRES_DAYS = 30
+// Janela em que um token já rotacionado segue aceito: requests concorrentes do
+// middleware (várias abas/fetches com o mesmo cookie) disparam refresh em paralelo;
+// sem a janela, o segundo request invalidaria a sessão (logout aleatório).
+const REFRESH_GRACE_WINDOW_MS = 60_000
 
 // ─── Tipos internos ───────────────────────────────────────────────────────────
 
@@ -81,7 +85,7 @@ export class AuthService {
   async verifyOtp(phone: string, code: string): Promise<VerifyOtpResult> {
     // Demo accounts: fixed OTP, skip the entire OTP table flow
     if (this.isDemoPhone(phone)) {
-      if (!this.demoOtp || code !== this.demoOtp) throw new OtpInvalidError()
+      if (!this.demoOtpMatches(code)) throw new OtpInvalidError()
       return this.issueSessionForPhone(phone)
     }
 
@@ -145,18 +149,7 @@ export class AuthService {
 
       // Gera tokens
       const accessToken = this.signAccessToken({ id: user.id, phone: user.phone ?? '' })
-      const { raw: refreshToken, hash: refreshTokenHash } = await this.generateRefreshToken()
-
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS)
-
-      await tx.refreshToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: refreshTokenHash,
-          expiresAt,
-        },
-      })
+      const refreshToken = await this.createRefreshToken(tx, user.id)
 
       console.info(`[auth] Login bem-sucedido para user ${user.id}`)
 
@@ -179,35 +172,25 @@ export class AuthService {
   // ── Refresh Token ───────────────────────────────────────────────────────────
 
   async refreshAccessToken(rawRefreshToken: string): Promise<RefreshResult> {
-    // Busca todos os refresh tokens ativos do usuário e tenta fazer bcrypt.compare
-    // É caro em teoria, mas na prática cada usuário tem poucos tokens ativos
-    const activeTokens = await this.prisma.refreshToken.findMany({
-      where: {
-        revokedAt: null,
-        expiresAt: { gt: new Date() },
-      },
-      // Sem filtro de userId: precisamos encontrar o token pelo hash
-      // Limitamos a busca para evitar full table scan em produção
-      // Em escala: armazenar o userId encriptado no token opaco
-      orderBy: { createdAt: 'desc' },
-      take: 1000, // guard em caso de volume extremo
-    })
+    const matchedToken = await this.findRefreshToken(rawRefreshToken)
+    if (!matchedToken) throw new RefreshTokenInvalidError()
 
-    let matchedToken: (typeof activeTokens)[number] | null = null
-
-    for (const record of activeTokens) {
-      const matches = await bcrypt.compare(rawRefreshToken, record.tokenHash)
-      if (matches) {
-        matchedToken = record
-        break
+    if (matchedToken.revokedAt) {
+      const sinceRevoke = Date.now() - matchedToken.revokedAt.getTime()
+      if (sinceRevoke > REFRESH_GRACE_WINDOW_MS) {
+        // Reuso fora da grace window = possível token vazado → revoga a família
+        await this.prisma.refreshToken.updateMany({
+          where: { userId: matchedToken.userId, revokedAt: null },
+          data: { revokedAt: new Date() },
+        })
+        console.warn(
+          `[auth] Reuso de refresh token revogado para user ${matchedToken.userId} — sessões revogadas`,
+        )
+        throw new RefreshTokenInvalidError()
       }
+      // Dentro da grace window: refresh concorrente legítimo — emite novo par sem re-revogar
     }
 
-    if (!matchedToken) {
-      throw new RefreshTokenInvalidError()
-    }
-
-    // Rotação: revoga o token atual e emite um novo par
     const user = await this.prisma.user.findUnique({
       where: { id: matchedToken.userId },
     })
@@ -216,24 +199,16 @@ export class AuthService {
       throw new RefreshTokenInvalidError()
     }
 
-    const { raw: newRefreshToken, hash: newRefreshTokenHash } = await this.generateRefreshToken()
-
-    const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS)
-
-    await this.prisma.$transaction([
-      this.prisma.refreshToken.update({
-        where: { id: matchedToken.id },
-        data: { revokedAt: new Date() },
-      }),
-      this.prisma.refreshToken.create({
-        data: {
-          userId: user.id,
-          tokenHash: newRefreshTokenHash,
-          expiresAt,
-        },
-      }),
-    ])
+    // Rotação: revoga o token atual (se ainda ativo) e emite um novo par
+    const newRefreshToken = await this.prisma.$transaction(async (tx) => {
+      if (!matchedToken.revokedAt) {
+        await tx.refreshToken.update({
+          where: { id: matchedToken.id },
+          data: { revokedAt: new Date() },
+        })
+      }
+      return this.createRefreshToken(tx, user.id)
+    })
 
     const accessToken = this.signAccessToken({
       id: user.id,
@@ -246,20 +221,14 @@ export class AuthService {
   // ── Logout ──────────────────────────────────────────────────────────────────
 
   async logout(userId: string, rawRefreshToken: string): Promise<void> {
-    const activeTokens = await this.prisma.refreshToken.findMany({
-      where: { userId, revokedAt: null },
-    })
+    const matched = await this.findRefreshToken(rawRefreshToken)
+    // userId vem do JWT autenticado — impede revogar token de outro usuário
+    if (!matched || matched.userId !== userId || matched.revokedAt) return
 
-    for (const record of activeTokens) {
-      const matches = await bcrypt.compare(rawRefreshToken, record.tokenHash)
-      if (matches) {
-        await this.prisma.refreshToken.update({
-          where: { id: record.id },
-          data: { revokedAt: new Date() },
-        })
-        break
-      }
-    }
+    await this.prisma.refreshToken.update({
+      where: { id: matched.id },
+      data: { revokedAt: new Date() },
+    })
   }
 
   // ── Helpers privados ────────────────────────────────────────────────────────
@@ -281,14 +250,7 @@ export class AuthService {
 
       const needsOnboarding = !user.profile
       const accessToken = this.signAccessToken({ id: user.id, phone: user.phone ?? '' })
-      const { raw: refreshToken, hash: refreshTokenHash } = await this.generateRefreshToken()
-
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS)
-
-      await tx.refreshToken.create({
-        data: { userId: user.id, tokenHash: refreshTokenHash, expiresAt },
-      })
+      const refreshToken = await this.createRefreshToken(tx, user.id)
 
       console.info(`[auth] Login demo para user ${user.id}`)
 
@@ -339,10 +301,67 @@ export class AuthService {
     return jwt.sign(payload, this.jwtSecret, { expiresIn: ACCESS_TOKEN_TTL })
   }
 
-  private async generateRefreshToken(): Promise<{ raw: string; hash: string }> {
-    const raw = randomBytes(48).toString('hex') // 96 chars hexadecimais
-    const hash = await bcrypt.hash(raw, BCRYPT_ROUNDS)
-    return { raw, hash }
+  /**
+   * Token opaco no formato `<recordId>.<segredo>`: o lookup vira um findUnique
+   * por PK + 1 bcrypt.compare, em vez do scan O(n) com compare por hash que
+   * degradava com o volume de tokens e servia de vetor de DoS.
+   */
+  private async createRefreshToken(
+    tx: Prisma.TransactionClient | PrismaClient,
+    userId: string,
+  ): Promise<string> {
+    const secret = randomBytes(32).toString('hex')
+    const hash = await bcrypt.hash(secret, BCRYPT_ROUNDS)
+
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRES_DAYS)
+
+    const record = await tx.refreshToken.create({
+      data: { userId, tokenHash: hash, expiresAt },
+    })
+
+    return `${record.id}.${secret}`
+  }
+
+  /** Resolve um refresh token cru (novo formato ou legado) para o registro no banco. */
+  private async findRefreshToken(raw: string) {
+    const dotIdx = raw.indexOf('.')
+
+    if (dotIdx > 0) {
+      const id = raw.slice(0, dotIdx)
+      const secret = raw.slice(dotIdx + 1)
+
+      const record = await this.prisma.refreshToken.findUnique({ where: { id } })
+      if (!record || record.expiresAt <= new Date()) return null
+
+      const matches = await bcrypt.compare(secret, record.tokenHash)
+      return matches ? record : null
+    }
+
+    // Formato legado (hex sem id, pré-redesign): scan limitado com compare por hash.
+    // Tokens legados expiram em 30 dias — remover este fallback depois de 2026-07-10.
+    const activeTokens = await this.prisma.refreshToken.findMany({
+      where: { revokedAt: null, expiresAt: { gt: new Date() } },
+      orderBy: { createdAt: 'desc' },
+      take: 1000,
+    })
+
+    for (const record of activeTokens) {
+      if (await bcrypt.compare(raw, record.tokenHash)) {
+        console.info('[auth] Refresh token em formato legado aceito — será rotacionado')
+        return record
+      }
+    }
+    return null
+  }
+
+  /** Comparação em tempo constante — evita vazar o código demo por timing. */
+  private demoOtpMatches(code: string): boolean {
+    const expected = this.demoOtp
+    if (!expected) return false
+    const a = Buffer.from(code)
+    const b = Buffer.from(expected)
+    return a.length === b.length && timingSafeEqual(a, b)
   }
 
   /** Mascara o telefone para logs: +55119****5678 */

@@ -36,6 +36,7 @@ vi.mock('jsonwebtoken', () => ({
 vi.mock('node:crypto', () => ({
   randomInt: vi.fn(() => 123456),
   randomBytes: vi.fn(() => ({ toString: () => 'mock-refresh-token-raw-hex' })),
+  timingSafeEqual: vi.fn((a: Buffer, b: Buffer) => a.equals(b)),
 }))
 
 const now = new Date()
@@ -88,8 +89,10 @@ const mockUserDb = {
 
 const mockRefreshTokenDb = {
   create: vi.fn(),
+  findUnique: vi.fn(),
   findMany: vi.fn(),
   update: vi.fn(),
+  updateMany: vi.fn(),
 }
 
 const mockTransaction = vi.fn()
@@ -113,6 +116,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.unstubAllEnvs()
     service = new AuthService(mockPrisma as never, mockWhatsApp, 'test-secret')
   })
 
@@ -181,7 +185,8 @@ describe('AuthService', () => {
       const result = await service.verifyOtp('+5511999990001', '123456')
 
       expect(result.accessToken).toBe('mock.access.token')
-      expect(result.refreshToken).toBe('mock-refresh-token-raw-hex')
+      // Formato <recordId>.<segredo> — lookup por PK no refresh
+      expect(result.refreshToken).toBe('rt-1.mock-refresh-token-raw-hex')
       expect(result.needsOnboarding).toBe(false)
       expect(result.user.id).toBe('user-1')
     })
@@ -280,46 +285,152 @@ describe('AuthService', () => {
   // ─── refreshAccessToken ──────────────────────────────────────────────────────
 
   describe('refreshAccessToken', () => {
-    it('retorna novos tokens quando refresh token válido', async () => {
-      mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
-      mockUserDb.findUnique.mockResolvedValue(mockUser)
-      mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
-      mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
-      mockPrisma.$transaction.mockImplementation((ops: unknown[]) =>
-        Promise.all(ops as Promise<unknown>[]),
+    beforeEach(() => {
+      // Rotação roda em $transaction com callback
+      mockTransaction.mockImplementation(async (fn: (tx: typeof mockPrisma) => Promise<unknown>) =>
+        fn(mockPrisma),
       )
+    })
 
-      const result = await service.refreshAccessToken('mock-refresh-token-raw-hex')
+    describe('formato novo (<id>.<segredo>)', () => {
+      it('faz lookup por PK (sem scan) e retorna novos tokens', async () => {
+        mockRefreshTokenDb.findUnique.mockResolvedValue(mockRefreshToken)
+        mockUserDb.findUnique.mockResolvedValue(mockUser)
+        mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
+        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+
+        const result = await service.refreshAccessToken('rt-1.mock-refresh-token-raw-hex')
+
+        expect(mockRefreshTokenDb.findUnique).toHaveBeenCalledWith({ where: { id: 'rt-1' } })
+        expect(mockRefreshTokenDb.findMany).not.toHaveBeenCalled()
+        expect(result.accessToken).toBe('mock.access.token')
+        expect(result.refreshToken).toBe('rt-2.mock-refresh-token-raw-hex')
+      })
+
+      it('lança RefreshTokenInvalidError quando o segredo não bate', async () => {
+        mockRefreshTokenDb.findUnique.mockResolvedValue(mockRefreshToken)
+        mockBcryptCompare.mockResolvedValueOnce(false)
+
+        await expect(service.refreshAccessToken('rt-1.segredo-errado')).rejects.toBeInstanceOf(
+          RefreshTokenInvalidError,
+        )
+      })
+
+      it('aceita token revogado há pouco (grace window de refresh concorrente) sem re-revogar', async () => {
+        mockRefreshTokenDb.findUnique.mockResolvedValue({
+          ...mockRefreshToken,
+          revokedAt: new Date(Date.now() - 10_000), // 10s atrás — dentro da janela de 60s
+        })
+        mockUserDb.findUnique.mockResolvedValue(mockUser)
+        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+
+        const result = await service.refreshAccessToken('rt-1.mock-refresh-token-raw-hex')
+
+        expect(result.refreshToken).toBe('rt-2.mock-refresh-token-raw-hex')
+        expect(mockRefreshTokenDb.update).not.toHaveBeenCalled()
+        expect(mockRefreshTokenDb.updateMany).not.toHaveBeenCalled()
+      })
+
+      it('reuso fora da grace window revoga a família inteira e rejeita', async () => {
+        mockRefreshTokenDb.findUnique.mockResolvedValue({
+          ...mockRefreshToken,
+          revokedAt: new Date(Date.now() - 5 * 60_000), // 5 min atrás — fora da janela
+        })
+
+        await expect(
+          service.refreshAccessToken('rt-1.mock-refresh-token-raw-hex'),
+        ).rejects.toBeInstanceOf(RefreshTokenInvalidError)
+
+        expect(mockRefreshTokenDb.updateMany).toHaveBeenCalledWith(
+          expect.objectContaining({ where: { userId: 'user-1', revokedAt: null } }),
+        )
+        expect(mockRefreshTokenDb.create).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('formato legado (hex sem id)', () => {
+      it('retorna novos tokens via scan limitado', async () => {
+        mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
+        mockUserDb.findUnique.mockResolvedValue(mockUser)
+        mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
+        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+
+        const result = await service.refreshAccessToken('mock-refresh-token-raw-hex')
+
+        expect(result.accessToken).toBe('mock.access.token')
+        expect(result.refreshToken).toBe('rt-2.mock-refresh-token-raw-hex')
+      })
+
+      it('lança RefreshTokenInvalidError quando token não encontrado', async () => {
+        mockRefreshTokenDb.findMany.mockResolvedValue([])
+
+        await expect(service.refreshAccessToken('invalid-token')).rejects.toBeInstanceOf(
+          RefreshTokenInvalidError,
+        )
+      })
+
+      it('revoga o token antigo ao emitir novo (rotação)', async () => {
+        mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
+        mockUserDb.findUnique.mockResolvedValue(mockUser)
+        mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
+        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+
+        await service.refreshAccessToken('mock-refresh-token-raw-hex')
+
+        expect(mockRefreshTokenDb.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { id: 'rt-1' },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            data: expect.objectContaining({ revokedAt: expect.any(Date) }),
+          }),
+        )
+      })
+    })
+  })
+
+  // ─── Contas demo ─────────────────────────────────────────────────────────────
+
+  describe('contas demo', () => {
+    beforeEach(() => {
+      // Limpeza fica no beforeEach raiz (vi.unstubAllEnvs) — sem teardown aqui
+      vi.stubEnv('DEMO_PHONES', '+5511999990001,+5511999990002')
+      vi.stubEnv('DEMO_OTP', '654321')
+      mockTransaction.mockImplementation(async (fn: (tx: typeof mockPrisma) => Promise<unknown>) =>
+        fn(mockPrisma),
+      )
+    })
+
+    it('requestOtp não grava OTP nem envia WhatsApp', async () => {
+      const result = await service.requestOtp('+5511999990001')
+
+      expect(result).toEqual({ expiresIn: 300 })
+      expect(mockOtpCodeDb.create).not.toHaveBeenCalled()
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(mockWhatsApp.sendOtp).not.toHaveBeenCalled()
+    })
+
+    it('verifyOtp emite sessão com o código demo sem tocar na tabela de OTP', async () => {
+      mockUserDb.findUnique.mockResolvedValue({ ...mockUser, profile: { id: 'p-1' } })
+      mockRefreshTokenDb.create.mockResolvedValue(mockRefreshToken)
+
+      const result = await service.verifyOtp('+5511999990001', '654321')
 
       expect(result.accessToken).toBe('mock.access.token')
-      expect(result.refreshToken).toBe('mock-refresh-token-raw-hex')
+      expect(result.refreshToken).toBe('rt-1.mock-refresh-token-raw-hex')
+      expect(mockOtpCodeDb.findFirst).not.toHaveBeenCalled()
     })
 
-    it('lança RefreshTokenInvalidError quando token não encontrado', async () => {
-      mockRefreshTokenDb.findMany.mockResolvedValue([])
-
-      await expect(service.refreshAccessToken('invalid-token')).rejects.toBeInstanceOf(
-        RefreshTokenInvalidError,
+    it('verifyOtp lança OtpInvalidError com código demo errado', async () => {
+      await expect(service.verifyOtp('+5511999990001', '000000')).rejects.toBeInstanceOf(
+        OtpInvalidError,
       )
     })
 
-    it('revoga o token antigo ao emitir novo (rotação)', async () => {
-      mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
-      mockUserDb.findUnique.mockResolvedValue(mockUser)
-      mockPrisma.$transaction.mockImplementation((ops: unknown[]) =>
-        Promise.all(ops as Promise<unknown>[]),
-      )
-      mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
-      mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+    it('bypass desativado quando DEMO_OTP está vazio', async () => {
+      vi.stubEnv('DEMO_OTP', '')
 
-      await service.refreshAccessToken('mock-refresh-token-raw-hex')
-
-      expect(mockRefreshTokenDb.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'rt-1' },
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          data: expect.objectContaining({ revokedAt: expect.any(Date) }),
-        }),
+      await expect(service.verifyOtp('+5511999990001', '654321')).rejects.toBeInstanceOf(
+        OtpInvalidError,
       )
     })
   })
