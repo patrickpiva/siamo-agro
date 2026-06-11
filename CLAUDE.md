@@ -2,6 +2,8 @@
 
 Guia de desenvolvimento do AgraIA. Lido automaticamente em toda sessão.
 Não apague seções; atualize-as quando houver mudanças de decisão.
+Quando este arquivo e o código divergirem, **o código é a fonte da verdade** —
+corrija o CLAUDE.md no mesmo PR que tocou o código.
 
 ---
 
@@ -173,6 +175,11 @@ updatedAt DateTime @updatedAt @map("updated_at")
   4. Revise, copie e aplique no SQL Editor do Supabase
   5. Atualize `schema.baseline.prisma` para o novo estado e commite ambos
 
+> **Armadilha — baseline defasado**: o passo 5 é fácil de esquecer. Em 2026-06-11 o
+> baseline estava 3 migrations atrás e o `diff:inc` listava objetos já aplicados
+> (ex.: `CREATE TABLE saved_listings`). Se o delta mostrar coisas que já existem no
+> banco, **não aplique o diff** — re-sincronize o baseline e gere de novo.
+
 > **Restrição de rede**: conexão direta ao Supabase (`db.PROJECT.supabase.co:5432`) está bloqueada. O schema engine do Prisma não consegue introspectar pelo pooler. Por isso o diff compara **dois arquivos de schema** — sem necessidade de conexão ao banco.
 
 ### Relações
@@ -218,8 +225,11 @@ Nunca retorne a entidade diretamente na raiz. Sempre dentro de `data`.
 ### Paginação
 
 - **Cursor-based** para todas as listagens (não offset).
-- Parâmetros: `cursor` (ID do último item) e `limit` (padrão 20, máximo 100).
+- Parâmetros: `cursor` (ID do último item) e `limit` (padrão 20, máximo 50).
 - Resposta inclui `meta.nextCursor` (null quando última página).
+- Em `GET /listings` com `search`/geo, a ordenação primária é rank/distância — o
+  keyset reconstrói as chaves do cursor com as MESMAS expressões de ordenação
+  (`ListingsService.buildCursorCondition`); o cursor exposto continua sendo só o id.
 
 ```typescript
 type PaginationMeta = {
@@ -231,9 +241,30 @@ type PaginationMeta = {
 
 ### Autenticação
 
-- JWT via Supabase Auth. Token no header `Authorization: Bearer <token>`.
+- OTP via WhatsApp → JWT **próprio** (`jsonwebtoken`), não Supabase Auth. Access token
+  de 15 min no header `Authorization: Bearer <token>`.
+- Refresh token opaco `<recordId>.<segredo>` (30 dias; bcrypt do segredo no banco):
+  lookup por PK + 1 compare. Rotação a cada refresh com **grace window de 60s** —
+  refreshes concorrentes do middleware não derrubam a sessão; reuso fora da janela
+  revoga **todas** as sessões do usuário. Tokens legados (hex sem `.`) têm fallback
+  até 2026-07-10 (`findRefreshToken` em `auth/service.ts`).
+- `JWT_SECRET` é obrigatório em produção: API falha no boot, web lança
+  `CONFIG_MISSING_ENV` — sem fallback silencioso (ver `apps/api/src/config.ts`).
 - Fastify plugin `authenticate` injeta `request.user` em rotas protegidas.
 - Nunca confie em dados do body para identificar o usuário autenticado — use `request.user.id`.
+- Rate limit por IP (`@fastify/rate-limit` + `trustProxy: true`): `/auth/otp/request`
+  5/15min, `/auth/otp/verify` 15/15min — 429 no envelope com code `RATE_LIMITED`.
+  `/auth/refresh` **não** tem limite por IP: refreshes chegam pelos IPs de egress
+  compartilhados da Vercel, um limite derrubaria usuários legítimos.
+
+### Fluxo de sessão no web
+
+- Cookies `httpOnly`: `access_token` (15 min) e `refresh_token` (30 dias).
+- `middleware.ts` roda em toda rota: access token expirando em <30s → **silent
+  refresh** contra `NEXT_PUBLIC_API_URL` e regrava os dois cookies; injeta
+  `Authorization` nos requests de `/api/proxy/*`.
+- O proxy (`app/api/proxy/[...path]`) injeta `Bearer` a partir do cookie e propaga
+  `X-Forwarded-For` — sem isso o rate limit por IP da API enxergaria só a Vercel.
 
 ---
 
@@ -420,7 +451,7 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ## 11. ESTADO IMPLEMENTADO
 
-> Atualizado: 2026-06-04. Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
+> Atualizado: 2026-06-11 (sincronizado com o código na revisão de hardening). Leia esta seção **antes** de propor qualquer nova feature, endpoint ou refactor para evitar duplicação ou conflito com o que já existe.
 
 ### Branches
 
@@ -450,8 +481,15 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)   |
 | `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                 |
 | `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                     |
+| `/anuncio/[id]/proposta`          | ✅     | Fazer proposta (Client → POST /transactions)          |
+| `/anuncio/[id]/propostas`         | ✅     | Propostas recebidas do anúncio (dono)                 |
+| `/proposta/[id]`                  | ✅     | Detalhe da proposta                                   |
+| `/proposta/[id]/enviada`          | ✅     | Confirmação pós-envio da proposta                     |
 | `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia        |
 | `/transacoes`                     | ✅     | Transações com EmptyState                             |
+| `/transacoes/[id]`                | ✅     | Detalhe da transação + chat                           |
+| `/transacoes/[id]/concluir`       | ✅     | Confirmação de conclusão (dual-party)                 |
+| `/transacoes/[id]/avaliar`        | ✅     | Avaliação pós-transação                               |
 | `/perfil`                         | ✅     | Perfil próprio                                        |
 | `/perfil/[id]`                    | ✅     | Perfil público                                        |
 | `/negocios`                       | ✅     | Negócios                                              |
@@ -476,7 +514,8 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | PATCH  | `/profiles/:id`                | ✅   | ✅                                    |
 | POST   | `/privacy/consent`             | ✅   | ✅ idempotente                        |
 | POST   | `/listings`                    | ✅   | ✅                                    |
-| GET    | `/listings`                    | ❌   | ✅ cursor-based, PostGIS              |
+| GET    | `/listings`                    | ❌   | ✅ cursor-based, PostGIS, FTS         |
+| GET    | `/listings/mine`               | ✅   | ✅ cursor-based                       |
 | GET    | `/listings/:id`                | ❌   | ✅                                    |
 | PATCH  | `/listings/:id`                | ✅   | ✅                                    |
 | DELETE | `/listings/:id`                | ✅   | ✅ soft delete                        |
@@ -484,13 +523,24 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | POST   | `/listings/:id/resume`         | ✅   | ✅                                    |
 | GET    | `/listings/:id/matches`        | ✅   | ✅                                    |
 | POST   | `/uploads/presigned`           | ✅   | ✅                                    |
+| POST   | `/uploads/confirm`             | ✅   | ✅                                    |
 | GET    | `/notifications`               | ✅   | ✅ cursor-based                       |
 | PATCH  | `/notifications/:id/read`      | ✅   | ✅                                    |
 | POST   | `/notifications/read-all`      | ✅   | ✅                                    |
 | POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência            |
+| POST   | `/transactions`                | ✅   | ✅ cria proposta (201)                |
 | GET    | `/transactions`                | ✅   | ✅                                    |
 | GET    | `/transactions/:id`            | ✅   | ✅                                    |
+| POST   | `/transactions/:id/accept`     | ✅   | ✅                                    |
+| POST   | `/transactions/:id/counter`    | ✅   | ✅ contraproposta                     |
+| POST   | `/transactions/:id/start`      | ✅   | ✅ confirmação dual-party de início   |
+| POST   | `/transactions/:id/complete`   | ✅   | ✅ confirmação dual-party de fim      |
+| POST   | `/transactions/:id/cancel`     | ✅   | ✅ com motivo                         |
 | POST   | `/transactions/:id/messages`   | ✅   | ✅                                    |
+| POST   | `/transactions/:id/rating`     | ✅   | ✅ avaliação (módulo reputation)      |
+| GET    | `/profiles/:id/reputation`     | ❌   | ✅ média ao vivo de ratings           |
+| GET    | `/help/faq`                    | ❌   | ✅                                    |
+| GET    | `/help/faq/search`             | ❌   | ✅ `?q=`                              |
 | GET    | `/me`                          | ✅   | ✅                                    |
 | PATCH  | `/me`                          | ✅   | ✅                                    |
 | GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`  |
@@ -510,9 +560,14 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 ### `packages/ui` — componentes exportados
 
-**Base:** Button (variantes: cta, cta-disabled, ghost-muted), Input, Label, Textarea, Badge, Avatar, Separator, Progress, Skeleton, Card, Sheet, Tabs, RadioGroup, Select, Checkbox, Dialog, Drawer, DropdownMenu, Switch, Tooltip
+> Fonte da verdade: `packages/ui/src/index.ts`. Os componentes vivem na **raiz de
+> `src/`** (apenas `button`/`card` ficam em `src/components/`). Primitivos shadcn
+> não listados abaixo (Input, Dialog, Tabs…) **não estão no index** — confirme antes
+> de importar de `@agraia/ui`. BottomTabBar é componente do app, não do pacote.
 
-**AgraIA:** SearchBar, SuggestionChip, ListingCard (`isCached?: boolean`), ListingCardSkeleton, NotificationIcon, BottomCTA, BottomTabBar, SectionLabel, ProgressIndicator, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, ChatInput (`isOffline?: boolean`)
+**Base:** Button (variantes: cta, cta-disabled, ghost-muted), Card, `cn()`, `formatBRL()`, `getInitials()`
+
+**AgraIA:** ListingCard (`isCached?: boolean`) + ListingCardSkeleton, MatchScoreBadge, KindBadge, StatusBadge, SectionLabel, ProgressIndicator, BottomCTA, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, FilterTabs, Fab, Toggle, PriceInput, SummaryBadge, ReviewCard, PriceBlock, StateBanner, ReputationSeal, ListingContextStrip, ProposalBlock, PriceProposalInput, QuantityStepper, ChatBubble, ChatInput (`isOffline?: boolean`), StarRating, MiniStarRating, RatingCategoryRow, SearchBar, SuggestionChip, RangeSlider, FilterChipGroup, CollectiveProgressBar, ListingMiniCard, NotificationIcon, SettingsRow, SettingsGroup, ConsentRow, PrivacyActionCard, ThemeSelector, FontSizeSlider
 
 **Estados especiais:** EmptyState (`iconVariant: 'lime' | 'muted'`), ErrorScreen (`compact?: boolean`, `iconVariant: 'red' | 'amber' | 'blue'`)
 
@@ -522,20 +577,20 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 ### Features especiais — Lote 6 (`feat/design-hardening`)
 
-| Feature                   | Arquivo                                                                 | Notas                                                                                                                                               |
-| ------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Offline banner            | `components/offline-banner.tsx`                                         | Amber (offline) / azul pulsante (reconectando). Mount guard para evitar hydration mismatch.                                                         |
-| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agraia:offline-queue`, max 3 retries, flush no reconnect                                                                              |
-| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agraia:reconnected` custom event ao reconectar                                                                                             |
-| Service Worker            | `src/sw.ts`                                                             | Serwist v9. Desabilitado em dev. Handlers: StaleWhileRevalidate (listings/profiles), NetworkFirst (pages/notifications), NetworkOnly (transactions) |
-| PWA manifest              | `public/manifest.json`                                                  | Ícones SVG placeholder em `public/icons/` — PNGs ainda não gerados                                                                                  |
-| PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                  |
-| Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                         |
-| 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                   |
-| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agraia:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                               |
-| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agraia:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                      |
-| Feed tab "Matches"        | `components/feed-list.tsx` + `GET /me/feed/matches`                     | `computing: true` exibe spinner; `matchScore` 0–1 convertido p/ 0–100 no `FeedCard`; `distanceKm` repassado ao card                                 |
-| Bell unread count         | `app/feed/page.tsx`                                                     | Query paralela no servidor (`Promise.all`); ponto vermelho renderizado somente quando `unreadCount > 0`                                             |
+| Feature                   | Arquivo                                                                 | Notas                                                                                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Offline banner            | `components/offline-banner.tsx`                                         | Amber (offline) / azul pulsante (reconectando). Mount guard para evitar hydration mismatch.                                                                     |
+| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agraia:offline-queue`, max 3 retries, flush no reconnect                                                                                          |
+| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agraia:reconnected` custom event ao reconectar                                                                                                         |
+| Service Worker            | `src/sw.ts`                                                             | Serwist v9. Desabilitado em dev. Handlers: StaleWhileRevalidate (listings/profiles), NetworkFirst (pages/notifications), NetworkOnly (transactions)             |
+| PWA manifest              | `public/manifest.json`                                                  | Ícones SVG placeholder em `public/icons/` — PNGs ainda não gerados                                                                                              |
+| PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                              |
+| Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                                     |
+| 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                               |
+| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agraia:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                                           |
+| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agraia:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                                  |
+| Feed tab "Matches"        | `components/feed-list.tsx` + `GET /me/feed/matches`                     | `computing: true` → spinner com re-poll de 4s (teto 10); 401 → CTA de login; `matchScore` 0–1 convertido p/ 0–100 no `FeedCard`; `distanceKm` repassado ao card |
+| Bell unread count         | `app/feed/page.tsx`                                                     | Query paralela no servidor (`Promise.all`); ponto vermelho renderizado somente quando `unreadCount > 0`                                                         |
 
 ---
 
@@ -607,15 +662,21 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [x] RLS: `migrations/manual/004_rls.sql` — RLS habilitado nas 14 tabelas públicas; aplicado em staging e produção (2026-06-02)
 - [x] PostGIS: `migrations/manual/001_postgis.sql` — setup canônico (extensão no schema `extensions`, coluna `geog`, trigger de sync, índice GiST). Produção já está nesse padrão.
 - [ ] Alinhar staging ao PostGIS de produção (schema `extensions`) — one-off em `migrations/manual/oneoff_staging_postgis_to_extensions.sql` (opcional; o app funciona com PostGIS em `public` também)
-- [ ] Migrations manuais ainda não escritas: matchmaking (003) e segurança adicional (005), se necessárias
+- [x] Matchmaking: `migrations/manual/005_matchmaking_perf.sql` — UNIQUE de `match_scores`, índice GIN de busca FTS (português), índice keyset do feed, drop de índices redundantes; aplicada em staging e produção (2026-06-11)
+- [ ] Remover o fallback de refresh token legado (`findRefreshToken` em `apps/api/src/modules/auth/service.ts`) após **2026-07-10** — o TTL de 30 dias esgota os tokens antigos
+- [ ] Job de expurgo físico 30 dias após `DELETE /me` (LGPD) — hoje só marca `status: DELETED`; anúncios do usuário continuam ativos no feed e não há purge implementado
+- [ ] Decidir o CTA de WhatsApp no detalhe do anúncio — `wa.me/?text=` sem telefone abre o share picker, não conversa com o vendedor
+- [ ] Unificar `API_URL` vs `NEXT_PUBLIC_API_URL` (mesmo backend, dois nomes — proxy/SSR usa um, middleware usa o outro)
+- [ ] Cron de limpeza de `otp_codes` e `refresh_tokens` expirados (crescimento de tabela sem bound)
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
 
 ---
 
 ## 12. ALGORITMO DE MATCHMAKING
 
-> Implementado em `apps/api/src/modules/matchmaking/algorithm.ts` e `apps/api/src/workers/matchmaking/processor.ts`.
-> Score mínimo para persistência: **0.20**. Pares abaixo disso são descartados silenciosamente.
+> Implementado em `apps/api/src/modules/matchmaking/algorithm.ts` (funções puras) e
+> `apps/api/src/workers/matchmaking/processor.ts` (pipeline do worker).
+> Persistência: score ≥ **0.20** (`MIN_SCORE`). Notificação: score ≥ **0.70** (`HIGH_SCORE_THRESHOLD`).
 
 ---
 
@@ -623,13 +684,16 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 ```
 score_final =
-  0.40 × distScore  +
-  0.25 × compatScore +
-  0.20 × repScore    +
-  0.15 × respScore
+  0.40 × distScore   +
+  0.35 × repScore    +
+  0.20 × compatScore +
+  0.05 × respScore
 ```
 
-Todos os sub-scores são normalizados para **[0, 1]**. O resultado final também fica em [0, 1] e é armazenado em `match_scores.score`.
+Pesos ajustáveis por env — `MATCH_WEIGHT_DISTANCE`, `MATCH_WEIGHT_REPUTATION`,
+`MATCH_WEIGHT_COMPATIBILITY`, `MATCH_WEIGHT_RESPONSIVENESS` — e precisam somar 1.0;
+caso contrário caem nos defaults (warn único no log do worker). Todos os sub-scores
+são normalizados para **[0, 1]**; o resultado vai em `match_scores.score`.
 
 ---
 
@@ -637,118 +701,122 @@ Todos os sub-scores são normalizados para **[0, 1]**. O resultado final também
 
 #### Distância — peso 0.40
 
-Decaimento **logarítmico** até `MAX_DISTANCE_KM = 500`:
+Decaimento **logarítmico** até `MATCH_MAX_DISTANCE_KM` (default **200 km**), via Haversine:
 
 ```ts
-distScore = Math.max(0, 1 - Math.log(1 + d) / Math.log(1 + 500))
+distScore = Math.max(0, 1 - Math.log(1 + d) / Math.log(1 + 200))
 ```
 
-Penaliza distâncias longas de forma mais suave do que o decaimento linear anterior e valoriza mais os matches de curta distância.
+Atenção: o raio de **busca** de candidatos é 500 km (processor) — entre 200 e 500 km
+o `distScore` é 0, mas o par ainda pode pontuar nos demais componentes.
 
-#### Compatibilidade — peso 0.25
+#### Reputação — peso 0.35
 
-Avaliada par-a-par entre os anúncios ativos do candidato e o anúncio-alvo. Condições:
-
-1. **`kind` complementar** (OFFER ↔ DEMAND): obrigatório — bônus 0 se ambos forem iguais.
-2. **Bônus de categoria**:
-
-| Condição                       | Bônus |
-| ------------------------------ | ----- |
-| Mesma `category` (exact match) | +0.30 |
-| Mesma categoria cluster        | +0.15 |
-| Sem cluster em comum           | +0.00 |
-
-**Clusters de categoria:**
-
-| Cluster         | Categorias                                        |
-| --------------- | ------------------------------------------------- |
-| GRAINS          | SOJA, MILHO, ARROZ, TRIGO, FEIJAO                 |
-| LIVESTOCK       | GADO, SUINOS, AVES, LEITE, PESCA                  |
-| HORTICULTURE    | FRUTAS, LEGUMES, CAFE, CANA, ALGODAO, HORTIFRUTI  |
-| AGRO_SERVICES   | AGRONOMIA, VETERINARIA, CONSULTORIA, CERTIFICACAO |
-| MECHANICAL      | MAQUINAS, IMPLEMENTOS, PECAS, MANUTENCAO          |
-| INFRASTRUCTURE  | IRRIGACAO, ARMAZENAMENTO, ENERGIA, CONSTRUCAO     |
-| LABOR_TRANSPORT | MAO_DE_OBRA, TRANSPORTE, LOGISTICA                |
-
-O `compatScore` final é a **média dos pares** candidato–alvo, tomando o par de maior bônus de categoria.
-
-#### Reputação — peso 0.20
-
-Lida **ao vivo** via LEFT JOIN na query PostGIS — nunca do campo desnormalizado `profile.current_rating`:
+Lida **ao vivo** via LEFT JOIN em `ratings` na query de candidatos — nunca dos campos
+desnormalizados `profile.current_rating`/`rating_count`:
 
 ```ts
-repScore = avgRating / 5.0 // AVG(ratings.score) do candidato
-repScore = 0.5 // prior neutro quando sem avaliações
+base = avgRating / 5
+coldStart = ratingCount < 3 ? ratingCount / 3 : 1 // 1 avaliação 5★ não supera veterano
+repScore = clamp01(base * coldStart + badgeBonus) // GOLD +0.10 · SILVER +0.05
 ```
 
-#### Responsividade — peso 0.15
+#### Compatibilidade — peso 0.20
 
-Tempo médio de resposta em transações ativas (query em `transactions` + `transaction_messages`):
+Avaliada par-a-par entre o anúncio-alvo e os anúncios **ATIVOS** do candidato; vale o
+**melhor par** (não a média). Base pela matriz de kind:
 
-```ts
-respScore = Math.max(0, 1 - avgResponseHours / 72)
-respScore = 0.5 // prior neutro quando sem histórico
-```
+| alvo \ candidato | OFFER | DEMAND | SERVICE | EQUIPMENT |
+| ---------------- | ----- | ------ | ------- | --------- |
+| OFFER            | 0.0   | 0.7    | 0.4     | 0.4       |
+| DEMAND           | 0.7   | 0.0    | 0.7     | 0.7       |
+| SERVICE          | 0.4   | 0.7    | 0.0     | 0.4       |
+| EQUIPMENT        | 0.4   | 0.7    | 0.4     | 0.0       |
+
+Base 0 (mesmo kind) zera o par — bônus de categoria não resgata concorrentes.
+Bônus: mesma `category` **+0.30**; mesmo cluster **+0.15**; sem cluster em comum +0.
+Categorias em inglês (fonte: `packages/shared/src/validators/listing.ts`):
+
+| Cluster         | Categorias                             |
+| --------------- | -------------------------------------- |
+| GRAINS          | COFFEE, CORN, SOY, GRAINS              |
+| LIVESTOCK       | LIVESTOCK, DAIRY                       |
+| HORTICULTURE    | FRUITS, VEGETABLES                     |
+| AGRO_SERVICES   | AGRONOMY, VETERINARY, CONSULTING       |
+| MECHANICAL      | MECHANICS, TRACTOR, HARVESTER          |
+| INFRASTRUCTURE  | IRRIGATION, IRRIGATION_SYSTEM, STORAGE |
+| LABOR_TRANSPORT | LABOR, TRANSPORT                       |
+
+Categorias fora do mapa (TOOLS, OTHER…) caem no cluster `OTHER`, que nunca ganha bônus.
+
+#### Responsividade — peso 0.05
+
+Tempo médio entre a criação da transação e a **primeira mensagem do próprio vendedor**
+(só transações ACCEPTED/IN_PROGRESS/COMPLETED — mensagem do comprador não conta).
+Função degrau:
+
+| Média de resposta | respScore          |
+| ----------------- | ------------------ |
+| < 1h              | 1.0                |
+| < 6h              | 0.7                |
+| < 24h             | 0.4                |
+| ≥ 24h             | 0.1                |
+| sem histórico     | 0.5 (prior neutro) |
 
 ---
 
 ### Busca de candidatos (PostGIS)
 
-Executada em `processor.ts` via query SQL raw. Seleciona todos os perfis em raio de 500 km com anúncios ativos que **não pertencem ao dono** do anúncio-alvo:
+Executada em `processor.ts` via query raw: até **500 candidatos** (`MAX_CANDIDATES`)
+em raio de **500 km**, ordenados por distância, com rating ao vivo agregado, excluindo
+o dono e exigindo ≥1 anúncio ativo:
 
 ```sql
-SELECT
-  p.id, p.user_id AS "userId", p.name, p.badge,
-  ST_Distance(target_geo, p_geo)::float / 1000 AS distance_km,
-  r_agg.avg_score,
-  r_agg.cnt
+SELECT p.id, p.user_id, p.badge, loc.latitude, loc.longitude,
+       ST_Distance(loc.geog, ST_MakePoint(:lng, :lat)::geography) / 1000.0 AS distance_km,
+       COALESCE(r_agg.avg_score, 0) AS current_rating,
+       COALESCE(r_agg.cnt, 0)       AS rating_count
 FROM profiles p
 JOIN locations loc ON loc.profile_id = p.id
 LEFT JOIN (
-  SELECT ratee_id,
-         AVG(score)::float AS avg_score,
-         COUNT(*)::int     AS cnt
-  FROM   ratings
-  GROUP BY ratee_id
+  SELECT ratee_id, AVG(score)::float AS avg_score, COUNT(*)::int AS cnt
+  FROM ratings GROUP BY ratee_id
 ) r_agg ON r_agg.ratee_id = p.user_id
 WHERE p.id != :ownerProfileId
-  AND ST_DWithin(
-        loc.geog,
-        ST_MakePoint(:lng, :lat)::geography,
-        500000   -- metros
-      )
+  AND loc.geog IS NOT NULL
+  AND ST_DWithin(loc.geog, ST_MakePoint(:lng, :lat)::geography, 500000)
+  AND EXISTS (SELECT 1 FROM listings l WHERE l.profile_id = p.id AND l.status = 'ACTIVE')
+ORDER BY ST_Distance(loc.geog, ST_MakePoint(:lng, :lat)::geography)
+LIMIT 500
 ```
+
+Scores computados em lotes de 50 (`BATCH_SIZE`); persistem os **top 50** (`TOP_MATCHES`)
+com score ≥ 0.20.
 
 ---
 
 ### Persistência
 
-Resultado salvo via upsert em `match_scores`. A recomputação sobrescreve o score anterior para o mesmo par `(listingId, candidateProfileId)`:
-
-```prisma
-model MatchScore {
-  id                 String  @id @default(cuid())
-  listingId          String
-  candidateProfileId String
-  score              Float
-  distanceKm         Float?
-
-  @@unique([listingId, candidateProfileId])
-}
-```
+`@@unique([listingId, candidateProfileId])` em `match_scores` (migration 005) garante
+uma linha por par. O processor faz **delete + recreate** em transação por listing —
+não upsert. Recomputo concorrente do mesmo listing é evitado pelo dedup de job
+(jobId) e, no pior caso, barra na constraint única (o retry do BullMQ resolve).
 
 ---
 
 ### Ciclo de vida dos jobs (BullMQ)
 
-| Evento                                                        | Job disparado                             | Efeito                                                           |
-| ------------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
-| `POST /listings` (criação de anúncio)                         | `compute-matches` para o novo listing     | Descobre candidatos imediatamente                                |
-| `GET /me/feed/matches` sem scores + usuário tem listing ativo | `compute-matches` para cada listing ativo | Popula o feed "Matches para mim" na primeira visita              |
-| `compute-matches` finaliza com score ≥ 0.20                   | `notify-match` por par                    | Notificação push/WhatsApp ao perfil candidato                    |
-| `notify-match` enfileirado fora do horário comercial BRT      | delay automático até 08:00–20:00 BRT      | Evita notificações em madrugada sem esgotar tentativas do BullMQ |
+| Evento                                                   | Job disparado                                                                                                                                                                   | Efeito                                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /listings` (criação)                               | `compute-matches` (sem dedup), disparado UMA vez dentro de `ListingsService.create`                                                                                             | Descobre candidatos imediatamente                                     |
+| `PATCH /listings/:id` mudando título/descrição/categoria | `compute-matches` (sem dedup)                                                                                                                                                   | Recomputa o matching do anúncio editado                               |
+| `GET /me/feed/matches` vazio + usuário tem listing ativo | `compute-matches` p/ listings próprios sem `matchesComputedAt` **e** até 30 vizinhos com `matches_computed_at IS NULL` — ambos `{ dedupe: true }` (jobId `compute:<listingId>`) | Popula o feed na primeira visita sem thundering herd                  |
+| `compute-matches` termina com pares ≥ 0.70               | `notify-match` para o **dono do anúncio**                                                                                                                                       | WhatsApp 1×/dia por dono (jobId `notify-match:<userId>:<YYYY-MM-DD>`) |
+| `notify-match` enfileirado fora de 08:00–20:00 BRT       | delay até a próxima janela comercial                                                                                                                                            | `msUntilNextBusinessHours()` no enqueue — sem `throw` nem retry loop  |
 
-O delay é calculado em `msUntilNextBusinessHours()` em `queue.ts` e aplicado como `delay` no job — sem `throw` nem retry loop.
+Jobs com `attempts: 3` + backoff exponencial. Completados ficam retidos por 1h —
+que é também a janela efetiva do dedup por jobId (um recompute via feed do mesmo
+listing só re-enfileira depois disso).
 
 ---
 
@@ -756,8 +824,11 @@ O delay é calculado em `msUntilNextBusinessHours()` em `queue.ts` e aplicado co
 
 1. `FeedList` com `activeTab === 'matches'` chama `fetchMatchesPage()` → `GET /api/proxy/me/feed/matches`.
 2. `toFeedCardData()` converte `matchScore` de float 0–1 para inteiro 0–100 antes de passar ao `FeedCard`.
-3. Se `computing: true` (primeira visita sem scores), exibe spinner animado em vez de `EmptyState`.
-4. `distanceKm` é repassado diretamente ao `FeedCard` para exibição de distância.
+3. `computing: true` (primeira visita sem scores) → spinner + **re-poll a cada 4s**
+   com teto de 10 tentativas (`refetchInterval` no TanStack Query).
+4. 401 → `EmptyState` com CTA de login (`/entrar`) — a aba é autenticada; antes
+   mostrava "Sem matches ainda" enganosamente.
+5. `distanceKm` é repassado diretamente ao `FeedCard` para exibição de distância.
 
 ---
 
@@ -817,3 +888,24 @@ Esses usuários são criados pelo seed (`pnpm db:seed`). O lookup é por telefon
 | Produção    | todos os três números | valor forte, rotacionado |
 
 Definir as variáveis no painel do Railway (API service) ou no `.env` local. Nunca commitar valores reais.
+
+---
+
+## 14. VARIÁVEIS DE AMBIENTE
+
+> Referência de **quem lê o quê**. As que afetam build cache estão listadas em `turbo.json`.
+> Nos provedores: configurar em Railway (api + worker), Vercel (web — **incluindo o
+> ambiente Preview**, ver nota do `JWT_SECRET`) e CI conforme o processo.
+
+| Variável                                                            | Processo                 | Obrigatória                  | Notas                                                                                                                                                        |
+| ------------------------------------------------------------------- | ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DATABASE_URL` / `DIRECT_URL`                                       | api, worker, web (SSR)   | sim                          | Pooler (PgBouncer) nas queries; direta só para tooling do Prisma                                                                                             |
+| `JWT_SECRET`                                                        | api, web                 | **sim em produção**          | Sem fallback: API falha no boot, web lança `CONFIG_MISSING_ENV`. Habilitar também no **Preview** da Vercel — build de preview roda com `NODE_ENV=production` |
+| `REDIS_URL`                                                         | worker (sim), api (não)  | só no worker                 | Sem ela a API loga warn e ignora jobs; o worker se recusa a subir                                                                                            |
+| `API_URL`                                                           | web (proxy + SSR fetch)  | não (default localhost:3001) | Railway em produção/staging                                                                                                                                  |
+| `NEXT_PUBLIC_API_URL`                                               | web (middleware refresh) | não (default localhost:3001) | ⚠ duplica `API_URL` — unificação está nos TODOs                                                                                                              |
+| `NEXT_PUBLIC_APP_URL`                                               | api, worker              | não                          | CORS da API + links nas notificações WhatsApp                                                                                                                |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`                        | api                      | p/ uploads                   | Também usada na validação de propriedade de fotos (`photo-ownership.ts`)                                                                                     |
+| `DEMO_PHONES` / `DEMO_OTP`                                          | api                      | não                          | §13 — bypass de OTP para contas demo; vazio = desativado                                                                                                     |
+| `MATCH_WEIGHT_*` / `MATCH_MAX_DISTANCE_KM`                          | api, worker              | não                          | §12 — tuning do matchmaking sem deploy (requer restart do processo)                                                                                          |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM` | api, worker              | não (modo stub)              | Sem elas o adapter loga e não envia mensagens reais                                                                                                          |
