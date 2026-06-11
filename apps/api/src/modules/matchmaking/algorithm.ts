@@ -16,6 +16,10 @@ import type { BadgeTier, ListingKind, ListingStatus } from '@agraia/db'
 //
 // All weights must sum to 1.0. Adjust via env vars for A/B tuning without deploy.
 
+// Warn uma única vez: loadWeights roda por par avaliado e um env inválido
+// inundava o log do worker com o mesmo aviso
+let warnedInvalidWeights = false
+
 function loadWeights() {
   const w = {
     distance: parseFloat(process.env['MATCH_WEIGHT_DISTANCE'] ?? '0.40'),
@@ -25,7 +29,10 @@ function loadWeights() {
   }
   const sum = w.distance + w.reputation + w.compatibility + w.responsiveness
   if (Math.abs(sum - 1.0) > 0.001) {
-    console.warn(`[matchmaking] weights sum to ${sum.toFixed(3)}, expected 1.0 — using defaults`)
+    if (!warnedInvalidWeights) {
+      console.warn(`[matchmaking] weights sum to ${sum.toFixed(3)}, expected 1.0 — using defaults`)
+      warnedInvalidWeights = true
+    }
     return { distance: 0.4, reputation: 0.35, compatibility: 0.2, responsiveness: 0.05 }
   }
   return w
