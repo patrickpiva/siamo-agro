@@ -2,7 +2,6 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { FastifyError } from 'fastify'
 import { prisma } from '@agraia/db'
 import { AppError } from '@agraia/shared'
-import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import { ListingsService } from './service.js'
 import {
   CreateListingBodySchema,
@@ -34,12 +33,8 @@ export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     onRequest: [app.authenticate],
     handler: async (request, reply) => {
+      // service.create já dispara o job de compute-matches — não duplicar aqui
       const listing = await service.create(request.user.id, request.body)
-      // Trigger match computation immediately after creation so the listing
-      // owner and nearby candidates see it in their "Matches para mim" feed.
-      addComputeMatchesJob(listing.id).catch((err: unknown) =>
-        console.error('[listings] erro ao despachar job de matches:', err),
-      )
       return reply.code(201).send({ data: listing, error: null })
     },
   })

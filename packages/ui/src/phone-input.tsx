@@ -73,7 +73,7 @@ export function PhoneInput({ value, onChange, error, autoFocus, disabled }: Phon
           aria-invalid={!!error}
           aria-describedby={error ? 'phone-error' : undefined}
           className={cn(
-            'text-foreground placeholder:text-muted-foreground flex-1 bg-transparent font-mono text-[15px]',
+            'text-foreground placeholder:text-muted-foreground flex-1 bg-transparent font-mono text-base',
             'focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
             'min-h-0', // reset do min-height global de inputs
           )}

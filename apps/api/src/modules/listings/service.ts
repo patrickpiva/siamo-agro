@@ -1,7 +1,7 @@
-import { Prisma, type $Enums } from '@agraia/db'
+import { Prisma } from '@agraia/db'
 import type { PrismaClient } from '@agraia/db'
 import { isCategoryValidForKind } from '@agraia/shared'
-import { addComputeMatchesJob } from '../../queues/listings-queue.js'
+import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import {
   ListingNotFoundError,
   ListingForbiddenError,
@@ -77,7 +77,7 @@ export class ListingsService {
         data: {
           profileId: profile.id,
           kind: body.kind,
-          category: body.category as unknown as $Enums.ServiceCategory,
+          category: body.category,
           title: body.title,
           description: body.description,
           price: body.price ?? null,
@@ -305,7 +305,7 @@ export class ListingsService {
         data: {
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
-          ...(body.category && { category: body.category as unknown as $Enums.ServiceCategory }),
+          ...(body.category && { category: body.category }),
           ...(body.price !== undefined && { price: body.price }),
           ...(body.negotiable !== undefined && { negotiable: body.negotiable }),
         },

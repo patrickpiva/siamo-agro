@@ -46,6 +46,16 @@ export function PriceInput({
     }
   }
 
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const digits = e.target.value.replace(/[^0-9]/g, '')
+    if (!digits) {
+      onChange(null)
+      return
+    }
+    const cents = parseInt(digits, 10)
+    if (cents <= 999_999_999) onChange(cents)
+  }
+
   return (
     <div
       className={cn(
@@ -62,7 +72,7 @@ export function PriceInput({
         type="text"
         inputMode="numeric"
         value={displayValue}
-        readOnly
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}

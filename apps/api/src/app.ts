@@ -49,6 +49,17 @@ export async function buildApp(): Promise<FastifyInstance> {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
 
+  // ── 404 handler — mantém o envelope { data, error } também em rota inexistente
+  app.setNotFoundHandler((request, reply) => {
+    return reply.code(404).send({
+      data: null,
+      error: {
+        code: 'NOT_FOUND',
+        message: `Rota ${request.method} ${request.url} não encontrada`,
+      },
+    })
+  })
+
   // ── Error handler global ────────────────────────────────────────────────────
   app.setErrorHandler((error: FastifyError, _request, reply) => {
     if (error instanceof AppError) {
