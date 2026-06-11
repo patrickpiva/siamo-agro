@@ -61,16 +61,30 @@ export function msUntilNextBusinessHours(): number {
 
 // ─── Job helpers ──────────────────────────────────────────────────────────────
 
-export async function addComputeMatchesJob(listingId: string): Promise<void> {
+/**
+ * `dedupe: true` usa jobId fixo por listing: enquanto um job igual estiver na
+ * fila/ativo (ou completado dentro da janela de removeOnComplete, 1h), novos
+ * adds são ignorados pelo BullMQ. Usado nos disparos vindos do feed — sem isso,
+ * cada visita ao feed vazio reenfileirava dezenas de computes idênticos.
+ * Criação/edição de anúncio NÃO deduplica: edição precisa recomputar sempre.
+ */
+export async function addComputeMatchesJob(
+  listingId: string,
+  opts?: { dedupe?: boolean },
+): Promise<void> {
   const queue = getMatchmakingQueue()
   if (!queue) {
     console.warn('[matchmaking-queue] Redis não configurado, job ignorado', { listingId })
     return
   }
-  await queue.add('compute-matches-for-listing', {
-    type: 'compute-matches-for-listing',
-    listingId,
-  })
+  await queue.add(
+    'compute-matches-for-listing',
+    {
+      type: 'compute-matches-for-listing',
+      listingId,
+    },
+    opts?.dedupe ? { jobId: `compute:${listingId}` } : {},
+  )
 }
 
 /**
