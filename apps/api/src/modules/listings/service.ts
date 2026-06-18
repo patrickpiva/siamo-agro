@@ -1,7 +1,8 @@
-import { Prisma, type $Enums } from '@agraia/db'
+import { Prisma } from '@agraia/db'
 import type { PrismaClient } from '@agraia/db'
 import { isCategoryValidForKind } from '@agraia/shared'
-import { addComputeMatchesJob } from '../../queues/listings-queue.js'
+import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
+import { isOwnedListingPhotoUrl } from './photo-ownership.js'
 import {
   ListingNotFoundError,
   ListingForbiddenError,
@@ -67,9 +68,8 @@ export class ListingsService {
     const profile = await this.prisma.profile.findUnique({ where: { userId } })
     if (!profile) throw new ListingProfileNotFoundError()
 
-    if (body.photoUrls.length > 0) {
-      const invalid = body.photoUrls.filter((url) => !url.includes(userId))
-      if (invalid.length > 0) throw new ListingPhotoOwnershipError()
+    if (body.photoUrls.some((url) => !isOwnedListingPhotoUrl(url, userId))) {
+      throw new ListingPhotoOwnershipError()
     }
 
     const listing = await this.prisma.$transaction(async (tx) => {
@@ -77,7 +77,7 @@ export class ListingsService {
         data: {
           profileId: profile.id,
           kind: body.kind,
-          category: body.category as unknown as $Enums.ServiceCategory,
+          category: body.category,
           title: body.title,
           description: body.description,
           price: body.price ?? null,
@@ -116,17 +116,21 @@ export class ListingsService {
   async list(query: ListListingsQuery): Promise<ListListingsResult> {
     const { kind, category, minPrice, maxPrice, lat, lng, radiusKm, search, cursor, limit } = query
 
-    let cursorCreatedAt: Date | undefined
-    if (cursor) {
-      const item = await this.prisma.listing.findUnique({
-        where: { id: cursor },
-        select: { createdAt: true },
-      })
-      cursorCreatedAt = item?.createdAt
-    }
-
     const hasGeo = lat !== undefined && lng !== undefined && radiusKm !== undefined
     const hasSearch = search !== undefined && search.length > 0
+
+    // Expressões de ordenação reutilizadas no keyset do cursor — precisam ser
+    // idênticas no ORDER BY e no WHERE para a paginação ser estável
+    const rankExpr = hasSearch
+      ? Prisma.sql`ts_rank(to_tsvector('portuguese', lst.title || ' ' || lst.description), plainto_tsquery('portuguese', ${search}))`
+      : null
+    const distExpr = hasGeo
+      ? Prisma.sql`ST_Distance(loc.geog, ST_MakePoint(${lng}, ${lat})::geography)`
+      : null
+
+    const cursorCondition = cursor
+      ? await this.buildCursorCondition(cursor, rankExpr, distExpr)
+      : null
 
     const conditions: Prisma.Sql[] = [Prisma.sql`lst.status = 'ACTIVE'`]
 
@@ -144,25 +148,13 @@ export class ListingsService {
         Prisma.sql`to_tsvector('portuguese', lst.title || ' ' || lst.description) @@ plainto_tsquery('portuguese', ${search})`,
       )
     }
-    if (cursor && cursorCreatedAt) {
-      conditions.push(
-        Prisma.sql`(lst.created_at < ${cursorCreatedAt} OR (lst.created_at = ${cursorCreatedAt} AND lst.id < ${cursor}))`,
-      )
-    }
+    if (cursorCondition) conditions.push(cursorCondition)
 
     const whereClause = Prisma.join(conditions, ' AND ')
 
     const orderParts: Prisma.Sql[] = []
-    if (hasSearch) {
-      orderParts.push(
-        Prisma.sql`ts_rank(to_tsvector('portuguese', lst.title || ' ' || lst.description), plainto_tsquery('portuguese', ${search})) DESC`,
-      )
-    }
-    if (hasGeo) {
-      orderParts.push(
-        Prisma.sql`ST_Distance(loc.geog, ST_MakePoint(${lng}, ${lat})::geography) ASC NULLS LAST`,
-      )
-    }
+    if (rankExpr) orderParts.push(Prisma.sql`${rankExpr} DESC`)
+    if (distExpr) orderParts.push(Prisma.sql`${distExpr} ASC NULLS LAST`)
     orderParts.push(Prisma.sql`lst.created_at DESC`)
     orderParts.push(Prisma.sql`lst.id DESC`)
 
@@ -299,13 +291,18 @@ export class ListingsService {
       throw new ListingInvalidCategoryError(body.category, listing.kind)
     }
 
+    // update aceitava qualquer photoUrl sem checar dono — mesma regra do create
+    if (body.photoUrls?.some((url) => !isOwnedListingPhotoUrl(url, userId))) {
+      throw new ListingPhotoOwnershipError()
+    }
+
     const updated = await this.prisma.$transaction(async (tx) => {
       await tx.listing.update({
         where: { id: listingId },
         data: {
           ...(body.title && { title: body.title }),
           ...(body.description && { description: body.description }),
-          ...(body.category && { category: body.category as unknown as $Enums.ServiceCategory }),
+          ...(body.category && { category: body.category }),
           ...(body.price !== undefined && { price: body.price }),
           ...(body.negotiable !== undefined && { negotiable: body.negotiable }),
         },
@@ -370,6 +367,46 @@ export class ListingsService {
   }
 
   // ── Helpers privados ─────────────────────────────────────────────────────────
+
+  /**
+   * Keyset para ordenação mista (rank DESC, distância ASC, created_at DESC, id DESC).
+   * O cursor segue sendo o id do último item; os valores de ordenação dele são
+   * recalculados aqui com as MESMAS expressões da query principal. Filtrar só por
+   * created_at quando a ordenação primária era rank/distância duplicava e pulava
+   * itens a partir da página 2.
+   */
+  private async buildCursorCondition(
+    cursor: string,
+    rankExpr: Prisma.Sql | null,
+    distExpr: Prisma.Sql | null,
+  ): Promise<Prisma.Sql | null> {
+    const rows = await this.prisma.$queryRaw<
+      { createdAt: Date; rank: number | null; distance: number | null }[]
+    >`
+      SELECT
+        lst.created_at AS "createdAt",
+        ${rankExpr ?? Prisma.sql`NULL::float`} AS rank,
+        ${distExpr ?? Prisma.sql`NULL::float`} AS distance
+      FROM listings lst
+      LEFT JOIN locations loc ON loc.profile_id = lst.profile_id
+      WHERE lst.id = ${cursor}
+    `
+    const keys = rows[0]
+    if (!keys) return null // cursor desconhecido → trata como primeira página
+
+    const tieBreak = Prisma.sql`(lst.created_at < ${keys.createdAt} OR (lst.created_at = ${keys.createdAt} AND lst.id < ${cursor}))`
+
+    if (rankExpr && distExpr && keys.rank !== null && keys.distance !== null) {
+      return Prisma.sql`(${rankExpr} < ${keys.rank} OR (${rankExpr} = ${keys.rank} AND (${distExpr} > ${keys.distance} OR (${distExpr} = ${keys.distance} AND ${tieBreak}))))`
+    }
+    if (rankExpr && keys.rank !== null) {
+      return Prisma.sql`(${rankExpr} < ${keys.rank} OR (${rankExpr} = ${keys.rank} AND ${tieBreak}))`
+    }
+    if (distExpr && keys.distance !== null) {
+      return Prisma.sql`(${distExpr} > ${keys.distance} OR (${distExpr} = ${keys.distance} AND ${tieBreak}))`
+    }
+    return tieBreak
+  }
 
   private async checkOwnership(listingId: string, userId: string) {
     const [listing, profile] = await Promise.all([

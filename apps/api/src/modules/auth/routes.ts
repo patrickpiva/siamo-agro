@@ -13,16 +13,16 @@ import {
   ErrorResponseSchema,
 } from './schema.js'
 import { createWhatsAppAdapter } from '../../integrations/whatsapp/index.js'
+import { getJwtSecret } from '../../config.js'
 
-const service = new AuthService(
-  prisma,
-  createWhatsAppAdapter(),
-  process.env['JWT_SECRET'] ?? 'dev-secret-change-in-production',
-)
+const service = new AuthService(prisma, createWhatsAppAdapter(), getJwtSecret())
 
 export const authRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── POST /api/v1/auth/otp/request ──────────────────────────────────────────
+  // Limite por IP (2ª camada além do limite por telefone no service): sem ele,
+  // um atacante rotacionando números gera custo de Twilio sem freio
   app.post('/otp/request', {
+    config: { rateLimit: { max: 5, timeWindow: '15 minutes' } },
     schema: {
       body: RequestOtpBodySchema,
       response: {
@@ -40,6 +40,7 @@ export const authRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // ── POST /api/v1/auth/otp/verify ───────────────────────────────────────────
   app.post('/otp/verify', {
+    config: { rateLimit: { max: 15, timeWindow: '15 minutes' } },
     schema: {
       body: VerifyOtpBodySchema,
       response: {

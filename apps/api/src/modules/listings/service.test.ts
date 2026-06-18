@@ -5,7 +5,7 @@ import { ListingNotFoundError, ListingForbiddenError } from './errors.js'
 
 // ─── Mock external dependencies ───────────────────────────────────────────────
 
-vi.mock('../../queues/listings-queue.js', () => ({
+vi.mock('../../workers/matchmaking/queue.js', () => ({
   addComputeMatchesJob: vi.fn().mockResolvedValue(undefined),
 }))
 

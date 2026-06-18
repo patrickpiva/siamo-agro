@@ -178,6 +178,8 @@ model Listing {
 
   @@index([profileId])
   @@index([kind, status])
+  // Keyset do feed: WHERE status = 'ACTIVE' ORDER BY created_at DESC, id DESC
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)])
   @@map("listings")
 }
 
@@ -296,7 +298,9 @@ model MatchScore {
   listing          Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
   candidateProfile Profile @relation("CandidateMatchScores", fields: [candidateProfileId], references: [id], onDelete: Cascade)
 
-  @@index([listingId])
+  // Unique impede pares duplicados sob recomputo concorrente; o índice de
+  // prefixo (listingId) fica coberto por ela
+  @@unique([listingId, candidateProfileId])
   @@index([candidateProfileId])
   @@map("match_scores")
 }
@@ -347,7 +351,6 @@ model Notification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@index([userId, read])
   @@map("notifications")
 }

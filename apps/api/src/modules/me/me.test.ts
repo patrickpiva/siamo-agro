@@ -120,8 +120,9 @@ describe('MeService.getFeedMatches', () => {
     expect(result.computing).toBe(true)
     expect(result.data).toHaveLength(0)
     expect(mockAddComputeMatchesJob).toHaveBeenCalledTimes(2)
-    expect(mockAddComputeMatchesJob).toHaveBeenCalledWith('listing_01')
-    expect(mockAddComputeMatchesJob).toHaveBeenCalledWith('listing_02')
+    // dedupe: true — disparos via feed usam jobId fixo para não inundar a fila
+    expect(mockAddComputeMatchesJob).toHaveBeenCalledWith('listing_01', { dedupe: true })
+    expect(mockAddComputeMatchesJob).toHaveBeenCalledWith('listing_02', { dedupe: true })
   })
 
   // ── With match scores ──────────────────────────────────────────────────────

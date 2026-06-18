@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { prisma } from '@agraia/db'
 
@@ -72,8 +73,11 @@ async function authHeader(): Promise<Record<string, string>> {
  * Direct Prisma read (Vercel → Supabase, co-located) — replaces the old fetch to
  * the Railway API, which detoured cross-region (US-East) for data sitting right
  * next to the Vercel function. Mirrors the API's `ListingsService.findById`.
+ *
+ * cache(): generateMetadata e a página chamam fetchListing no mesmo request —
+ * sem o cache, a query e o incremento de viewCount rodariam em dobro.
  */
-export async function fetchListing(id: string): Promise<Listing | null> {
+export const fetchListing = cache(async (id: string): Promise<Listing | null> => {
   const listing = await prisma.listing.findUnique({
     where: { id },
     include: {
@@ -117,7 +121,7 @@ export async function fetchListing(id: string): Promise<Listing | null> {
       state: listing.profile.location?.state ?? null,
     },
   }
-}
+})
 
 export interface FetchListingsQuery {
   kind?: string
@@ -145,23 +149,6 @@ export async function fetchListings(query: FetchListingsQuery = {}): Promise<{
   return { data: json.data, meta: json.meta }
 }
 
-export interface Proposal {
-  id: string
-  listingId: string
-  profile: { id: string; name: string; avatarUrl: string | null }
-  price: number | null
-  quantity: number | null
-  message: string | null
-  status: string
-  createdAt: string
-}
-
-export interface ProposalsResponse {
-  data: Proposal[]
-  meta: ListingMeta
-  error: null
-}
-
 export async function fetchMyListings(
   query: {
     status?: string
@@ -180,14 +167,4 @@ export async function fetchMyListings(
   if (!res.ok) return { data: [], meta: { nextCursor: null, limit: 20 } }
   const json = (await res.json()) as ListingsResponse
   return { data: json.data, meta: json.meta }
-}
-
-export async function fetchListingProposals(id: string, limit = 3): Promise<Proposal[]> {
-  const res = await fetch(`${API_URL}/api/v1/listings/${id}/proposals?limit=${limit}`, {
-    cache: 'no-store',
-    headers: await authHeader(),
-  })
-  if (!res.ok) return []
-  const json = (await res.json()) as ProposalsResponse
-  return json.data
 }

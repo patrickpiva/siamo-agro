@@ -62,9 +62,7 @@ describe('fetchListing', () => {
     )
 
     await fetchListing('cm-target-id')
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/listings/cm-target-id'),
-      expect.any(Object),
-    )
+    // Client components sempre passam pelo /api/proxy (injeção de auth + região)
+    expect(fetch).toHaveBeenCalledWith('/api/proxy/listings/cm-target-id', expect.any(Object))
   })
 })

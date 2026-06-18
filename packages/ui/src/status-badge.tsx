@@ -1,6 +1,6 @@
 import { cn } from './lib/utils'
 
-type ListingStatus = 'ACTIVE' | 'PAUSED' | 'CLOSED' | 'PENDING_REVIEW'
+type ListingStatus = 'ACTIVE' | 'PAUSED' | 'CLOSED'
 
 const STATUS_CONFIG: Record<ListingStatus, { label: string; className: string }> = {
   ACTIVE: {
@@ -14,10 +14,6 @@ const STATUS_CONFIG: Record<ListingStatus, { label: string; className: string }>
   CLOSED: {
     label: 'ENCERRADO',
     className: 'bg-muted-foreground text-background',
-  },
-  PENDING_REVIEW: {
-    label: 'EM ANÁLISE',
-    className: 'bg-blue-500 text-white',
   },
 }
 

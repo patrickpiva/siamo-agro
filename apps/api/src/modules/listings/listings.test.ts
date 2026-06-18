@@ -412,16 +412,20 @@ describe('ListingsService', () => {
       expect(sqlStr).toContain('plainto_tsquery')
     })
 
-    it('paginação cursor resolve createdAt antes da query principal', async () => {
+    it('paginação cursor busca as chaves de ordenação via $queryRaw antes da query principal', async () => {
       const cursorDate = new Date('2024-06-01')
-      mockPrisma.listing.findUnique.mockResolvedValue({ createdAt: cursorDate })
-      mockPrisma.$queryRaw.mockResolvedValue([])
+      // 1ª chamada: lookup das chaves do cursor (created_at/rank/distance); 2ª: query principal
+      mockPrisma.$queryRaw
+        .mockResolvedValueOnce([{ createdAt: cursorDate, rank: null, distance: null }])
+        .mockResolvedValueOnce([])
 
       await service.list({ limit: 20, cursor: 'listing_01' })
 
-      expect(mockPrisma.listing.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { id: 'listing_01' } }),
-      )
+      expect(mockPrisma.listing.findUnique).not.toHaveBeenCalled()
+      expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(2)
+      // a query principal (2ª chamada) carrega o keyset de created_at/id
+      const mainSql = JSON.stringify(mockPrisma.$queryRaw.mock.calls[1])
+      expect(mainSql).toContain('created_at')
     })
 
     it('soft-deleted listings (CLOSED) não aparecem na lista', async () => {

@@ -8,14 +8,14 @@ import { FeedCard } from '@/components/feed/feed-card'
 import type { FeedCardListing } from '@/components/feed/feed-card'
 import type { FetchListingsQuery, Listing } from '@/lib/api'
 
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
-
 // ─── Response shapes ──────────────────────────────────────────────────────────
 
 interface FeedListResponse {
   data: Listing[]
   meta: { nextCursor: string | null; limit: number }
   error: null
+  /** Marcador local (não vem da API): 401 nas abas autenticadas → CTA de login */
+  unauthenticated?: boolean
 }
 
 interface MatchesFeedResponse extends FeedListResponse {
@@ -31,7 +31,7 @@ async function fetchListingsPage(
   for (const [k, v] of Object.entries(query)) {
     if (v !== undefined && v !== '') params.set(k, String(v))
   }
-  const res = await fetch(`${API_URL}/api/v1/listings?${params.toString()}`)
+  const res = await fetch(`/api/proxy/listings?${params.toString()}`)
   if (!res.ok) throw new Error('Erro ao buscar anúncios')
   return res.json() as Promise<FeedListResponse>
 }
@@ -44,7 +44,13 @@ async function fetchMatchesPage(cursor?: string): Promise<MatchesFeedResponse> {
     credentials: 'include',
   })
   if (res.status === 401) {
-    return { data: [], meta: { nextCursor: null, limit: 20 }, computing: false, error: null }
+    return {
+      data: [],
+      meta: { nextCursor: null, limit: 20 },
+      computing: false,
+      error: null,
+      unauthenticated: true,
+    }
   }
   if (!res.ok) throw new Error('Erro ao buscar matches')
   return res.json() as Promise<MatchesFeedResponse>
@@ -58,7 +64,7 @@ async function fetchSavedPage(cursor?: string): Promise<FeedListResponse> {
     credentials: 'include',
   })
   if (res.status === 401) {
-    return { data: [], meta: { nextCursor: null, limit: 20 }, error: null }
+    return { data: [], meta: { nextCursor: null, limit: 20 }, error: null, unauthenticated: true }
   }
   if (!res.ok) throw new Error('Erro ao buscar anúncios salvos')
   return res.json() as Promise<FeedListResponse>
@@ -99,6 +105,9 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
   const isSaved = activeTab === 'saved'
 
   const sentinelRef = useRef<HTMLDivElement>(null)
+  // Teto de re-polls do estado "calculando matches" — região sem candidatos não
+  // deve pollar para sempre
+  const computingPolls = useRef(0)
 
   const { data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
@@ -110,6 +119,17 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
       },
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => lastPage.meta.nextCursor ?? undefined,
+      refetchInterval: (query) => {
+        if (!isMatches) return false
+        const first = query.state.data?.pages[0] as MatchesFeedResponse | undefined
+        if (!first?.computing) {
+          computingPolls.current = 0
+          return false
+        }
+        if (computingPolls.current >= 10) return false
+        computingPolls.current += 1
+        return 4000
+      },
     })
 
   // Refetch saved / matches whenever the tab becomes active
@@ -166,7 +186,22 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
   const isComputing =
     isMatches && listings.length === 0 && (data.pages[0] as MatchesFeedResponse)?.computing
 
+  const isUnauthenticated =
+    (isMatches || isSaved) && listings.length === 0 && data.pages[0]?.unauthenticated
+
   if (listings.length === 0) {
+    if (isUnauthenticated) {
+      return (
+        <EmptyState
+          icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+          iconVariant="muted"
+          title={isMatches ? 'Entre para ver seus matches' : 'Entre para ver seus salvos'}
+          description="Faça login com seu WhatsApp para acessar esta aba."
+          actions={[{ label: 'Entrar', variant: 'primary', href: '/entrar' }]}
+        />
+      )
+    }
+
     if (isComputing) {
       return (
         <div className="flex flex-col items-center gap-3 px-6 py-16">

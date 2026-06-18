@@ -2,9 +2,10 @@
  * Client-safe API helpers (no cookies / server-only imports).
  * Use these inside 'use client' components.
  * For Server Components, use @/lib/api instead.
+ *
+ * Sempre via /api/proxy — chamadas diretas a NEXT_PUBLIC_API_URL do browser
+ * perdem a injeção de auth e fazem hop cross-region (Railway US-East).
  */
-
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
 
 export interface ListingPhoto {
   id: string
@@ -47,7 +48,7 @@ interface ListingResponse {
 
 export async function fetchListing(id: string): Promise<Listing | null> {
   try {
-    const res = await fetch(`${API_URL}/api/v1/listings/${id}`, { cache: 'no-store' })
+    const res = await fetch(`/api/proxy/listings/${id}`, { cache: 'no-store' })
     if (!res.ok) return null
     const json = (await res.json()) as ListingResponse
     return json.data

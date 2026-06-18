@@ -23,6 +23,11 @@ async function handler(
   const headers: Record<string, string> = {}
   if (token) headers['Authorization'] = `Bearer ${token}`
 
+  // Propaga o IP do cliente (Vercel popula x-forwarded-for) — sem isso o rate
+  // limit por IP da API enxergaria só o IP de egress da Vercel
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) headers['X-Forwarded-For'] = forwardedFor
+
   const rawBody =
     request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : undefined
 

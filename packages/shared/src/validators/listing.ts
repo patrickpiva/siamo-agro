@@ -28,7 +28,7 @@ export const LISTING_CATEGORIES = [
 ] as const
 export type ListingCategoryEnum = (typeof LISTING_CATEGORIES)[number]
 
-export const LISTING_STATUSES = ['ACTIVE', 'PAUSED', 'CLOSED', 'PENDING_REVIEW'] as const
+export const LISTING_STATUSES = ['ACTIVE', 'PAUSED', 'CLOSED'] as const
 export type ListingStatusEnum = (typeof LISTING_STATUSES)[number]
 
 export const stepOneSchema = z.object({

@@ -107,8 +107,8 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
   }
 
   // 4. Compute average first-response time per seller from transaction history.
-  //    Measured as: time from PROPOSED to first message in the transaction thread.
-  //    Only considers transactions that progressed past the proposal stage.
+  //    Measured as: time from PROPOSED to the seller's OWN first message —
+  //    counting any message would credit the buyer's follow-up to the seller.
   type ResponseRow = { userId: string; avgResponseHours: number }
   const responseRows =
     candidateUserIds.length > 0
@@ -120,9 +120,11 @@ export async function processComputeMatchesJob(job: Job<ComputeMatchesJobData>):
             )::float                                                                AS "avgResponseHours"
           FROM transactions t
           JOIN (
-            SELECT transaction_id, MIN(created_at) AS min_created_at
-            FROM transaction_messages
-            GROUP BY transaction_id
+            SELECT tm.transaction_id, MIN(tm.created_at) AS min_created_at
+            FROM transaction_messages tm
+            JOIN transactions t2 ON t2.id = tm.transaction_id
+            WHERE tm.sender_id = t2.seller_id
+            GROUP BY tm.transaction_id
           ) first_msg ON first_msg.transaction_id = t.id
           WHERE t.seller_id = ANY(${candidateUserIds})
             AND t.status IN ('ACCEPTED', 'IN_PROGRESS', 'COMPLETED')
