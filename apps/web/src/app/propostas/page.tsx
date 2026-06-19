@@ -16,7 +16,7 @@ export default async function PropostasPage({ searchParams }: Props) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       <ScreenHeader
-        backHref="/feed"
+        backHref="/"
         title={
           <span className="text-[15px] font-medium">
             {isSent ? 'Propostas enviadas' : 'Minhas propostas'}
@@ -38,7 +38,7 @@ export default async function PropostasPage({ searchParams }: Props) {
             : 'Quando alguém fizer uma proposta nos seus anúncios, ela aparecerá aqui.'}
         </p>
         <Link
-          href="/feed"
+          href="/"
           className="bg-cta-bg text-cta-fg rounded-[12px] px-6 py-[13px] text-[14px] font-medium"
         >
           Explorar anúncios

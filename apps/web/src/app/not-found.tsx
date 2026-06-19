@@ -25,7 +25,7 @@ export default function NotFound() {
           {
             label: 'Ver feed',
             variant: 'primary',
-            href: '/feed',
+            href: '/',
           },
         ]}
       />

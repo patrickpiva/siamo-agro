@@ -125,7 +125,7 @@ async function ProfileContent({ id }: { id: string }) {
     <div className="bg-background flex flex-col pb-36">
       {/* Header — always back button + centered title */}
       <header className="bg-background/80 sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm">
-        <BackButton fallbackHref="/feed" />
+        <BackButton fallbackHref="/" />
         <span className="text-[15px] font-medium">Perfil</span>
         <div className="w-12" />
       </header>

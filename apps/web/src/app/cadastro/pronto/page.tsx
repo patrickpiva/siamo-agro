@@ -14,7 +14,7 @@ const NEXT_STEPS = [
     icon: <Search size={22} strokeWidth={1.8} />,
     title: 'Explorar anúncios próximos',
     description: 'Veja o que produtores da sua região oferecem',
-    href: '/feed' as const,
+    href: '/' as const,
   },
   {
     icon: <User size={22} strokeWidth={1.8} />,
@@ -86,7 +86,7 @@ export default async function CadastroProntoPage({ searchParams }: PageProps) {
 
       <BottomCTA>
         <Button variant="cta" asChild>
-          <Link href="/feed">Explorar AgraIA</Link>
+          <Link href="/">Explorar AgraIA</Link>
         </Button>
       </BottomCTA>
     </main>

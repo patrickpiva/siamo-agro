@@ -70,7 +70,7 @@ export default function EntrarCodigoPage() {
       if (result.data.needsOnboarding) {
         router.push('/cadastro/perfil')
       } else {
-        router.push('/feed')
+        router.push('/')
       }
     },
     [isBlocked, phone, otpAttempts, incrementOtpAttempts, setPhoneVerified, router],

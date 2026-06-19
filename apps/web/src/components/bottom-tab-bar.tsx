@@ -6,18 +6,19 @@ import { Home, Search, Plus, MessageCircle, User } from '@agraia/ui/icons'
 import { cn } from '@agraia/ui'
 
 const TABS = [
-  { href: '/feed', label: 'FEED', Icon: Home },
-  { href: '/busca', label: 'BUSCA', Icon: Search },
+  { href: '/', label: 'INÍCIO', Icon: Home },
+  { href: '/explorar', label: 'EXPLORAR', Icon: Search },
   { href: '/anuncio/novo', label: 'PUBLICAR', Icon: Plus, cta: true },
   { href: '/transacoes', label: 'NEGÓCIOS', Icon: MessageCircle },
   { href: '/meu-perfil', label: 'PERFIL', Icon: User },
 ] as const
 
-export function BottomTabBar() {
+export function BottomTabBar({ authenticated = false }: { authenticated?: boolean }) {
   const pathname = usePathname()
 
   const isHidden =
-    pathname === '/' ||
+    // Home (/) mostra a nav só para autenticado; landing pública não.
+    (pathname === '/' && !authenticated) ||
     pathname.startsWith('/entrar') ||
     pathname.startsWith('/cadastro') ||
     pathname.startsWith('/anuncio/') ||
@@ -40,14 +41,28 @@ export function BottomTabBar() {
       <ul className="flex h-[64px] items-stretch">
         {TABS.map(({ href, label, Icon, ...rest }) => {
           const isCta = 'cta' in rest && rest.cta
+
+          // PUBLICAR: botão elevado (lime/preto invertido), sem label — igual ao wireframe
+          if (isCta) {
+            return (
+              <li key={href} className="flex flex-1 items-center justify-center">
+                <Link
+                  href={href}
+                  aria-label={label}
+                  className="bg-cta-bg text-cta-fg -mt-2 flex size-11 items-center justify-center rounded-[14px]"
+                >
+                  <Icon size={24} strokeWidth={2.5} />
+                </Link>
+              </li>
+            )
+          }
+
           const isActive =
-            href === '/feed'
-              ? pathname === '/feed'
+            href === '/'
+              ? pathname === '/'
               : href === '/meu-perfil'
                 ? pathname === '/meu-perfil' || pathname.startsWith('/meu-perfil/')
-                : href === '/busca'
-                  ? pathname.startsWith('/busca')
-                  : pathname.startsWith(href)
+                : pathname.startsWith(href)
 
           return (
             <li key={href} className="flex flex-1 items-stretch">
@@ -62,7 +77,7 @@ export function BottomTabBar() {
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
-                <Icon size={isCta ? 24 : 20} strokeWidth={1.8} />
+                <Icon size={20} strokeWidth={1.8} />
                 <span className="font-mono text-[9px] leading-none tracking-[0.3px]">{label}</span>
               </Link>
             </li>

@@ -23,7 +23,7 @@ export function FeedTabs({ activeTab }: FeedTabsProps) {
   function navigate(tab: FeedTab) {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', tab)
-    router.push(`/feed?${params.toString()}`)
+    router.push(`/explorar?${params.toString()}`)
   }
 
   return (

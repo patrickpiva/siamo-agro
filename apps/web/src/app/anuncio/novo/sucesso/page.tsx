@@ -110,7 +110,7 @@ async function SuccessContent({ id }: { id: string }) {
             url={`${appUrl}/anuncio/${id}`}
           />
           <Link
-            href="/feed"
+            href="/"
             className="bg-card border-border flex items-center justify-center rounded-[12px] border py-3 text-[13px] font-medium"
           >
             Voltar ao feed
