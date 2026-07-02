@@ -12,10 +12,10 @@ interface BackButtonProps {
 
 /**
  * Navigates back in browser history.
- * Falls back to `fallbackHref` (default: "/feed") when there's no history entry
+ * Falls back to `fallbackHref` (default: "/") when there's no history entry
  * (e.g. the user opened the page directly via URL).
  */
-export function BackButton({ fallbackHref = '/feed', className }: BackButtonProps) {
+export function BackButton({ fallbackHref = '/', className }: BackButtonProps) {
   const router = useRouter()
 
   function handleBack() {

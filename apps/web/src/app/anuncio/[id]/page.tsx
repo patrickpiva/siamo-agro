@@ -176,7 +176,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
     <div className="bg-background flex min-h-screen flex-col pb-24">
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref="/feed" />
+        <BackButton fallbackHref="/" />
 
         <div className="flex gap-2">
           {isOwner ? (

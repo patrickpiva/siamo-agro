@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Providers } from './providers'
+import { getServerSession } from '@/lib/server-auth'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
 import { OfflineBanner } from '@/components/offline-banner'
 import { SplashScreen } from '@/components/splash-screen'
@@ -44,7 +45,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Nav global precisa saber se há sessão: na home (/) ela aparece para usuário
+  // logado, mas a landing pública (mesmo /) não deve mostrar a barra.
+  const session = await getServerSession()
   return (
     <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <head>
@@ -78,7 +82,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <OfflineBanner />
           {/* Bottom padding on mobile so content clears the fixed tab bar */}
           <div className="lg:contents [&>*]:pb-20 lg:[&>*]:pb-0">{children}</div>
-          <BottomTabBar />
+          <BottomTabBar authenticated={session !== null} />
         </Providers>
         <Analytics />
       </body>

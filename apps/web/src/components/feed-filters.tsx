@@ -38,7 +38,7 @@ export function FeedFilters({ initialFilters, mobile }: FeedFiltersProps) {
         params.delete(key)
       }
       if (key === 'kind') params.delete('category')
-      router.push(`/feed?${params.toString()}`)
+      router.push(`/explorar?${params.toString()}`)
     },
     [router, searchParams],
   )

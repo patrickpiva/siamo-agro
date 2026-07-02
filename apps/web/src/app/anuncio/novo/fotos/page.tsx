@@ -97,7 +97,7 @@ export default function WizardStep4() {
   function handleClose() {
     if (!window.confirm('Descartar anúncio? Seu rascunho será perdido.')) return
     reset()
-    router.push('/feed')
+    router.push('/')
   }
 
   if (!kind) return null

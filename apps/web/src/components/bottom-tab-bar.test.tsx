@@ -26,9 +26,9 @@ vi.mock('next/link', () => ({
 
 import { usePathname } from 'next/navigation'
 
-function renderWithPath(path: string) {
+function renderWithPath(path: string, authenticated = true) {
   vi.mocked(usePathname).mockReturnValue(path)
-  return render(<BottomTabBar />)
+  return render(<BottomTabBar authenticated={authenticated} />)
 }
 
 // ---------------------------------------------------------------------------
@@ -36,7 +36,6 @@ function renderWithPath(path: string) {
 // ---------------------------------------------------------------------------
 describe('BottomTabBar — oculta nas rotas internas', () => {
   const hiddenRoutes = [
-    '/',
     '/entrar',
     '/entrar/codigo',
     '/cadastro/perfil',
@@ -56,6 +55,11 @@ describe('BottomTabBar — oculta nas rotas internas', () => {
       expect(container.firstChild).toBeNull()
     })
   })
+
+  it('oculta na landing pública (/ sem sessão)', () => {
+    const { container } = renderWithPath('/', false)
+    expect(container.firstChild).toBeNull()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -63,7 +67,8 @@ describe('BottomTabBar — oculta nas rotas internas', () => {
 // ---------------------------------------------------------------------------
 describe('BottomTabBar — visível nas rotas de tab', () => {
   const visibleRoutes = [
-    '/feed',
+    '/', // home autenticada
+    '/explorar',
     '/busca',
     '/busca?q=soja',
     '/transacoes',
@@ -83,19 +88,25 @@ describe('BottomTabBar — visível nas rotas de tab', () => {
 // Tab ativa
 // ---------------------------------------------------------------------------
 describe('BottomTabBar — tab ativa marcada corretamente', () => {
-  it('marca FEED como ativo em /feed', () => {
-    const { getByLabelText } = renderWithPath('/feed')
-    expect(getByLabelText('FEED')).toHaveAttribute('aria-current', 'page')
+  it('marca INÍCIO como ativo em /', () => {
+    const { getByLabelText } = renderWithPath('/')
+    expect(getByLabelText('INÍCIO')).toHaveAttribute('aria-current', 'page')
   })
 
-  it('não marca FEED como ativo em /busca', () => {
-    const { getByLabelText } = renderWithPath('/busca')
-    expect(getByLabelText('FEED')).not.toHaveAttribute('aria-current', 'page')
-    expect(getByLabelText('BUSCA')).toHaveAttribute('aria-current', 'page')
+  it('marca EXPLORAR como ativo em /explorar (e não INÍCIO)', () => {
+    const { getByLabelText } = renderWithPath('/explorar')
+    expect(getByLabelText('EXPLORAR')).toHaveAttribute('aria-current', 'page')
+    expect(getByLabelText('INÍCIO')).not.toHaveAttribute('aria-current', 'page')
   })
 
   it('marca PERFIL como ativo em /meu-perfil', () => {
     const { getByLabelText } = renderWithPath('/meu-perfil')
     expect(getByLabelText('PERFIL')).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('não marca nenhuma tab de rota em /busca (fora da nav)', () => {
+    const { getByLabelText } = renderWithPath('/busca')
+    expect(getByLabelText('INÍCIO')).not.toHaveAttribute('aria-current', 'page')
+    expect(getByLabelText('EXPLORAR')).not.toHaveAttribute('aria-current', 'page')
   })
 })
