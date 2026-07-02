@@ -2,7 +2,7 @@
   "name": "AgraIA",
   "short_name": "AgraIA",
   "description": "Marketplace inteligente para o agronegócio brasileiro",
-  "start_url": "/feed",
+  "start_url": "/explorar",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#0A0A0A",

@@ -104,7 +104,12 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 // ─── Route matcher ────────────────────────────────────────────────────────────
 // Runs on all routes except Next.js internals and static assets.
 // The token-refresh fetch goes directly to localhost:3001, so no infinite loop risk.
+// Public files (sw.js, manifest.json, icons/, robots.txt, sitemap.xml) must stay
+// excluded too — otherwise every request for them triggers the cross-region
+// silent-refresh fetch to the API, which can stall or fail the asset request.
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon\\.ico|sw\\.js|manifest\\.json|icons/|robots\\.txt|sitemap\\.xml).*)',
+  ],
 }
