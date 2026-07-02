@@ -954,6 +954,27 @@
   .dark .push-examples-bg {
     background: rgba(255, 255, 255, 0.04);
   }
+
+  /* ---- Lote 7 — Home pending anchor pulse (âmbar) ---- */
+  @keyframes home-anchor-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(0.8);
+    }
+  }
+  .home-anchor-pulse {
+    animation: home-anchor-pulse 1.6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home-anchor-pulse {
+      animation: none;
+    }
+  }
 }
 
 /* ─── Splash screen (PWA standalone mode only) ──────────────────────────────

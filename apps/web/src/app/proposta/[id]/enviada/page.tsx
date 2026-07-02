@@ -89,7 +89,7 @@ export default async function PropostaEnviadaPage({ searchParams }: Props) {
           Ver minhas propostas enviadas
         </Link>
         <Link
-          href="/feed"
+          href="/"
           className="text-muted-foreground flex w-full items-center justify-center py-[10px] text-[13px]"
         >
           Voltar ao feed

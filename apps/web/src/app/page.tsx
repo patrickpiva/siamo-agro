@@ -4,10 +4,24 @@ import { Button, BottomCTA } from '@agraia/ui'
 import { WhatsAppLogo } from '@agraia/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { getServerSession } from '@/lib/server-auth'
+import { getHomeData } from '@/lib/home'
+import { HomeScreen } from '@/components/home/home-screen'
 
-export default async function LandingPage() {
+export default async function RootPage() {
   const session = await getServerSession()
-  if (session) redirect('/feed')
+
+  // Autenticado: Home v2 (pergunta única). Sem perfil ainda → onboarding.
+  if (session) {
+    const data = await getHomeData(session.userId)
+    if (!data) redirect('/cadastro/perfil')
+    return <HomeScreen data={data} />
+  }
+
+  // Não autenticado: landing pública.
+  return <Landing />
+}
+
+function Landing() {
   return (
     <main className="bg-background mx-auto flex min-h-screen max-w-[430px] flex-col">
       <StatusBar />
@@ -21,10 +35,8 @@ export default async function LandingPage() {
 
       {/* Hero + headline */}
       <div className="flex flex-1 flex-col justify-center px-6 pb-4">
-        {/* Ilustração */}
         <HeroIllustration />
 
-        {/* Headline */}
         <h1 className="mb-3 text-[30px] font-medium leading-[1.15] tracking-[-0.5px]">
           Conecte-se a{' '}
           <em className="text-accent-forest dark:text-accent-lime font-mono not-italic">

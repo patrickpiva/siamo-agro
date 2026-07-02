@@ -24,7 +24,7 @@ export function OwnerActions({ listingId, status }: OwnerActionsProps) {
     if (!confirm('Encerrar este anúncio? Esta ação não pode ser desfeita.')) return
     setLoading('close')
     await fetch(`/api/listings/${listingId}`, { method: 'DELETE' })
-    router.push('/feed')
+    router.push('/')
   }
 
   return (

@@ -33,7 +33,7 @@ export default async function MyListingsPage({
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3">
         <Link
-          href="/feed"
+          href="/"
           aria-label="Voltar"
           className="bg-muted flex size-9 flex-shrink-0 items-center justify-center rounded-full"
         >

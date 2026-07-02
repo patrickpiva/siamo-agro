@@ -44,7 +44,7 @@ export function AvaliarForm({ transactionId }: AvaliarFormProps) {
         setSubmitting(false)
         return
       }
-      router.push('/feed')
+      router.push('/')
     } catch {
       setError('Falha ao enviar. Verifique sua conexão.')
       setSubmitting(false)

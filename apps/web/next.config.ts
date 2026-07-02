@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Lote 7: o feed virou /explorar; URLs/bookmarks antigos de /feed seguem válidos.
+  async redirects() {
+    return [{ source: '/feed', destination: '/explorar', permanent: true }]
+  },
 }
 
 const withSerwist = withSerwistInit({
