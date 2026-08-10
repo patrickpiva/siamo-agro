@@ -2,7 +2,7 @@
  * Lógica pura da Home v2 (Lote 7) — sem Prisma, sem server-only, testável isolado.
  * O agregador de dados (Prisma direto, ADR §9) vive em `home.ts` e reexporta daqui.
  */
-import type { ProfileType, BadgeTier } from '@agraia/db'
+import type { ProfileType, BadgeTier } from '@siamo/db'
 
 export type HomeState = 'FIRST_ACCESS' | 'RETURNING_PENDING' | 'RETURNING_CLEAR'
 

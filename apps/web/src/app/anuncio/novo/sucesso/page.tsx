@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Check } from '@agraia/ui/icons'
+import { Check } from '@siamo/ui/icons'
 import { fetchListing } from '@/lib/api'
 import { ShareButton } from '@/components/listings/share-button'
 

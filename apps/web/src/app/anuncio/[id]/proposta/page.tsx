@@ -8,8 +8,8 @@ import {
   QuantityStepper,
   BottomCTA,
   Button,
-} from '@agraia/ui'
-import { AlertCircle } from '@agraia/ui/icons'
+} from '@siamo/ui'
+import { AlertCircle } from '@siamo/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { fetchListing, type Listing } from '@/lib/api-client'
 

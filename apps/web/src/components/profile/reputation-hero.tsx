@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { ReputationSeal } from '@agraia/ui'
+import { ReputationSeal } from '@siamo/ui'
 
 interface ReputationHeroProps {
   name: string

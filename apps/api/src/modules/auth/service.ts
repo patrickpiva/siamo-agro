@@ -1,7 +1,7 @@
 import { randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import type { Prisma, PrismaClient } from '@agraia/db'
+import type { Prisma, PrismaClient } from '@siamo/db'
 import type { WhatsAppAdapter } from '../../integrations/whatsapp/types.js'
 import {
   OtpRateLimitError,

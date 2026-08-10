@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Camera } from '@agraia/ui/icons'
-import { ReputationSeal, getInitials } from '@agraia/ui'
+import { Camera } from '@siamo/ui/icons'
+import { ReputationSeal, getInitials } from '@siamo/ui'
 
 interface RepStats {
   transactions: number

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Send, ChevronRight } from '@agraia/ui/icons'
+import { Send, ChevronRight } from '@siamo/ui/icons'
 import type { PendingProposal } from '@/lib/home-state'
 
 function formatBRL(value: number): string {

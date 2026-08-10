@@ -1,6 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import {
   type HomeData,
   type Opportunity,

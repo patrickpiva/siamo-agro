@@ -1,10 +1,10 @@
 import { notFound, redirect } from 'next/navigation'
 import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ListingContextStrip } from '@agraia/ui'
-import { Clock } from '@agraia/ui/icons'
+import { ListingContextStrip } from '@siamo/ui'
+import { Clock } from '@siamo/ui/icons'
 import { TransactionActionButton } from '@/components/transactions/transaction-actions'
 
 interface PageProps {

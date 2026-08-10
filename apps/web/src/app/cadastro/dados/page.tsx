@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { z } from 'zod'
-import { Button, BottomCTA, ProgressIndicator, SectionLabel } from '@agraia/ui'
+import { Button, BottomCTA, ProgressIndicator, SectionLabel } from '@siamo/ui'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 const schema = z.object({
   name: z

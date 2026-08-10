@@ -1,6 +1,6 @@
-import { Star } from '@agraia/ui/icons'
-import { ReputationSeal } from '@agraia/ui'
-import { cn } from '@agraia/ui'
+import { Star } from '@siamo/ui/icons'
+import { ReputationSeal } from '@siamo/ui'
+import { cn } from '@siamo/ui'
 
 interface ProposerCardProps {
   name: string

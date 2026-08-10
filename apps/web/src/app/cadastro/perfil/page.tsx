@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, ProgressIndicator, SelectCard } from '@agraia/ui'
-import { CoffeeBean, Agronomist } from '@agraia/ui/icons'
+import { Button, BottomCTA, ProgressIndicator, SelectCard } from '@siamo/ui'
+import { CoffeeBean, Agronomist } from '@siamo/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'

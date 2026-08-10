@@ -10,10 +10,10 @@ import {
   SummaryBadge,
   PriceInput,
   Toggle,
-} from '@agraia/ui'
+} from '@siamo/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 // ─── Price unit by category ───────────────────────────────────────────────────
 

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { MatchScoreBadge } from '@agraia/ui'
+import { MatchScoreBadge } from '@siamo/ui'
 import type { MatchResult } from '@/lib/matches-api'
 
 interface MatchCardProps {

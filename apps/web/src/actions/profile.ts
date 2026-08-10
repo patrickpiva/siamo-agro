@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { getServerSession } from '@/lib/server-auth'
 
 // ─── Types ────────────────────────────────────────────────────────────────────

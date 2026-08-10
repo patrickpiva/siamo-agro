@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@agraia/ui/icons'
+import { ArrowLeft } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { ProfileEditForm } from '@/components/profile/profile-edit-form'
 
 export const metadata: Metadata = { title: 'Editar Perfil' }

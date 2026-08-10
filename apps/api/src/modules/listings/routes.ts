@@ -1,7 +1,7 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { FastifyError } from 'fastify'
-import { prisma } from '@agraia/db'
-import { AppError } from '@agraia/shared'
+import { prisma } from '@siamo/db'
+import { AppError } from '@siamo/shared'
 import { ListingsService } from './service.js'
 import {
   CreateListingBodySchema,

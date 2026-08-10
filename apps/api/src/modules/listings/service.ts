@@ -1,6 +1,6 @@
-import { Prisma } from '@agraia/db'
-import type { PrismaClient } from '@agraia/db'
-import { isCategoryValidForKind } from '@agraia/shared'
+import { Prisma } from '@siamo/db'
+import type { PrismaClient } from '@siamo/db'
+import { isCategoryValidForKind } from '@siamo/shared'
 import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import { isOwnedListingPhotoUrl } from './photo-ownership.js'
 import {

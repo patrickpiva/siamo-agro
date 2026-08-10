@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus } from '@agraia/ui/icons'
-import { FilterTabs, FAB, type FilterTab } from '@agraia/ui'
+import { Plus } from '@siamo/ui/icons'
+import { FilterTabs, FAB, type FilterTab } from '@siamo/ui'
 import { MyListingCard } from '@/components/listings/my-listing-card'
 import type { Listing } from '@/lib/api'
 

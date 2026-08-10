@@ -1,5 +1,5 @@
-import { Check, ChevronRight } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { Check, ChevronRight } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 export type OnboardStepState = 'done' | 'active' | 'todo'
 

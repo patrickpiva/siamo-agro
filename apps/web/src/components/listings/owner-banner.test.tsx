@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { OwnerBanner } from './owner-banner'
 
-vi.mock('@agraia/ui/icons', () => ({
+vi.mock('@siamo/ui/icons', () => ({
   Info: () => null,
 }))
 

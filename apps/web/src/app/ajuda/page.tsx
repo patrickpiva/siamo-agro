@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Search } from '@agraia/ui/icons'
+import { ArrowLeft, Search } from '@siamo/ui/icons'
 import { FaqList } from '@/components/help/faq-item'
 import { WhatsAppSupportCard } from '@/components/help/whatsapp-support-card'
 

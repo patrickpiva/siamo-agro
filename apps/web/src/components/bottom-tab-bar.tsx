@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Plus, MessageCircle, User } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { Home, Search, Plus, MessageCircle, User } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 const TABS = [
   { href: '/', label: 'INÍCIO', Icon: Home },

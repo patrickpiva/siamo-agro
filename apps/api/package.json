@@ -1,5 +1,5 @@
 {
-  "name": "@agraia/api",
+  "name": "@siamo/api",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -16,8 +16,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@agraia/db": "workspace:*",
-    "@agraia/shared": "workspace:*",
+    "@siamo/db": "workspace:*",
+    "@siamo/shared": "workspace:*",
     "@fastify/cors": "^10.0.0",
     "@fastify/helmet": "^12.0.0",
     "@fastify/jwt": "^9.0.0",

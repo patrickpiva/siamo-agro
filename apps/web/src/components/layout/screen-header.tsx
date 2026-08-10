@@ -2,8 +2,8 @@
 
 import type { Route } from 'next'
 import Link from 'next/link'
-import { ArrowLeft } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { ArrowLeft } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 interface ScreenHeaderProps {
   backHref?: Route

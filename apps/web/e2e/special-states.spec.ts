@@ -11,11 +11,11 @@ async function goOnline(page: Page) {
 }
 
 async function setVisitCount(page: Page, count: number) {
-  await page.evaluate((n) => localStorage.setItem('agraia:visits', String(n)), count)
+  await page.evaluate((n) => localStorage.setItem('siamo:visits', String(n)), count)
 }
 
 async function setSessionCount(page: Page, count: number) {
-  await page.evaluate((n) => localStorage.setItem('agraia:session-count', String(n)), count)
+  await page.evaluate((n) => localStorage.setItem('siamo:session-count', String(n)), count)
 }
 
 // ─── [H1] Offline with cached feed ───────────────────────────────────────────
@@ -114,8 +114,8 @@ test('pwa-prompt-shown-on-third-visit', async ({ page }) => {
   await setVisitCount(page, 3)
   // We can only verify the shouldShowInstallPrompt logic via evaluate
   const shouldShow = await page.evaluate(() => {
-    const visits = parseInt(localStorage.getItem('agraia:visits') ?? '0', 10)
-    const dismissed = localStorage.getItem('agraia:pwa-dismissed-at')
+    const visits = parseInt(localStorage.getItem('siamo:visits') ?? '0', 10)
+    const dismissed = localStorage.getItem('siamo:pwa-dismissed-at')
     return visits >= 3 && !dismissed
   })
   expect(shouldShow).toBe(true)
@@ -124,8 +124,8 @@ test('pwa-prompt-shown-on-third-visit', async ({ page }) => {
 test('pwa-prompt-dismiss-stores-preference', async ({ page }) => {
   await page.goto('/feed')
   // Simulate dismiss
-  await page.evaluate(() => localStorage.setItem('agraia:pwa-dismissed-at', String(Date.now())))
-  const dismissedAt = await page.evaluate(() => localStorage.getItem('agraia:pwa-dismissed-at'))
+  await page.evaluate(() => localStorage.setItem('siamo:pwa-dismissed-at', String(Date.now())))
+  const dismissedAt = await page.evaluate(() => localStorage.getItem('siamo:pwa-dismissed-at'))
   expect(dismissedAt).not.toBeNull()
 })
 
@@ -136,24 +136,24 @@ test('push-modal-shown-on-third-session', async ({ page }) => {
   await setSessionCount(page, 3)
   // In Playwright the Notification API is available; verify the modal trigger logic
   const sessionCount = await page.evaluate(() =>
-    parseInt(localStorage.getItem('agraia:session-count') ?? '0', 10),
+    parseInt(localStorage.getItem('siamo:session-count') ?? '0', 10),
   )
   expect(sessionCount).toBeGreaterThanOrEqual(3)
 })
 
 test('push-modal-dismiss-stores-preference', async ({ page }) => {
   await page.goto('/feed')
-  await page.evaluate(() => localStorage.setItem('agraia:push-dismissed-at', String(Date.now())))
-  const dismissed = await page.evaluate(() => localStorage.getItem('agraia:push-dismissed-at'))
+  await page.evaluate(() => localStorage.setItem('siamo:push-dismissed-at', String(Date.now())))
+  const dismissed = await page.evaluate(() => localStorage.getItem('siamo:push-dismissed-at'))
   expect(dismissed).not.toBeNull()
 })
 
 test('push-permission-denied-doesnt-retry-for-30d', async ({ page }) => {
   await page.goto('/feed')
   const now = Date.now()
-  await page.evaluate((ts) => localStorage.setItem('agraia:push-denied-at', String(ts)), now)
+  await page.evaluate((ts) => localStorage.setItem('siamo:push-denied-at', String(ts)), now)
   const shouldShow = await page.evaluate(() => {
-    const deniedAt = localStorage.getItem('agraia:push-denied-at')
+    const deniedAt = localStorage.getItem('siamo:push-denied-at')
     if (!deniedAt) return true
     const HARD_TTL = 30 * 24 * 3600 * 1000
     return Date.now() - parseInt(deniedAt, 10) >= HARD_TTL

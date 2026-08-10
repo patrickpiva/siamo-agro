@@ -1,5 +1,5 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { ReputationService } from './service.js'
 import {
   TransactionParamsSchema,

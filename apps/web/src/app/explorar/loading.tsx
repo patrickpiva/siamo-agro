@@ -1,4 +1,4 @@
-import { ListingCardSkeleton } from '@agraia/ui'
+import { ListingCardSkeleton } from '@siamo/ui'
 
 function Bone({ className }: { className?: string }) {
   return <div className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} />

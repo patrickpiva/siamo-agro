@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin } from '@agraia/ui/icons'
-import { CATEGORY_ICONS } from '@agraia/ui/icons'
-import { MatchScoreBadge } from '@agraia/ui'
-import { cn } from '@agraia/ui'
+import { MapPin } from '@siamo/ui/icons'
+import { CATEGORY_ICONS } from '@siamo/ui/icons'
+import { MatchScoreBadge } from '@siamo/ui'
+import { cn } from '@siamo/ui'
 
 export interface FeedCardListing {
   id: string

@@ -3,7 +3,7 @@ import type {
   TransactionStatus,
   CancellationReason,
   NotificationType,
-} from '@agraia/db'
+} from '@siamo/db'
 import type {
   CreateTransactionBody,
   ListTransactionsQuery,

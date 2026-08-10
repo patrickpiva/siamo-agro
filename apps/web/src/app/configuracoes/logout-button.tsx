@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut } from '@agraia/ui/icons'
+import { LogOut } from '@siamo/ui/icons'
 import * as Dialog from '@radix-ui/react-dialog'
 
 export function LogoutButton() {

@@ -10,7 +10,7 @@ export default defineConfig({
   outDir: 'dist',
   clean: true,
   bundle: true,
-  // Inline all @agraia/* workspace packages so Node.js never tries to
+  // Inline all @siamo/* workspace packages so Node.js never tries to
   // import their .ts source files at runtime.
   noExternal: [/^@agraia\//],
   // Keep packages with native binaries external.

@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Button, BottomCTA } from '@agraia/ui'
-import { Check, Plus, Search, User, ChevronRight } from '@agraia/ui/icons'
+import { Button, BottomCTA } from '@siamo/ui'
+import { Check, Plus, Search, User, ChevronRight } from '@siamo/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 
 const NEXT_STEPS = [

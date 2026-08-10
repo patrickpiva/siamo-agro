@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { MessageSquare } from '@agraia/ui/icons'
+import { MessageSquare } from '@siamo/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 
 export const metadata: Metadata = { title: 'Minhas propostas — AgraIA' }
