@@ -6,7 +6,7 @@ import {
   OtpMaxAttemptsError,
   RefreshTokenInvalidError,
 } from './errors.js'
-import type { WhatsAppAdapter } from '../../adapters/whatsapp/index.js'
+import type { WhatsAppAdapter } from '../../integrations/whatsapp/types.js'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -107,6 +107,7 @@ const mockPrisma = {
 // WhatsApp adapter mock
 const mockWhatsApp: WhatsAppAdapter = {
   sendOtp: vi.fn(async () => {}),
+  sendNotification: vi.fn(async () => {}),
 }
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
