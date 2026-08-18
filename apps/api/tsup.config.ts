@@ -12,7 +12,7 @@ export default defineConfig({
   bundle: true,
   // Inline all @siamo/* workspace packages so Node.js never tries to
   // import their .ts source files at runtime.
-  noExternal: [/^@agraia\//],
+  noExternal: [/^@siamo\//],
   // Keep packages with native binaries external.
   external: ['@prisma/client', '@prisma/engines', 'bullmq', 'ioredis'],
 })
