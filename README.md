@@ -1,4 +1,4 @@
-# AgraIA
+# Siamo
 
 Plataforma digital de marketplace B2B que conecta **produtores rurais** a **prestadores de serviço** no agronegócio brasileiro — com reputação verificada, matchmaking por localização/especialidade e UX otimizada para conectividade limitada no campo.
 
@@ -24,7 +24,7 @@ Plataforma digital de marketplace B2B que conecta **produtores rurais** a **pres
 ## Estrutura do monorepo
 
 ```
-agraia/
+siamo-agro/
 ├── apps/
 │   ├── web/          # Next.js 15 — App Router, Tailwind v4, TypeScript
 │   │   ├── app/      # Rotas (Server Components por padrão)
@@ -112,10 +112,10 @@ pnpm db:studio
 pnpm dev
 
 # Apenas o frontend
-pnpm --filter @agraia/web dev
+pnpm --filter @siamo/web dev
 
 # Apenas a API
-pnpm --filter @agraia/api dev
+pnpm --filter @siamo/api dev
 ```
 
 ---
@@ -219,7 +219,7 @@ Todos os endpoints de escrita exigem `Authorization: Bearer <token>`. O frontend
 - Commits: [Conventional Commits](https://www.conventionalcommits.org/pt-br/)
 - Branches: `feat/`, `fix/`, `chore/`, `docs/`
 - Erros: classes tipadas (`AppError`) — nunca `throw new Error("string")`
-- Imports: aliases `@/` (apps) e `@agraia/*` (packages) — sem `../../`
+- Imports: aliases `@/` (apps) e `@siamo/*` (packages) — sem `../../`
 - Pre-commit: ESLint + Prettier rodam automaticamente via Husky
 
 Consulte o [CLAUDE.md](./CLAUDE.md) para decisões arquiteturais detalhadas, convenções de código e estado completo de implementação.

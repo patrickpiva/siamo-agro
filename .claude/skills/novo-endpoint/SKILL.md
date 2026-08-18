@@ -1,6 +1,6 @@
 # Skill: novo-endpoint
 
-Adiciona um endpoint a um módulo existente da API AgraIA.
+Adiciona um endpoint a um módulo existente da API Siamo.
 Use quando o módulo já existe e o usuário quer acrescentar uma rota nova.
 
 ## Antes de começar
