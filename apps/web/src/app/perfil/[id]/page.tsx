@@ -68,10 +68,10 @@ async function getReputation(profileId: string): Promise<ReputationData | null> 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { id } = await params
   const profile = await getProfile(id)
-  if (!profile) return { title: 'Perfil não encontrado — AgraIA' }
+  if (!profile) return { title: 'Perfil não encontrado — Siamo' }
   return {
-    title: `${profile.name} — AgraIA`,
-    description: `Perfil de ${profile.name} no AgraIA. Nota ${profile.currentRating.toFixed(1)}.`,
+    title: `${profile.name} — Siamo`,
+    description: `Perfil de ${profile.name} no Siamo. Nota ${profile.currentRating.toFixed(1)}.`,
   }
 }
 

@@ -91,7 +91,7 @@ export default function PrivacidadePage() {
           />
           <ConsentRow
             title="Comunicações de marketing"
-            description="Dicas, tendências e novidades do AgraIA por WhatsApp"
+            description="Dicas, tendências e novidades do Siamo por WhatsApp"
             acceptedAt={consents?.marketingOptInAt}
             revocable
             currentValue={consents?.marketingOptIn ?? false}

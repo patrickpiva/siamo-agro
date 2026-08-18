@@ -100,7 +100,7 @@ export default function AjudaPage() {
 
       {/* App version */}
       <p className="text-muted-foreground mt-8 px-5 text-center font-mono text-[11px]">
-        AgraIA v1.0.0
+        Siamo v1.0.0
       </p>
     </div>
   )

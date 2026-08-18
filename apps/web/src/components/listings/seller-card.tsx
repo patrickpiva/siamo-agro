@@ -70,7 +70,7 @@ export function SellerCard({ profile }: SellerCardProps) {
           <StatCell value={profile.responseTime ?? '—'} label="resposta" />
           <StatCell
             value={profile.yearsActive ? `${profile.yearsActive} anos` : '—'}
-            label="no AgraIA"
+            label="no Siamo"
           />
         </div>
       </div>

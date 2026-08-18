@@ -33,15 +33,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'AgraIA',
-    template: '%s | AgraIA',
+    default: 'Siamo',
+    template: '%s | Siamo',
   },
   description: 'Conectando produtores rurais e prestadores de serviço no agronegócio brasileiro',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AgraIA',
+    title: 'Siamo',
   },
 }
 
@@ -65,7 +65,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <span
             style={{ color: '#c6e845', fontFamily: 'monospace', fontSize: '22px', fontWeight: 500 }}
           >
-            [AgraIA]
+            [Siamo]
           </span>
           <div className="splash-spinner" />
         </div>

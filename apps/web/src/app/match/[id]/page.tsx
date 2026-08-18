@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { X, MapPin, Star, TrendingUp, Clock } from '@siamo/ui/icons'
 import { BreakdownBar } from '@/components/matches/breakdown-bar'
 
-export const metadata: Metadata = { title: 'Breakdown do match — AgraIA' }
+export const metadata: Metadata = { title: 'Breakdown do match — Siamo' }
 
 interface BreakdownPageProps {
   params: Promise<{ id: string }>

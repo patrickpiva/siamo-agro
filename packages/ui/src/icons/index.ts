@@ -1,9 +1,9 @@
 /**
- * Sistema de ícones do AgraIA
+ * Sistema de ícones do Siamo
  *
  * Fonte única para todos os ícones do projeto. Combina:
  * - Lucide React (ícones genéricos UI)
- * - Ícones AgraIA custom (domínio agropecuário)
+ * - Ícones Siamo custom (domínio agropecuário)
  * - Ícones de tipo de anúncio (kinds)
  * - Logos sociais (WhatsApp, etc.)
  *

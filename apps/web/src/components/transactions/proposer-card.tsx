@@ -66,7 +66,7 @@ export function ProposerCard({
           <p className="font-mono text-[14px] font-medium">
             {memberYears} {memberYears === 1 ? 'ano' : 'anos'}
           </p>
-          <p className="text-muted-foreground text-[10px] leading-[1.3]">no AgraIA</p>
+          <p className="text-muted-foreground text-[10px] leading-[1.3]">no Siamo</p>
         </div>
       </div>
     </div>

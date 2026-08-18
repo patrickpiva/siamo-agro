@@ -87,7 +87,7 @@ export default function DesignSystemPage() {
         <div className="mx-auto flex max-w-4xl items-baseline gap-3">
           <span className="text-primary font-mono text-2xl">◆</span>
           <div>
-            <h1 className="text-lg font-semibold">AgraIA — Design System</h1>
+            <h1 className="text-lg font-semibold">Siamo — Design System</h1>
             <p className="text-muted-foreground mt-0.5 font-mono text-xs">
               /design-system · somente desenvolvimento
             </p>
@@ -330,7 +330,7 @@ export default function DesignSystemPage() {
               {[
                 { cls: 'text-2xl font-medium', label: '2xl — score de match' },
                 { cls: 'text-lg font-medium', label: 'lg — preços' },
-                { cls: 'text-sm', label: 'sm — labels [AgraIA]' },
+                { cls: 'text-sm', label: 'sm — labels [Siamo]' },
                 { cls: 'text-xs', label: 'xs — metadados técnicos' },
               ].map((t) => (
                 <div key={t.label} className="flex items-baseline gap-4">
@@ -339,7 +339,7 @@ export default function DesignSystemPage() {
                       ? '92 /100'
                       : t.label.includes('preço')
                         ? 'R$ 1.850 / saca'
-                        : '[AgraIA] · 8 km · há 2h'}
+                        : '[Siamo] · 8 km · há 2h'}
                   </span>
                   <TokenBadge>{t.label}</TokenBadge>
                 </div>
@@ -432,7 +432,7 @@ export default function DesignSystemPage() {
             },
             {
               title: 'Verde-floresta assume o texto no light',
-              body: '#1F5F3F (#C6E845 não tem contraste sobre branco). Assume preços, labels [AgraIA], aba ativa e estrelas.',
+              body: '#1F5F3F (#C6E845 não tem contraste sobre branco). Assume preços, labels [Siamo], aba ativa e estrelas.',
             },
             {
               title: 'CTA light é invertido',

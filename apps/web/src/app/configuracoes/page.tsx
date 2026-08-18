@@ -136,7 +136,7 @@ export default async function ConfiguracoesPage() {
         />
         <SettingsRow
           icon={<Info size={18} strokeWidth={1.8} />}
-          title="Sobre o AgraIA"
+          title="Sobre o Siamo"
           rightElement={<span className="text-muted-foreground font-mono text-[12px]">v1.0.0</span>}
         />
       </SettingsGroup>

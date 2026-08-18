@@ -105,7 +105,7 @@ export async function uploadPhotoAction(
   return {
     ok: true,
     data: {
-      url: `https://api.dicebear.com/9.x/initials/svg?seed=AgraIA&backgroundColor=1F5F3F&textColor=C6E845`,
+      url: `https://api.dicebear.com/9.x/initials/svg?seed=Siamo&backgroundColor=1F5F3F&textColor=C6E845`,
     },
   }
 }
