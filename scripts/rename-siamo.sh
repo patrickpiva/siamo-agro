@@ -110,7 +110,7 @@ Plano: docs/plano-migracao-siamo.md"
       -e 's|agraia:|siamo:|g' \
       -e 's|AgraIA|Siamo|g' \
       -e 's|agra\.ia\.br|siamoagro.com|g' \
-      -e 's|agraia|siamoagro|g'
+      -e 's|agraia|siamo-agro|g'   # repo/pasta = "siamo-agro"; o domínio (siamoagro.com) já foi tratado acima
 
     echo "→ Committing…"
     # -u: only tracked files — never sweep unrelated untracked work into the PR

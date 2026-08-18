@@ -1,5 +1,23 @@
 # Plano de Migração de Marca — AgraIA → Siamo
 
+> **Status (2026-08-18)**
+>
+> | Item                                               | Estado                           |
+> | -------------------------------------------------- | -------------------------------- |
+> | PR 0 — prep (plano, script, limpeza)               | ✅ mergeado (#31)                |
+> | PR 1 — rename interno `@agraia/*` → `@siamo/*`     | ✅ commitado — confirmar merge   |
+> | PR 2 — marca user-facing                           | ⬜ pendente                      |
+> | PR 3 — docs                                        | ⬜ pendente                      |
+> | Domínio siamoagro.com (Namecheap) + DNS            | ✅ feito                         |
+> | Vercel — domínios                                  | ✅ feito                         |
+> | Railway — domínios                                 | ✅ feito                         |
+> | Repo GitHub → `patrickpiva/siamo-agro`             | ✅ feito (antecipado da Fase 3)  |
+> | Supabase — nome dos projetos                       | ✅ feito (antecipado da Fase 3)  |
+> | Twilio/Meta — display name + novo Content Template | ⚠️ **caminho crítico — status?** |
+> | Ícones Siamo (SVG + PNG 192/512)                   | ⬜ pendente                      |
+> | Env vars apontando p/ siamoagro.com                | ⬜ só após PR 2 validado         |
+> | Remover domínios/DNS de agra.ia.br                 | ⬜ último passo                  |
+
 > Criado em 2026-08-07. Decisões de branding aprovadas pelos stakeholders.
 > Auditoria feita por leitura dirigida dos arquivos-chave (o grep completo de
 > verificação está na §7 — rodar antes de abrir cada PR).
@@ -172,6 +190,86 @@ Todos os provedores são atualizados — identidade, conexões e variáveis. Nad
 - Atualizar memória do projeto / CLAUDE.md §11 com o novo estado.
 
 ---
+
+## 3b. Runbook detalhado — Domínio, Vercel e Railway
+
+> Regra de ouro da ordem: **adicione o domínio no provedor primeiro** (Vercel/Railway
+> mostram o valor exato do CNAME/TXT), **depois** crie o registro no DNS.
+
+### Domínio (siamoagro.com)
+
+1. **[Fase 0]** Registrar `siamoagro.com` em um registrador de `.com` (Cloudflare
+   Registrar, Namecheap etc.). Se usar Cloudflare como DNS: registros em modo
+   **DNS only** (nuvem cinza) — o setup atual é sem proxy e os certs da Vercel e
+   do Railway são emitidos via verificação direta.
+2. **[Fase 1]** Criar os registros conforme os valores mostrados pelos provedores:
+
+   | Tipo  | Nome                            | Valor                                            |
+   | ----- | ------------------------------- | ------------------------------------------------ |
+   | CNAME | `app.siamoagro.com`             | alvo mostrado pela Vercel (`*.vercel-dns-*.com`) |
+   | CNAME | `staging.siamoagro.com`         | idem                                             |
+   | CNAME | `api.siamoagro.com`             | alvo mostrado pelo Railway (`*.up.railway.app`)  |
+   | CNAME | `api-staging.siamoagro.com`     | idem                                             |
+   | TXT   | `_railway-verify.api.…`         | valor mostrado pelo Railway                      |
+   | TXT   | `_railway-verify.api-staging.…` | valor mostrado pelo Railway                      |
+   | A     | `siamoagro.com` (apex)          | `76.76.21.21` (Vercel) — redirect p/ app         |
+   | CNAME | `www.siamoagro.com`             | `cname.vercel-dns.com` — redirect p/ app         |
+
+3. Verificar propagação: `dig +short app.siamoagro.com` etc.; certs aparecem como
+   emitidos nos dashboards.
+4. **[Fase 3]** Apagar no registro.br os 4 CNAMEs + 2 TXTs de `agra.ia.br`.
+
+### Vercel
+
+1. **[Fase 1]** Projeto web → Settings → Domains → **Add** `app.siamoagro.com`,
+   atribuído ao branch de produção (`main`). Copiar o CNAME mostrado → DNS → esperar
+   "Valid Configuration" + certificado.
+2. **Add** `staging.siamoagro.com` atribuído ao branch `staging`.
+3. **Add** `siamoagro.com` e `www.siamoagro.com` com **Redirect** para
+   `app.siamoagro.com` (308).
+4. Ambos os domínios (novo e antigo) servem em paralelo — nada de env vars ainda.
+5. **[Fase 3]** Settings → Environment Variables:
+   - `NEXT_PUBLIC_APP_URL` — Production: `https://app.siamoagro.com`; Preview
+     (escopo branch `staging`): `https://staging.siamoagro.com`
+   - `API_URL` — Production: `https://api.siamoagro.com`; Preview (branch
+     `staging`): `https://api-staging.siamoagro.com`
+   - `JWT_SECRET` e demais: **não mexer**
+6. **Redeploy** (env var só vale em novo deploy).
+7. Após o rename do repo GitHub: Settings → Git — confirmar que o projeto aponta
+   para `siamoagro`; se webhook quebrar, disconnect/reconnect.
+8. Settings → General → renomear projeto (`siamoagro-web`) — muda a URL
+   `*.vercel.app` default, sem impacto.
+9. Remover `app.agra.ia.br` e `staging.agra.ia.br` do projeto.
+
+### Railway
+
+1. **[Fase 1]** Ambiente **production** → serviço `api` → Settings → Networking →
+   **Custom Domain** → `api.siamoagro.com`. Copiar CNAME (+ TXT `_railway-verify`)
+   → DNS → esperar cert.
+2. Ambiente **staging** → serviço `api` → `api-staging.siamoagro.com`, idem.
+3. Worker não tem domínio — nada a fazer na Fase 1.
+4. **[Fase 3]** Variáveis — nos **DOIS serviços** (api E worker), nos **DOIS
+   ambientes**: `NEXT_PUBLIC_APP_URL` → novo domínio do app (controla CORS da API e
+   links das notificações WhatsApp). Aceitar o redeploy que o Railway propõe.
+5. `TWILIO_CONTENT_SID` → novo SID (api + worker) quando o template Meta for aprovado.
+6. Após o rename do repo GitHub: conferir em cada serviço Settings → Source que os
+   deploys continuam disparando (fazer um push trivial ou checar webhooks) —
+   reconectar se necessário.
+7. Confirmar **App Sleeping OFF** nos dois serviços, dois ambientes (não deveria
+   mudar, mas é barato conferir).
+8. Renomear o projeto no dashboard (cosmético).
+9. Remover `api.agra.ia.br` e `api-staging.agra.ia.br` dos serviços.
+
+### Smoke test pós-cutover
+
+```bash
+curl -sI https://api.siamoagro.com/health | head -1
+curl -sI https://app.siamoagro.com | head -1
+curl -sI https://siamoagro.com | head -3          # 308 → app.
+```
+
+Login OTP real + criação de anúncio + proposta no app novo; conferir headers de
+CORS respondendo para `https://app.siamoagro.com`.
 
 ## 4. Ordem de dependência (resumo)
 
