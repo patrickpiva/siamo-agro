@@ -1,6 +1,6 @@
-# CLAUDE.md — AgraIA
+# CLAUDE.md — Siamo
 
-Guia de desenvolvimento do AgraIA. Lido automaticamente em toda sessão.
+Guia de desenvolvimento do Siamo. Lido automaticamente em toda sessão.
 Não apague seções; atualize-as quando houver mudanças de decisão.
 Quando este arquivo e o código divergirem, **o código é a fonte da verdade** —
 corrija o CLAUDE.md no mesmo PR que tocou o código.
@@ -9,7 +9,7 @@ corrija o CLAUDE.md no mesmo PR que tocou o código.
 
 ## 1. VISÃO DO PRODUTO
 
-AgraIA é uma plataforma digital de marketplace B2B para o agronegócio brasileiro que conecta produtores rurais a prestadores de serviço (consultores agronômicos, operadores de máquinas, fornecedores de insumos). O diferencial está na reputação verificada dos prestadores, no sistema de matchmaking por localização/especialidade e na UX pensada para usuários com conectividade limitada no campo.
+Siamo é uma plataforma digital de marketplace B2B para o agronegócio brasileiro que conecta produtores rurais a prestadores de serviço (consultores agronômicos, operadores de máquinas, fornecedores de insumos). O diferencial está na reputação verificada dos prestadores, no sistema de matchmaking por localização/especialidade e na UX pensada para usuários com conectividade limitada no campo.
 
 ---
 
@@ -30,7 +30,7 @@ AgraIA é uma plataforma digital de marketplace B2B para o agronegócio brasilei
 **Estrutura de pastas**
 
 ```
-agraia/
+siamo-agro/
 ├── apps/
 │   ├── web/          → Next.js 15 (porta 3000)
 │   │   ├── app/      → App Router (Server Components por padrão)
@@ -68,10 +68,10 @@ agraia/
 
 - Paths absolutos sempre via alias — nunca `../../`:
   - `@/` → raiz de `apps/web/` e `apps/api/`
-  - `@agraia/db` → `packages/db`
-  - `@agraia/shared` → `packages/shared`
-  - `@agraia/ui` → `packages/ui`
-- Ordem de imports: node built-ins → third-party → internal (`@agraia/*`) → local (`@/`)
+  - `@siamo/db` → `packages/db`
+  - `@siamo/shared` → `packages/shared`
+  - `@siamo/ui` → `packages/ui`
+- Ordem de imports: node built-ins → third-party → internal (`@siamo/*`) → local (`@/`)
 
 ### Validação
 
@@ -442,7 +442,7 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 | `prisma db push` em produção                         | `migrate diff` → SQL Editor do Supabase               |
 | Hex direto em componentes (`#fff`, `#333`)           | CSS variables do tema (`hsl(var(--background))`)      |
 | `"use client"` desnecessário em Server Components    | Mantenha no servidor; desça só o que precisa          |
-| Imports relativos longos (`../../../lib/utils`)      | Aliases `@/lib/utils` ou `@agraia/shared`             |
+| Imports relativos longos (`../../../lib/utils`)      | Aliases `@/lib/utils` ou `@siamo/shared`              |
 | PRs grandes com múltiplos propósitos                 | Um PR = um propósito; quebre se necessário            |
 | Editar arquivos gerados de `packages/ui` diretamente | Customize via `className` e CSS variables             |
 | Commitar diretamente em `main`                       | Sempre via feature branch + PR                        |
@@ -455,11 +455,11 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ### Branches
 
-| Branch             | Deploy automático              | Conteúdo                                 |
-| ------------------ | ------------------------------ | ---------------------------------------- |
-| `main`             | → Production (app.agra.ia.br)  | Sprints 0–3 + Design Hardening mergeados |
-| `staging`          | → Staging (staging.agra.ia.br) | Integração pré-release; espelha `main`   |
-| `feat/*` / `fix/*` | PR preview (Vercel)            | Features em desenvolvimento              |
+| Branch             | Deploy automático                 | Conteúdo                                 |
+| ------------------ | --------------------------------- | ---------------------------------------- |
+| `main`             | → Production (app.siamoagro.com)  | Sprints 0–3 + Design Hardening mergeados |
+| `staging`          | → Staging (staging.siamoagro.com) | Integração pré-release; espelha `main`   |
+| `feat/*` / `fix/*` | PR preview (Vercel)               | Features em desenvolvimento              |
 
 ---
 
@@ -563,15 +563,15 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 > Fonte da verdade: `packages/ui/src/index.ts`. Os componentes vivem na **raiz de
 > `src/`** (apenas `button`/`card` ficam em `src/components/`). Primitivos shadcn
 > não listados abaixo (Input, Dialog, Tabs…) **não estão no index** — confirme antes
-> de importar de `@agraia/ui`. BottomTabBar é componente do app, não do pacote.
+> de importar de `@siamo/ui`. BottomTabBar é componente do app, não do pacote.
 
 **Base:** Button (variantes: cta, cta-disabled, ghost-muted), Card, `cn()`, `formatBRL()`, `getInitials()`
 
-**AgraIA:** ListingCard (`isCached?: boolean`) + ListingCardSkeleton, MatchScoreBadge, KindBadge, StatusBadge, SectionLabel, ProgressIndicator, BottomCTA, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, FilterTabs, Fab, Toggle, PriceInput, SummaryBadge, ReviewCard, PriceBlock, StateBanner, ReputationSeal, ListingContextStrip, ProposalBlock, PriceProposalInput, QuantityStepper, ChatBubble, ChatInput (`isOffline?: boolean`), StarRating, MiniStarRating, RatingCategoryRow, SearchBar, SuggestionChip, RangeSlider, FilterChipGroup, CollectiveProgressBar, ListingMiniCard, NotificationIcon, SettingsRow, SettingsGroup, ConsentRow, PrivacyActionCard, ThemeSelector, FontSizeSlider
+**Siamo:** ListingCard (`isCached?: boolean`) + ListingCardSkeleton, MatchScoreBadge, KindBadge, StatusBadge, SectionLabel, ProgressIndicator, BottomCTA, SelectCard, PhoneInput, OTPInput, AvatarUpload, ConsentCheckbox, FilterTabs, Fab, Toggle, PriceInput, SummaryBadge, ReviewCard, PriceBlock, StateBanner, ReputationSeal, ListingContextStrip, ProposalBlock, PriceProposalInput, QuantityStepper, ChatBubble, ChatInput (`isOffline?: boolean`), StarRating, MiniStarRating, RatingCategoryRow, SearchBar, SuggestionChip, RangeSlider, FilterChipGroup, CollectiveProgressBar, ListingMiniCard, NotificationIcon, SettingsRow, SettingsGroup, ConsentRow, PrivacyActionCard, ThemeSelector, FontSizeSlider
 
 **Estados especiais:** EmptyState (`iconVariant: 'lime' | 'muted'`), ErrorScreen (`compact?: boolean`, `iconVariant: 'red' | 'amber' | 'blue'`)
 
-**Icons (`@agraia/ui/icons`):** Re-exports Lucide + SVG custom: CoffeeBean, Agronomist, Tractor, Soybean, Corn, Cattle, Harvester, Irrigation, Soil, Farm, Offer, Demand, Service, Equipment, WhatsAppLogo. Map `CATEGORY_ICONS`.
+**Icons (`@siamo/ui/icons`):** Re-exports Lucide + SVG custom: CoffeeBean, Agronomist, Tractor, Soybean, Corn, Cattle, Harvester, Irrigation, Soil, Farm, Offer, Demand, Service, Equipment, WhatsAppLogo. Map `CATEGORY_ICONS`.
 
 ---
 
@@ -580,15 +580,15 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | Feature                   | Arquivo                                                                 | Notas                                                                                                                                                           |
 | ------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Offline banner            | `components/offline-banner.tsx`                                         | Amber (offline) / azul pulsante (reconectando). Mount guard para evitar hydration mismatch.                                                                     |
-| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `agraia:offline-queue`, max 3 retries, flush no reconnect                                                                                          |
-| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `agraia:reconnected` custom event ao reconectar                                                                                                         |
+| Offline queue             | `lib/offline-queue.ts`                                                  | localStorage `siamo:offline-queue`, max 3 retries, flush no reconnect                                                                                           |
+| Online status hook        | `hooks/use-online-status.ts`                                            | Dispara `siamo:reconnected` custom event ao reconectar                                                                                                          |
 | Service Worker            | `src/sw.ts`                                                             | Serwist v9. Desabilitado em dev. Handlers: StaleWhileRevalidate (listings/profiles), NetworkFirst (pages/notifications), NetworkOnly (transactions)             |
 | PWA manifest              | `public/manifest.json`                                                  | Ícones SVG placeholder em `public/icons/` — PNGs ainda não gerados                                                                                              |
 | PWA install sheet         | `hooks/use-pwa-install.ts` + `components/pwa-install-sheet.tsx`         | `beforeinstallprompt`, visitas ≥ 3, dismiss 7 dias                                                                                                              |
 | Push permission modal     | `hooks/use-push-permission.ts` + `components/push-permission-modal.tsx` | Sessões ≥ 3, soft dismiss 7d, hard deny 30d                                                                                                                     |
 | 404 / 500 / network error | `app/not-found.tsx`, `app/error.tsx`, `components/network-error.tsx`    | Usam ErrorScreen de `packages/ui`                                                                                                                               |
-| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `agraia:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                                           |
-| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `agraia:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                                  |
+| Bookmark (salvar anúncio) | `components/listings/bookmark-button.tsx`                               | Optimistic toggle com `useTransition`; dispara `siamo:bookmark-toggled`; redireciona p/ `/entrar` se não autenticado                                            |
+| Feed tab "Salvos"         | `components/feed-list.tsx`                                              | Refetch no evento `siamo:bookmark-toggled` (mesma página) e ao ativar a aba (back-navigation)                                                                   |
 | Feed tab "Matches"        | `components/feed-list.tsx` + `GET /me/feed/matches`                     | `computing: true` → spinner com re-poll de 4s (teto 10); 401 → CTA de login; `matchScore` 0–1 convertido p/ 0–100 no `FeedCard`; `distanceKm` repassado ao card |
 | Bell unread count         | `app/feed/page.tsx`                                                     | Query paralela no servidor (`Promise.all`); ponto vermelho renderizado somente quando `unreadCount > 0`                                                         |
 
@@ -603,7 +603,7 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | Botão voltar        | `bg-muted flex size-12 items-center justify-center rounded-full`   |
 | Ação primária (CTA) | `bg-cta-bg text-cta-fg`                                            |
 | Seção label         | `font-mono text-[10px] tracking-[0.4px]` uppercase                 |
-| Card de anúncio     | `ListingCard` de `@agraia/ui`                                      |
+| Card de anúncio     | `ListingCard` de `@siamo/ui`                                       |
 
 ---
 
@@ -620,19 +620,19 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 **Plataformas e ambientes:**
 
-| Plataforma  | Ambiente   | Serviço / Domínio                  | Notas                                            |
-| ----------- | ---------- | ---------------------------------- | ------------------------------------------------ |
-| Railway     | production | `api` → `api.agra.ia.br`           | Start: `node apps/api/dist/index.js`; Pro plan   |
-| Railway     | production | `worker`                           | Start: `node apps/api/dist/worker.js`; sem porta |
-| Railway     | production | Redis plugin                       | Injeta `REDIS_URL`                               |
-| Railway     | staging    | `api` → `api-staging.agra.ia.br`   | Mesmo build, vars de staging                     |
-| Railway     | staging    | `worker`                           | Idem, sem porta                                  |
-| Railway     | staging    | Redis plugin                       | Redis isolado de produção                        |
-| Vercel      | production | `app.agra.ia.br`                   | Branch `main`; root dir `apps/web`               |
-| Vercel      | staging    | `staging.agra.ia.br`               | Branch `staging`; mesma config de build          |
-| Supabase    | production | projeto `agraia-production`        | Migrations manuais; ver §4                       |
-| Supabase    | staging    | projeto `agraia-staging`           | Cópia do schema; dados de teste                  |
-| registro.br | —          | DNS autoritativo para `agra.ia.br` | Ver registros abaixo; **sem** proxy Cloudflare   |
+| Plataforma | Ambiente   | Serviço / Domínio                     | Notas                                            |
+| ---------- | ---------- | ------------------------------------- | ------------------------------------------------ |
+| Railway    | production | `api` → `api.siamoagro.com`           | Start: `node apps/api/dist/index.js`; Pro plan   |
+| Railway    | production | `worker`                              | Start: `node apps/api/dist/worker.js`; sem porta |
+| Railway    | production | Redis plugin                          | Injeta `REDIS_URL`                               |
+| Railway    | staging    | `api` → `api-staging.siamoagro.com`   | Mesmo build, vars de staging                     |
+| Railway    | staging    | `worker`                              | Idem, sem porta                                  |
+| Railway    | staging    | Redis plugin                          | Redis isolado de produção                        |
+| Vercel     | production | `app.siamoagro.com`                   | Branch `main`; root dir `apps/web`               |
+| Vercel     | staging    | `staging.siamoagro.com`               | Branch `staging`; mesma config de build          |
+| Supabase   | production | projeto `siamo-agro-production`       | Migrations manuais; ver §4                       |
+| Supabase   | staging    | projeto `siamo-agro-staging`          | Cópia do schema; dados de teste                  |
+| Namecheap  | —          | DNS autoritativo para `siamoagro.com` | Ver registros abaixo; **sem** proxy Cloudflare   |
 
 **Região e cold starts (decisão de latência — 2026-06-04):**
 
@@ -640,16 +640,21 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - **Railway permanece em US-East** (sem região no Brasil) → mantido **fora do caminho de leitura quente** (ver ADR §9 "reads via Prisma direto"). Atende escritas, auth e worker.
 - **App Sleeping OFF**: `railway.toml` define `sleepApplication = false` + `numReplicas = 1` para a API. O **worker** é configurado no dashboard — confirmar App Sleeping OFF nos **dois serviços** e **ambos os ambientes**. Motivo: cold-starts de ~3,3 s no login e no primeiro carregamento de matches. Custo: serviços always-on cobram compute contínuo (aceitável em produção; trade-off em staging).
 
-**Registros DNS (registro.br):**
+**Registros DNS (Namecheap):**
 
-| Tipo  | Nome                                     | Destino                                                                           |
-| ----- | ---------------------------------------- | --------------------------------------------------------------------------------- |
-| CNAME | `app.agra.ia.br`                         | `8f75f4d91770dccf.vercel-dns-017.com`                                             |
-| CNAME | `staging.agra.ia.br`                     | `8f75f4d91770dccf.vercel-dns-017.com`                                             |
-| CNAME | `api.agra.ia.br`                         | `csyynwdg.up.railway.app`                                                         |
-| CNAME | `api-staging.agra.ia.br`                 | `qx1cmaqd.up.railway.app`                                                         |
-| TXT   | `_railway-verify.api.agra.ia.br`         | `railway-verify=f80b10bd5cf310d8764572e4cbe0cd28cd784cf52f0952a52db22f031e226730` |
-| TXT   | `_railway-verify.api-staging.agra.ia.br` | `railway-verify=5d1c706826d6167cef729148d9b8883f6735e8055c36181d1166b40466f7e37d` |
+| Tipo  | Nome                                        | Destino                                               |
+| ----- | ------------------------------------------- | ----------------------------------------------------- |
+| CNAME | `app.siamoagro.com`                         | alvo do projeto na Vercel (`*.vercel-dns-*.com`)      |
+| CNAME | `staging.siamoagro.com`                     | idem                                                  |
+| CNAME | `api.siamoagro.com`                         | alvo do serviço `api` no Railway (`*.up.railway.app`) |
+| CNAME | `api-staging.siamoagro.com`                 | idem (ambiente staging)                               |
+| TXT   | `_railway-verify.api.siamoagro.com`         | token de verificação do Railway                       |
+| TXT   | `_railway-verify.api-staging.siamoagro.com` | idem (ambiente staging)                               |
+
+> Os valores exatos de destino e os tokens `_railway-verify` são **por domínio** e
+> mudam a cada domínio adicionado — leia-os sempre no dashboard (Vercel → Settings →
+> Domains; Railway → serviço → Settings → Networking) em vez de copiar daqui.
+> Runbook completo do rebrand: `docs/plano-migracao-siamo.md` §3b.
 
 ---
 
@@ -838,7 +843,7 @@ listing só re-enfileira depois disso).
 
 ### Problema resolvido
 
-O fluxo de autenticação do AgraIA usa OTP via WhatsApp (Twilio). Em ambientes de desenvolvimento, QA e demonstrações não é desejável enviar mensagens reais — seja por custo, dependência de conectividade ou por expor números de telefone reais de testadores.
+O fluxo de autenticação do Siamo usa OTP via WhatsApp (Twilio). Em ambientes de desenvolvimento, QA e demonstrações não é desejável enviar mensagens reais — seja por custo, dependência de conectividade ou por expor números de telefone reais de testadores.
 
 ### Solução
 
@@ -897,15 +902,16 @@ Definir as variáveis no painel do Railway (API service) ou no `.env` local. Nun
 > Nos provedores: configurar em Railway (api + worker), Vercel (web — **incluindo o
 > ambiente Preview**, ver nota do `JWT_SECRET`) e CI conforme o processo.
 
-| Variável                                                            | Processo                 | Obrigatória                  | Notas                                                                                                                                                        |
-| ------------------------------------------------------------------- | ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL` / `DIRECT_URL`                                       | api, worker, web (SSR)   | sim                          | Pooler (PgBouncer) nas queries; direta só para tooling do Prisma                                                                                             |
-| `JWT_SECRET`                                                        | api, web                 | **sim em produção**          | Sem fallback: API falha no boot, web lança `CONFIG_MISSING_ENV`. Habilitar também no **Preview** da Vercel — build de preview roda com `NODE_ENV=production` |
-| `REDIS_URL`                                                         | worker (sim), api (não)  | só no worker                 | Sem ela a API loga warn e ignora jobs; o worker se recusa a subir                                                                                            |
-| `API_URL`                                                           | web (proxy + SSR fetch)  | não (default localhost:3001) | Railway em produção/staging                                                                                                                                  |
-| `NEXT_PUBLIC_API_URL`                                               | web (middleware refresh) | não (default localhost:3001) | ⚠ duplica `API_URL` — unificação está nos TODOs                                                                                                              |
-| `NEXT_PUBLIC_APP_URL`                                               | api, worker              | não                          | CORS da API + links nas notificações WhatsApp                                                                                                                |
-| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`                        | api                      | p/ uploads                   | Também usada na validação de propriedade de fotos (`photo-ownership.ts`)                                                                                     |
-| `DEMO_PHONES` / `DEMO_OTP`                                          | api                      | não                          | §13 — bypass de OTP para contas demo; vazio = desativado                                                                                                     |
-| `MATCH_WEIGHT_*` / `MATCH_MAX_DISTANCE_KM`                          | api, worker              | não                          | §12 — tuning do matchmaking sem deploy (requer restart do processo)                                                                                          |
-| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM` | api, worker              | não (modo stub)              | Sem elas o adapter loga e não envia mensagens reais                                                                                                          |
+| Variável                                                            | Processo                 | Obrigatória                  | Notas                                                                                                                                                                            |
+| ------------------------------------------------------------------- | ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` / `DIRECT_URL`                                       | api, worker, web (SSR)   | sim                          | Pooler (PgBouncer) nas queries; direta só para tooling do Prisma                                                                                                                 |
+| `JWT_SECRET`                                                        | api, web                 | **sim em produção**          | Sem fallback: API falha no boot, web lança `CONFIG_MISSING_ENV`. Habilitar também no **Preview** da Vercel — build de preview roda com `NODE_ENV=production`                     |
+| `REDIS_URL`                                                         | worker (sim), api (não)  | só no worker                 | Sem ela a API loga warn e ignora jobs; o worker se recusa a subir                                                                                                                |
+| `API_URL`                                                           | web (proxy + SSR fetch)  | não (default localhost:3001) | Railway em produção/staging                                                                                                                                                      |
+| `NEXT_PUBLIC_API_URL`                                               | web (middleware refresh) | não (default localhost:3001) | ⚠ duplica `API_URL` — unificação está nos TODOs                                                                                                                                  |
+| `NEXT_PUBLIC_APP_URL`                                               | api, worker              | não                          | CORS da API + links nas notificações WhatsApp                                                                                                                                    |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`                        | api                      | p/ uploads                   | Também usada na validação de propriedade de fotos (`photo-ownership.ts`)                                                                                                         |
+| `DEMO_PHONES` / `DEMO_OTP`                                          | api                      | não                          | §13 — bypass de OTP para contas demo; vazio = desativado                                                                                                                         |
+| `MATCH_WEIGHT_*` / `MATCH_MAX_DISTANCE_KM`                          | api, worker              | não                          | §12 — tuning do matchmaking sem deploy (requer restart do processo)                                                                                                              |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM` | api, worker              | não (modo stub)              | Sem elas o adapter loga e não envia mensagens reais                                                                                                                              |
+| `TWILIO_CONTENT_SID_OTP`                                            | api                      | **sim em produção**          | Content SID (HX…) do template `siamo_otp` aprovado pela Meta. Vazio = Body livre, que só entrega no sandbox. Nome exato lido em `twilio.adapter.ts` — não é `TWILIO_CONTENT_SID` |

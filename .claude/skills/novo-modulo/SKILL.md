@@ -1,13 +1,13 @@
 # Skill: novo-modulo
 
-Cria um novo módulo de domínio completo na API Fastify do AgraIA.
+Cria um novo módulo de domínio completo na API Fastify do Siamo.
 Use quando o usuário pedir para criar um módulo, feature ou domínio novo na API.
 
 ## Contexto do projeto
 
 - API: Fastify 5 + TypeScript (NodeNext — imports precisam de extensão `.js`)
-- ORM: Prisma via `@agraia/db`
-- Validação: Zod via `@agraia/shared` (validators compartilhados) ou local
+- ORM: Prisma via `@siamo/db`
+- Validação: Zod via `@siamo/shared` (validators compartilhados) ou local
 - Type provider: `fastify-type-provider-zod` (instale se não estiver em package.json)
 - Testes: Vitest
 - Ponto de entrada: `apps/api/src/app.ts`
@@ -32,7 +32,7 @@ apps/api/src/modules/{nome}/
 Erros tipados do módulo. Nunca `throw new Error("string")`.
 
 ```typescript
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 
 export class {Nome}NotFoundError extends AppError {
   constructor(id: string) {
@@ -117,7 +117,7 @@ export type Create{Nome}Body = z.infer<typeof Create{Nome}BodySchema>
 Lógica de negócio com prisma injetado. Sem lógica HTTP aqui.
 
 ```typescript
-import type { PrismaClient } from '@agraia/db'
+import type { PrismaClient } from '@siamo/db'
 import type { Create{Nome}Body } from './schema.js'
 import { {Nome}NotFoundError, {Nome}ConflictError } from './errors.js'
 
@@ -164,7 +164,7 @@ Handlers HTTP com type-provider-zod. Sem lógica de negócio aqui.
 
 ```typescript
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { {Nome}Service } from './service.js'
 import {
   Create{Nome}BodySchema,
@@ -173,7 +173,7 @@ import {
   List{Nome}ResponseSchema,
   ErrorResponseSchema,
 } from './schema.js'
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 
 const service = new {Nome}Service(prisma)
 
