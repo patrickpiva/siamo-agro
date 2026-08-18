@@ -5,9 +5,9 @@
 > | Item                                               | Estado                           |
 > | -------------------------------------------------- | -------------------------------- |
 > | PR 0 — prep (plano, script, limpeza)               | ✅ mergeado (#31)                |
-> | PR 1 — rename interno `@agraia/*` → `@siamo/*`     | ✅ commitado — confirmar merge   |
-> | PR 2 — marca user-facing                           | ⬜ pendente                      |
-> | PR 3 — docs                                        | ⬜ pendente                      |
+> | PR 1 — rename interno `@agraia/*` → `@siamo/*`     | ✅ mergeado (930c2ab)            |
+> | PR 2 — marca user-facing + correções residuais     | ✅ mergeado (a25aaeb)            |
+> | PR 3 — docs                                        | 🔄 em revisão                    |
 > | Domínio siamoagro.com (Namecheap) + DNS            | ✅ feito                         |
 > | Vercel — domínios                                  | ✅ feito                         |
 > | Railway — domínios                                 | ✅ feito                         |
