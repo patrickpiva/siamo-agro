@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { RefreshCw } from '@agraia/ui/icons'
-import { RangeSlider, FilterChipGroup } from '@agraia/ui'
-import { cn } from '@agraia/ui'
+import { RefreshCw } from '@siamo/ui/icons'
+import { RangeSlider, FilterChipGroup } from '@siamo/ui'
+import { cn } from '@siamo/ui'
 
 export interface FilterValues {
   kinds: string[]

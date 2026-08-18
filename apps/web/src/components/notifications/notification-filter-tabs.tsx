@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 type NotifTab = 'all' | 'proposals' | 'transactions' | 'matches'
 

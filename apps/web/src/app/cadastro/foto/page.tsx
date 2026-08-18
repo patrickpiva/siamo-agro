@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, BottomCTA, ProgressIndicator, AvatarUpload } from '@agraia/ui'
-import { Camera, Image } from '@agraia/ui/icons'
+import { Button, BottomCTA, ProgressIndicator, AvatarUpload } from '@siamo/ui'
+import { Camera, Image } from '@siamo/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { useOnboardingStore } from '@/stores/onboarding'

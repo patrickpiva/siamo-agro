@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { MessageCircle } from '@agraia/ui/icons'
-import { Button } from '@agraia/ui'
+import { MessageCircle } from '@siamo/ui/icons'
+import { Button } from '@siamo/ui'
 
 interface Props {
   transactionId: string

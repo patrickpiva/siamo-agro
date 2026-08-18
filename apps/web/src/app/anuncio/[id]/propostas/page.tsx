@@ -3,11 +3,11 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ChevronRight } from '@agraia/ui/icons'
+import { ChevronRight } from '@siamo/ui/icons'
 
-export const metadata: Metadata = { title: 'Propostas recebidas — AgraIA' }
+export const metadata: Metadata = { title: 'Propostas recebidas — Siamo' }
 
 interface PageProps {
   params: Promise<{ id: string }>

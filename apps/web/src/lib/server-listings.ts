@@ -1,4 +1,4 @@
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 
 export interface ActiveListing {
   id: string

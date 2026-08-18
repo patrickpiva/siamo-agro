@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LogOut } from '@agraia/ui/icons'
+import { LogOut } from '@siamo/ui/icons'
 import * as Dialog from '@radix-ui/react-dialog'
 
 export function LogoutButton() {
@@ -50,7 +50,7 @@ export function LogoutButton() {
         >
           <Dialog.Title className="mb-2 text-[17px] font-medium">Sair da conta?</Dialog.Title>
           <Dialog.Description id="logout-desc" className="text-muted-foreground mb-6 text-[14px]">
-            Você precisará fazer login novamente para acessar o AgraIA.
+            Você precisará fazer login novamente para acessar o Siamo.
           </Dialog.Description>
           <div className="flex flex-col gap-3">
             <button

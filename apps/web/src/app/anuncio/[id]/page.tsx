@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@agraia/ui/icons'
+import { Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@siamo/ui/icons'
 import { BookmarkButton } from '@/components/listings/bookmark-button'
 import { BackButton } from '@/components/layout/back-button'
-import { PriceBlock } from '@agraia/ui'
+import { PriceBlock } from '@siamo/ui'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchListing } from '@/lib/api'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { ListingHero } from '@/components/listings/listing-hero'
 import { SellerCard } from '@/components/listings/seller-card'
 import { OwnerBanner } from '@/components/listings/owner-banner'
@@ -91,7 +91,7 @@ export async function generateMetadata({
   const listing = await fetchListing(id)
   if (!listing) return {}
   return {
-    title: `${listing.title} · AgraIA`,
+    title: `${listing.title} · Siamo`,
     description: listing.description.slice(0, 160),
     openGraph: {
       images: listing.photos[0] ? [{ url: listing.photos[0].url }] : [],
@@ -169,7 +169,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
   const photos = [...listing.photos].sort((a, b) => a.order - b.order).map((p) => ({ url: p.url }))
 
   const catLabel = CATEGORY_LABELS[listing.category] ?? listing.category
-  const waText = encodeURIComponent(`Olá, vi seu anúncio "${listing.title}" no AgraIA`)
+  const waText = encodeURIComponent(`Olá, vi seu anúncio "${listing.title}" no Siamo`)
   const waLink = `https://wa.me/?text=${waText}`
 
   return (

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { QuantityStepper } from '@agraia/ui'
+import { QuantityStepper } from '@siamo/ui'
 
 // ---------------------------------------------------------------------------
 // QuantityStepper — testa o fix de skip (stale closure + onClick duplo)

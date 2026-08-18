@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import useEmblaCarousel from 'embla-carousel-react'
-import { KindBadge } from '@agraia/ui'
-import { cn } from '@agraia/ui'
-import { CATEGORY_ICONS } from '@agraia/ui/icons'
+import { KindBadge } from '@siamo/ui'
+import { cn } from '@siamo/ui'
+import { CATEGORY_ICONS } from '@siamo/ui/icons'
 
 const CATEGORY_BG: Record<string, string> = {
   COFFEE: 'bg-[#D4B896] dark:bg-[#3d2817]',

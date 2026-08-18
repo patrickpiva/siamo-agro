@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@agraia/db'
+import type { PrismaClient } from '@siamo/db'
 import { ProfileAlreadyExistsError } from './errors.js'
 import type { CreateProfileBody } from './schema.js'
 

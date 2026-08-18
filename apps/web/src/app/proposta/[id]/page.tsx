@@ -2,13 +2,13 @@ import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
-import { prisma } from '@agraia/db'
-import { StateBanner, ProposalBlock, ListingContextStrip } from '@agraia/ui'
+import { prisma } from '@siamo/db'
+import { StateBanner, ProposalBlock, ListingContextStrip } from '@siamo/ui'
 import { ProposerCard } from '@/components/transactions/proposer-card'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProposalReviewActions } from '@/components/transactions/proposal-review-actions'
 
-export const metadata: Metadata = { title: 'Nova proposta — AgraIA' }
+export const metadata: Metadata = { title: 'Nova proposta — Siamo' }
 
 interface PageProps {
   params: Promise<{ id: string }>

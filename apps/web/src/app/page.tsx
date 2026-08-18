@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Button, BottomCTA } from '@agraia/ui'
-import { WhatsAppLogo } from '@agraia/ui/icons'
+import { Button, BottomCTA } from '@siamo/ui'
+import { WhatsAppLogo } from '@siamo/ui/icons'
 import { StatusBar } from '@/components/layout/status-bar'
 import { getServerSession } from '@/lib/server-auth'
 import { getHomeData } from '@/lib/home'
@@ -29,7 +29,7 @@ function Landing() {
       {/* Logo */}
       <div className="px-6 pt-14 text-center">
         <span className="text-accent-forest dark:text-accent-lime font-mono text-2xl font-medium tracking-[-0.5px]">
-          [AgraIA]
+          [Siamo]
         </span>
       </div>
 
@@ -60,7 +60,7 @@ function Landing() {
           <Link href="/entrar">Entrar com WhatsApp</Link>
         </Button>
         <Button variant="ghost-muted" asChild>
-          <Link href="/sobre">Saiba mais sobre o AgraIA</Link>
+          <Link href="/sobre">Saiba mais sobre o Siamo</Link>
         </Button>
       </BottomCTA>
     </main>

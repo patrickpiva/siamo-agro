@@ -1,4 +1,4 @@
-import { MiniStarRating, formatBRL } from '@agraia/ui'
+import { MiniStarRating, formatBRL } from '@siamo/ui'
 
 interface ReviewItemProps {
   score: number

@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Send, Clock, Bell } from '@agraia/ui/icons'
-import { ProposalBlock } from '@agraia/ui'
+import { Send, Clock, Bell } from '@siamo/ui/icons'
+import { ProposalBlock } from '@siamo/ui'
 
-export const metadata: Metadata = { title: 'Proposta enviada — AgraIA' }
+export const metadata: Metadata = { title: 'Proposta enviada — Siamo' }
 
 interface Props {
   searchParams: Promise<{

@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@agraia/ui/components",
-    "utils": "@agraia/ui/lib/utils",
-    "ui": "@agraia/ui/components",
-    "lib": "@agraia/ui/lib",
-    "hooks": "@agraia/ui/hooks"
+    "components": "@siamo/ui/components",
+    "utils": "@siamo/ui/lib/utils",
+    "ui": "@siamo/ui/components",
+    "lib": "@siamo/ui/lib",
+    "hooks": "@siamo/ui/hooks"
   },
   "iconLibrary": "lucide"
 }

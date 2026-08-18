@@ -1,4 +1,4 @@
-import { WhatsAppLogo } from '@agraia/ui/icons'
+import { WhatsAppLogo } from '@siamo/ui/icons'
 
 function isSupportOnline(): boolean {
   const now = new Date()
@@ -23,7 +23,7 @@ export function WhatsAppSupportCard() {
             : 'Fora do horário — respondemos amanhã às 8h'}
         </p>
         <a
-          href="https://wa.me/5521999999999?text=Ol%C3%A1%2C+preciso+de+ajuda+com+o+AgraIA."
+          href="https://wa.me/5521999999999?text=Ol%C3%A1%2C+preciso+de+ajuda+com+o+Siamo."
           target="_blank"
           rel="noopener noreferrer"
           className="inline-block rounded-[8px] bg-[#25D366] px-4 py-[8px] text-[13px] font-medium text-white"

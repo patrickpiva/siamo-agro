@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { CATEGORY_ICONS, Star } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { CATEGORY_ICONS, Star } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 import type { Opportunity } from '@/lib/home-state'
 
 const CATEGORY_BG: Record<string, string> = {

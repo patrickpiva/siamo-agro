@@ -1,4 +1,4 @@
-import { Info } from '@agraia/ui/icons'
+import { Info } from '@siamo/ui/icons'
 
 const STATUS_LABELS: Record<string, string> = {
   ACTIVE: 'ATIVO',

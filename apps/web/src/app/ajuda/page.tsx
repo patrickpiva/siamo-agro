@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Search } from '@agraia/ui/icons'
+import { ArrowLeft, Search } from '@siamo/ui/icons'
 import { FaqList } from '@/components/help/faq-item'
 import { WhatsAppSupportCard } from '@/components/help/whatsapp-support-card'
 
@@ -100,7 +100,7 @@ export default function AjudaPage() {
 
       {/* App version */}
       <p className="text-muted-foreground mt-8 px-5 text-center font-mono text-[11px]">
-        AgraIA v1.0.0
+        Siamo v1.0.0
       </p>
     </div>
   )

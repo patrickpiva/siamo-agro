@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Clock } from '@agraia/ui/icons'
-import { StateBanner, ListingContextStrip, BottomCTA, Button } from '@agraia/ui'
+import { Clock } from '@siamo/ui/icons'
+import { StateBanner, ListingContextStrip, BottomCTA, Button } from '@siamo/ui'
 import { CompletionConfirmSplit } from '@/components/transactions/completion-confirm-split'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { route } from '@/lib/route'

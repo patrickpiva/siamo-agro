@@ -10,8 +10,8 @@ import {
   Users,
   Plus,
   type IconProps,
-} from '@agraia/ui/icons'
-import { ProgressIndicator, BottomCTA, Button, SectionLabel, SummaryBadge, cn } from '@agraia/ui'
+} from '@siamo/ui/icons'
+import { ProgressIndicator, BottomCTA, Button, SectionLabel, SummaryBadge, cn } from '@siamo/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore } from '@/stores/listing-draft'
 

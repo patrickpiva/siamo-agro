@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown } from '@agraia/ui/icons'
+import { ChevronDown } from '@siamo/ui/icons'
 
 interface PendingAnchorProps {
   label: string

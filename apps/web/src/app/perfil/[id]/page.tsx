@@ -2,9 +2,9 @@ import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ListingMiniCard } from '@agraia/ui'
+import { ListingMiniCard } from '@siamo/ui'
 import { BackButton } from '@/components/layout/back-button'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
 import { ReviewItem } from '@/components/profile/review-item'
@@ -68,10 +68,10 @@ async function getReputation(profileId: string): Promise<ReputationData | null> 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { id } = await params
   const profile = await getProfile(id)
-  if (!profile) return { title: 'Perfil não encontrado — AgraIA' }
+  if (!profile) return { title: 'Perfil não encontrado — Siamo' }
   return {
-    title: `${profile.name} — AgraIA`,
-    description: `Perfil de ${profile.name} no AgraIA. Nota ${profile.currentRating.toFixed(1)}.`,
+    title: `${profile.name} — Siamo`,
+    description: `Perfil de ${profile.name} no Siamo. Nota ${profile.currentRating.toFixed(1)}.`,
   }
 }
 

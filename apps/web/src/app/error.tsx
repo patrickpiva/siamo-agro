@@ -1,7 +1,7 @@
 'use client'
 
 import { RefreshCw, AlertCircle } from 'lucide-react'
-import { ErrorScreen } from '@agraia/ui'
+import { ErrorScreen } from '@siamo/ui'
 
 interface ErrorPageProps {
   error: Error & { digest?: string }

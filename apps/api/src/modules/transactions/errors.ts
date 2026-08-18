@@ -1,4 +1,4 @@
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 
 export class TransactionNotFoundError extends AppError {
   constructor(id: string) {

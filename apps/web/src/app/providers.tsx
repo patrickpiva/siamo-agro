@@ -60,8 +60,8 @@ export function Providers({ children }: { children: ReactNode }) {
       void queryClient.invalidateQueries({ queryKey: ['listings'] })
       void queryClient.invalidateQueries({ queryKey: ['notifications'] })
     }
-    window.addEventListener('agraia:reconnected', handleReconnected)
-    return () => window.removeEventListener('agraia:reconnected', handleReconnected)
+    window.addEventListener('siamo:reconnected', handleReconnected)
+    return () => window.removeEventListener('siamo:reconnected', handleReconnected)
   }, [queryClient])
 
   const pathname = usePathname()

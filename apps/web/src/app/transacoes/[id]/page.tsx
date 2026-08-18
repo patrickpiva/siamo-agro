@@ -2,10 +2,10 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
-import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@agraia/ui'
-import { MoreVertical } from '@agraia/ui/icons'
+import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@siamo/ui'
+import { MoreVertical } from '@siamo/ui/icons'
 import { LazyChatView as ChatView } from '@/components/transactions/lazy-chat-view'
 import {
   TransactionActionButton,

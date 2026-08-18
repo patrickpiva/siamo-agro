@@ -1,14 +1,14 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Bell, Search } from '@agraia/ui/icons'
+import { Bell, Search } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { FeedTabs, type FeedTab } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
-import { ListingCardSkeleton } from '@agraia/ui'
+import { ListingCardSkeleton } from '@siamo/ui'
 
-export const metadata: Metadata = { title: 'Explorar — AgraIA' }
+export const metadata: Metadata = { title: 'Explorar — Siamo' }
 
 interface ExplorarPageProps {
   searchParams: Promise<{

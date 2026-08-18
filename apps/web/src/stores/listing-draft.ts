@@ -175,7 +175,7 @@ export const useListingDraftStore = create<ListingDraftState & ListingDraftActio
         }),
     }),
     {
-      name: 'agraia:listing-draft',
+      name: 'siamo:listing-draft',
       storage: createJSONStorage(() =>
         typeof window !== 'undefined'
           ? sessionStorage

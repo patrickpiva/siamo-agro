@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 interface ReviewCardProps {
   label: string

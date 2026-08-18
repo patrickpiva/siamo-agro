@@ -8,11 +8,11 @@ import withSerwistInit from '@serwist/next'
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
-  transpilePackages: ['@agraia/ui', '@agraia/shared'],
+  transpilePackages: ['@siamo/ui', '@siamo/shared'],
   // Transform barrel imports into direct deep imports so unused exports are
-  // never bundled — biggest win for the @agraia/ui/icons and lucide-react barrels.
+  // never bundled — biggest win for the @siamo/ui/icons and lucide-react barrels.
   experimental: {
-    optimizePackageImports: ['lucide-react', '@agraia/ui', '@agraia/ui/icons'],
+    optimizePackageImports: ['lucide-react', '@siamo/ui', '@siamo/ui/icons'],
   },
   // Derives NEXT_PUBLIC_* vars from their server-side counterparts so client
   // components get the values without requiring duplicate entries in .env.

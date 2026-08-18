@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@agraia/ui'
+import { StateBanner, StarRating, RatingCategoryRow, BottomCTA, Button } from '@siamo/ui'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { route } from '@/lib/route'
 

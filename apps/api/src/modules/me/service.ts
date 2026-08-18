@@ -1,5 +1,5 @@
-import type { PrismaClient } from '@agraia/db'
-import { AppError, NotFoundError } from '@agraia/shared'
+import type { PrismaClient } from '@siamo/db'
+import { AppError, NotFoundError } from '@siamo/shared'
 import { addComputeMatchesJob } from '../../workers/matchmaking/queue.js'
 import type {
   UpdateMeBody,

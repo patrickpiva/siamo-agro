@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Bell } from '@agraia/ui/icons'
-import { WhatsAppLogo } from '@agraia/ui/icons'
-import { SettingsGroup, SettingsRow } from '@agraia/ui'
+import { ArrowLeft, Bell } from '@siamo/ui/icons'
+import { WhatsAppLogo } from '@siamo/ui/icons'
+import { SettingsGroup, SettingsRow } from '@siamo/ui'
 
 interface NotifPrefs {
   whatsapp: boolean

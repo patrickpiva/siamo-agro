@@ -11,10 +11,10 @@ import {
   Shield,
   HelpCircle,
   Info,
-} from '@agraia/ui/icons'
-import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@agraia/ui'
+} from '@siamo/ui/icons'
+import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@siamo/ui'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { LogoutButton } from './logout-button'
 
 export const metadata: Metadata = { title: 'Configurações' }
@@ -136,7 +136,7 @@ export default async function ConfiguracoesPage() {
         />
         <SettingsRow
           icon={<Info size={18} strokeWidth={1.8} />}
-          title="Sobre o AgraIA"
+          title="Sobre o Siamo"
           rightElement={<span className="text-muted-foreground font-mono text-[12px]">v1.0.0</span>}
         />
       </SettingsGroup>

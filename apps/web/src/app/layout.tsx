@@ -33,15 +33,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'AgraIA',
-    template: '%s | AgraIA',
+    default: 'Siamo',
+    template: '%s | Siamo',
   },
   description: 'Conectando produtores rurais e prestadores de serviço no agronegócio brasileiro',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'AgraIA',
+    title: 'Siamo',
   },
 }
 
@@ -61,11 +61,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
         {/* Splash — shown only on the very first standalone PWA launch per session */}
-        <div id="agraia-splash" aria-hidden="true">
+        <div id="siamo-splash" aria-hidden="true">
           <span
             style={{ color: '#c6e845', fontFamily: 'monospace', fontSize: '22px', fontWeight: 500 }}
           >
-            [AgraIA]
+            [Siamo]
           </span>
           <div className="splash-spinner" />
         </div>
@@ -73,7 +73,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             Shows splash only when: standalone PWA mode + first visit of this session. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;if(s&&!sessionStorage.getItem('agraia:launched')){var el=document.getElementById('agraia-splash');if(el)el.style.display='flex';}}catch(e){}})();`,
+            __html: `(function(){try{var s=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone;if(s&&!sessionStorage.getItem('siamo:launched')){var el=document.getElementById('siamo-splash');if(el)el.style.display='flex';}}catch(e){}})();`,
           }}
         />
         <SplashScreen />

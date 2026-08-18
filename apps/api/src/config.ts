@@ -1,4 +1,4 @@
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 
 export class MissingEnvError extends AppError {
   constructor(name: string) {

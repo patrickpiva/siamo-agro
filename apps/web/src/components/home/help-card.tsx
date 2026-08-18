@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Route } from 'next'
-import { MessageCircle, ChevronRight } from '@agraia/ui/icons'
+import { MessageCircle, ChevronRight } from '@siamo/ui/icons'
 
 /** Card de ajuda (WhatsApp) exibido no primeiro acesso. */
 export function HelpCard({ href = '/ajuda' }: { href?: Route }) {

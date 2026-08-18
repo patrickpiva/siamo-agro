@@ -1,4 +1,4 @@
-export const APP_NAME = 'AgraIA'
+export const APP_NAME = 'Siamo'
 export const APP_DESCRIPTION =
   'Conectando produtores rurais e prestadores de serviço no agronegócio brasileiro'
 

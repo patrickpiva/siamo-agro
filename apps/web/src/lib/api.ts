@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { cookies } from 'next/headers'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 
 const API_URL = process.env['API_URL'] ?? 'http://localhost:3001'
 
