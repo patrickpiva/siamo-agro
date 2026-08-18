@@ -1,4 +1,4 @@
--- AgraIA — Seed de dados
+-- Siamo — Seed de dados
 -- Execute APÓS reset_data.sql no Supabase SQL Editor.
 -- Cria 8 usuários, 8 perfis, 8 localizações e 19 anúncios.
 --

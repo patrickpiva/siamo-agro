@@ -1,6 +1,6 @@
 # Skill: qa-feature
 
-Checklist de qualidade antes de abrir um PR no AgraIA.
+Checklist de qualidade antes de abrir um PR no Siamo.
 Executar **na ordem** — cada etapa é um gate. Não pular para a próxima se a atual falhar.
 
 ---
