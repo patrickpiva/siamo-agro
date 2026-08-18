@@ -1,7 +1,7 @@
 import type { Route } from 'next'
 import type { LucideIcon } from 'lucide-react'
-import type { ProfileType } from '@agraia/db'
-import { Home, Search, Wrench } from '@agraia/ui/icons'
+import type { ProfileType } from '@siamo/db'
+import { Home, Search, Wrench } from '@siamo/ui/icons'
 
 export interface HomeAction {
   label: string

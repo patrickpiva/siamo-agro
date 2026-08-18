@@ -1,5 +1,5 @@
-import { getInitials } from '@agraia/ui'
-import type { ProfileType, BadgeTier } from '@agraia/db'
+import { getInitials } from '@siamo/ui'
+import type { ProfileType, BadgeTier } from '@siamo/db'
 
 const TYPE_LABEL: Record<ProfileType, string> = {
   PRODUCER: 'PRODUTOR',

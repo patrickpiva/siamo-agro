@@ -1,8 +1,8 @@
 import { notFound, redirect } from 'next/navigation'
 import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
-import { prisma } from '@agraia/db'
-import { formatBRL } from '@agraia/ui'
+import { prisma } from '@siamo/db'
+import { formatBRL } from '@siamo/ui'
 import { BackButton } from '@/components/layout/back-button'
 import { AvaliarForm } from './avaliar-form'
 

@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, X } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { ArrowLeft, X } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 interface WizardHeaderProps {
   title: string

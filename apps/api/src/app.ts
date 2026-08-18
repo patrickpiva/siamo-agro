@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyError } from 'fastify'
 import Fastify from 'fastify'
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import jwtPlugin from '@fastify/jwt'

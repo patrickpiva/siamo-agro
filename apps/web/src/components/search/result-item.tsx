@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { CATEGORY_ICONS } from '@agraia/ui/icons'
-import { MatchScoreBadge } from '@agraia/ui'
-import { cn } from '@agraia/ui'
+import { CATEGORY_ICONS } from '@siamo/ui/icons'
+import { MatchScoreBadge } from '@siamo/ui'
+import { cn } from '@siamo/ui'
 
 export interface ResultItemData {
   id: string

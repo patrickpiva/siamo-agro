@@ -1,4 +1,4 @@
-import { WhatsAppLogo } from '@agraia/ui/icons'
+import { WhatsAppLogo } from '@siamo/ui/icons'
 
 function isSupportOnline(): boolean {
   const now = new Date()

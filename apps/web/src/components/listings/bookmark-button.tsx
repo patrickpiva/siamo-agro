@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Bookmark } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { Bookmark } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 interface BookmarkButtonProps {
   listingId: string
@@ -39,7 +39,7 @@ export function BookmarkButton({ listingId, initialSaved, isAuthenticated }: Boo
         const json = (await res.json()) as { data: { saved: boolean } }
         setSaved(json.data.saved)
         window.dispatchEvent(
-          new CustomEvent('agraia:bookmark-toggled', {
+          new CustomEvent('siamo:bookmark-toggled', {
             detail: { listingId, saved: json.data.saved },
           }),
         )

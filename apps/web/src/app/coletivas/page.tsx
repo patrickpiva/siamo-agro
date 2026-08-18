@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft, Plus } from '@agraia/ui/icons'
+import { ArrowLeft, Plus } from '@siamo/ui/icons'
 import { CollectiveCard } from '@/components/collective/collective-card'
 import type { CollectiveCampaign } from '@/components/collective/collective-card'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 export const metadata: Metadata = { title: 'Compras coletivas — AgraIA' }
 

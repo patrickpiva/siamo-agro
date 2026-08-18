@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@agraia/ui/icons'
+import { ArrowLeft } from '@siamo/ui/icons'
 import { MatchItem } from '@/components/matches/match-item'
 import type { MatchItemData } from '@/components/matches/match-item'
 

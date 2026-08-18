@@ -90,7 +90,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       reset: () => set(initialState),
     }),
     {
-      name: 'agraia:onboarding',
+      name: 'siamo:onboarding',
       storage: createJSONStorage(() => sessionStorage),
     },
   ),

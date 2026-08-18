@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { HelpCircle, ArrowLeft } from 'lucide-react'
-import { ErrorScreen } from '@agraia/ui'
+import { ErrorScreen } from '@siamo/ui'
 
 export default function NotFound() {
   const router = useRouter()

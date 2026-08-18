@@ -8,7 +8,7 @@
  * - Logos sociais (WhatsApp, etc.)
  *
  * REGRA: nenhum componente da aplicação importa de 'lucide-react' direto.
- * Sempre importa daqui: import { Bell, CoffeeBean } from '@agraia/ui/icons'
+ * Sempre importa daqui: import { Bell, CoffeeBean } from '@siamo/ui/icons'
  *
  * Tamanhos padrão:
  *   size={16} — inline em texto, badges, chips

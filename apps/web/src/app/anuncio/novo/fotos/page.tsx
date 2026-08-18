@@ -19,8 +19,8 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Camera, Image, Plus, Trash2 } from '@agraia/ui/icons'
-import { ProgressIndicator, BottomCTA, Button, cn } from '@agraia/ui'
+import { Camera, Image, Plus, Trash2 } from '@siamo/ui/icons'
+import { ProgressIndicator, BottomCTA, Button, cn } from '@siamo/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore, type PendingPhoto } from '@/stores/listing-draft'
 import { uploadImages } from '@/lib/upload'

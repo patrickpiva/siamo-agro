@@ -981,7 +981,7 @@
    Hidden in regular browser; CSS media query reveals it only in standalone.
    JS (SplashScreen component) adds [data-dismissed] after hydration to fade out.
    ─────────────────────────────────────────────────────────────────────────── */
-#agraia-splash {
+#siamo-splash {
   display: none; /* always hidden; inline script reveals it only on first standalone launch */
   position: fixed;
   inset: 0;
@@ -994,7 +994,7 @@
   pointer-events: none;
 }
 
-#agraia-splash[data-dismissed] {
+#siamo-splash[data-dismissed] {
   opacity: 0;
   transition: opacity 350ms ease;
 }

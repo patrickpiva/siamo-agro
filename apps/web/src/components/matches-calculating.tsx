@@ -1,5 +1,5 @@
 import { Star } from 'lucide-react'
-import { EmptyState } from '@agraia/ui'
+import { EmptyState } from '@siamo/ui'
 
 /**
  * Shown inside a listing's matches panel while the match job is still pending.

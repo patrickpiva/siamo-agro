@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin } from '@agraia/ui/icons'
-import { MatchScoreBadge } from '@agraia/ui'
-import { Star } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { MapPin } from '@siamo/ui/icons'
+import { MatchScoreBadge } from '@siamo/ui'
+import { Star } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 export interface MatchItemData {
   id: string

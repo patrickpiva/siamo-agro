@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { WifiOff, RefreshCw, Loader2 } from 'lucide-react'
 import { useOnlineStatus } from '@/hooks/use-online-status'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 function minutesAgo(since: Date): number {
   return Math.floor((Date.now() - since.getTime()) / 60_000)

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Trash2 } from '@agraia/ui/icons'
-import { SettingsGroup, ConsentRow, PrivacyActionCard } from '@agraia/ui'
+import { ArrowLeft, Download, Eye, Trash2 } from '@siamo/ui/icons'
+import { SettingsGroup, ConsentRow, PrivacyActionCard } from '@siamo/ui'
 import * as Dialog from '@radix-ui/react-dialog'
 
 interface Consents {

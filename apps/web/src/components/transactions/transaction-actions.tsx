@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@agraia/ui'
+import { Button } from '@siamo/ui'
 
 interface TransactionActionsProps {
   transactionId: string

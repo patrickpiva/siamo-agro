@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { WifiOff, Bell, Zap } from 'lucide-react'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 
 interface PWAInstallSheetProps {
   onClose: () => void

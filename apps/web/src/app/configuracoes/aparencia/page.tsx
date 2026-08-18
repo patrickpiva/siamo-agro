@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowLeft, Zap, Eye } from '@agraia/ui/icons'
-import { ThemeSelector, FontSizeSlider, SettingsGroup, SettingsRow } from '@agraia/ui'
+import { ArrowLeft, Zap, Eye } from '@siamo/ui/icons'
+import { ThemeSelector, FontSizeSlider, SettingsGroup, SettingsRow } from '@siamo/ui'
 import { useTheme, type Theme, type FontSize } from '@/lib/theme'
 
 export default function AparenciaPage() {

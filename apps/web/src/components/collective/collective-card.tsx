@@ -1,6 +1,6 @@
-import { Clock, Check } from '@agraia/ui/icons'
-import { CollectiveProgressBar } from '@agraia/ui'
-import { cn } from '@agraia/ui'
+import { Clock, Check } from '@siamo/ui/icons'
+import { CollectiveProgressBar } from '@siamo/ui'
+import { cn } from '@siamo/ui'
 
 export interface CollectiveCampaign {
   id: string

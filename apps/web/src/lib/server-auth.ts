@@ -1,7 +1,7 @@
 import 'server-only'
 import { cookies } from 'next/headers'
 import jwt from 'jsonwebtoken'
-import { AppError } from '@agraia/shared'
+import { AppError } from '@siamo/shared'
 
 export interface ServerSession {
   userId: string

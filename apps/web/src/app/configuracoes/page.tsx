@@ -11,10 +11,10 @@ import {
   Shield,
   HelpCircle,
   Info,
-} from '@agraia/ui/icons'
-import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@agraia/ui'
+} from '@siamo/ui/icons'
+import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@siamo/ui'
 import { getServerSession } from '@/lib/server-auth'
-import { prisma } from '@agraia/db'
+import { prisma } from '@siamo/db'
 import { LogoutButton } from './logout-button'
 
 export const metadata: Metadata = { title: 'Configurações' }

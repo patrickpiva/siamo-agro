@@ -25,7 +25,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/listings') ||
         url.pathname.startsWith('/api/proxy/listings'),
       handler: new StaleWhileRevalidate({
-        cacheName: 'agraia-api-listings',
+        cacheName: 'siamo-api-listings',
         plugins: [new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 6 * 3600 })],
       }),
     },
@@ -36,7 +36,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/profiles') ||
         url.pathname.startsWith('/api/proxy/profiles'),
       handler: new StaleWhileRevalidate({
-        cacheName: 'agraia-api-profiles',
+        cacheName: 'siamo-api-profiles',
         plugins: [new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 6 * 3600 })],
       }),
     },
@@ -47,7 +47,7 @@ const serwist = new Serwist({
         url.pathname.startsWith('/api/v1/notifications') ||
         url.pathname.startsWith('/api/proxy/notifications'),
       handler: new NetworkFirst({
-        cacheName: 'agraia-api-notifications',
+        cacheName: 'siamo-api-notifications',
         plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 3600 })],
         networkTimeoutSeconds: 5,
       }),
@@ -67,7 +67,7 @@ const serwist = new Serwist({
     {
       matcher: ({ request }) => request.mode === 'navigate',
       handler: new NetworkFirst({
-        cacheName: 'agraia-pages',
+        cacheName: 'siamo-pages',
         plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 24 * 3600 })],
         networkTimeoutSeconds: 5,
       }),

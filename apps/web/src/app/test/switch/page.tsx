@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Toggle, PriceInput } from '@agraia/ui'
+import { Toggle, PriceInput } from '@siamo/ui'
 import {
   WhatsAppLogo,
   Cattle,
@@ -15,7 +15,7 @@ import {
   Tractor,
   Agronomist,
   Citrus,
-} from '@agraia/ui/icons'
+} from '@siamo/ui/icons'
 
 export default function SwitchTestPage() {
   const [on, setOn] = useState(false)

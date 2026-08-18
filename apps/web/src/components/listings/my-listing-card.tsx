@@ -1,5 +1,5 @@
-import { MoreVertical, Eye, MessageCircle, Star } from '@agraia/ui/icons'
-import { KindBadge, StatusBadge } from '@agraia/ui'
+import { MoreVertical, Eye, MessageCircle, Star } from '@siamo/ui/icons'
+import { KindBadge, StatusBadge } from '@siamo/ui'
 import type { Listing } from '@/lib/api'
 
 interface MyListingCardProps {

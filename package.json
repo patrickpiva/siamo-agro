@@ -1,5 +1,5 @@
 {
-  "name": "agraia",
+  "name": "siamoagro",
   "private": true,
   "version": "0.0.1",
   "packageManager": "pnpm@9.15.0",
@@ -13,13 +13,13 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,yaml,yml}\"",
     "prepare": "husky",
-    "db:generate": "pnpm --filter @agraia/db db:generate",
-    "db:migrate:diff": "pnpm --filter @agraia/db db:migrate:diff",
-    "db:migrate:diff:inc": "pnpm --filter @agraia/db db:migrate:diff:inc",
-    "db:migrate:deploy": "pnpm --filter @agraia/db db:migrate:deploy",
-    "db:seed": "pnpm --filter @agraia/db db:seed",
-    "db:studio": "pnpm --filter @agraia/db db:studio",
-    "db:reset": "pnpm --filter @agraia/db db:reset"
+    "db:generate": "pnpm --filter @siamo/db db:generate",
+    "db:migrate:diff": "pnpm --filter @siamo/db db:migrate:diff",
+    "db:migrate:diff:inc": "pnpm --filter @siamo/db db:migrate:diff:inc",
+    "db:migrate:deploy": "pnpm --filter @siamo/db db:migrate:deploy",
+    "db:seed": "pnpm --filter @siamo/db db:seed",
+    "db:studio": "pnpm --filter @siamo/db db:studio",
+    "db:reset": "pnpm --filter @siamo/db db:reset"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

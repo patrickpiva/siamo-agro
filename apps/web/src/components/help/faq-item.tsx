@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, ChevronUp } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { ChevronRight, ChevronUp } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 interface FaqItemProps {
   id: string

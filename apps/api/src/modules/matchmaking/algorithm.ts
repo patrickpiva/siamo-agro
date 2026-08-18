@@ -1,4 +1,4 @@
-import type { BadgeTier, ListingKind, ListingStatus } from '@agraia/db'
+import type { BadgeTier, ListingKind, ListingStatus } from '@siamo/db'
 
 // ─── Weights ──────────────────────────────────────────────────────────────────
 //

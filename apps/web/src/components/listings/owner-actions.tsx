@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2 } from '@agraia/ui/icons'
+import { Loader2 } from '@siamo/ui/icons'
 
 interface OwnerActionsProps {
   listingId: string

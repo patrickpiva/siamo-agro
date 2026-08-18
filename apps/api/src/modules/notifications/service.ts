@@ -1,5 +1,5 @@
-import type { PrismaClient } from '@agraia/db'
-import { AppError } from '@agraia/shared'
+import type { PrismaClient } from '@siamo/db'
+import { AppError } from '@siamo/shared'
 import type { ListNotificationsQuery } from './schema.js'
 
 export class NotificationsService {

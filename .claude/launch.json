@@ -4,14 +4,14 @@
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@agraia/web", "dev"],
+      "runtimeArgs": ["--filter", "@siamo/web", "dev"],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "api",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@agraia/api", "dev"],
+      "runtimeArgs": ["--filter", "@siamo/api", "dev"],
       "port": 3001,
       "autoPort": true
     }

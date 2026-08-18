@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@agraia/ui/icons'
+import { ArrowLeft } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchMyListings } from '@/lib/api'
 import { MyListingsView } from '@/components/listings/my-listings-view'

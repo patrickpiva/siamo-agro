@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getInitials } from '@agraia/ui'
+import { getInitials } from '@siamo/ui'
 import type { ContinueThread } from '@/lib/home-state'
 
 /** "Continue de onde parou" — conversa em andamento com contador de mensagens novas. */

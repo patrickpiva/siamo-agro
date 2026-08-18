@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ShareButton } from './share-button'
 
-vi.mock('@agraia/ui/icons', () => ({
+vi.mock('@siamo/ui/icons', () => ({
   Share2: () => null,
 }))
 

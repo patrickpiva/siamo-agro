@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import type { ReactNode } from 'react'
-import { ChevronRight } from '@agraia/ui/icons'
-import { cn } from '@agraia/ui'
+import { ChevronRight } from '@siamo/ui/icons'
+import { cn } from '@siamo/ui'
 
 interface ChoiceCardProps {
   href: Route

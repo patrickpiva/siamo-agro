@@ -11,6 +11,9 @@
 # Branch creation, push and PR opening are done manually — see the plan §3 Fase 2.
 
 set -e
+# -f: no glob expansion — the CODE_FILES/DOC_FILES patterns (*.ts, *.json…) must
+# reach `find` as literal tokens, not be expanded against the repo root.
+set -f
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -62,7 +65,8 @@ case "$STAGE" in
     echo "→ Building…";             pnpm build
 
     echo "→ Committing…"
-    git add -A
+    # -u: only tracked files — never sweep unrelated untracked work into the PR
+    git add -u
     git commit -m "chore: renomeia escopo interno @agraia → @siamo (rebrand Siamo, PR 1/3)
 
 - Escopo de pacotes @agraia/* → @siamo/* (package.json ×6, imports, configs, Dockerfile)
@@ -85,7 +89,8 @@ Plano: docs/plano-migracao-siamo.md"
     echo "→ Building…";       pnpm build
 
     echo "→ Committing…"
-    git add -A
+    # -u: only tracked files — never sweep unrelated untracked work into the PR
+    git add -u
     git commit -m "feat: rebrand user-facing AgraIA → Siamo (PR 2/3)
 
 - Títulos, manifest PWA, splash, APP_NAME, template WhatsApp de OTP
@@ -105,10 +110,11 @@ Plano: docs/plano-migracao-siamo.md"
       -e 's|agraia:|siamo:|g' \
       -e 's|AgraIA|Siamo|g' \
       -e 's|agra\.ia\.br|siamoagro.com|g' \
-      -e 's|agraia|siamoagro|g'
+      -e 's|agraia|siamo-agro|g'   # repo/pasta = "siamo-agro"; o domínio (siamoagro.com) já foi tratado acima
 
     echo "→ Committing…"
-    git add -A
+    # -u: only tracked files — never sweep unrelated untracked work into the PR
+    git add -u
     git commit -m "docs: rebrand AgraIA → Siamo na documentação (PR 3/3)
 
 - CLAUDE.md, README, docs/, .claude/skills

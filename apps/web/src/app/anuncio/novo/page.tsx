@@ -1,13 +1,13 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { OfferKind, DemandKind, ServiceKind, EquipmentKind } from '@agraia/ui/icons'
-import { ProgressIndicator, BottomCTA, Button } from '@agraia/ui'
+import { OfferKind, DemandKind, ServiceKind, EquipmentKind } from '@siamo/ui/icons'
+import { ProgressIndicator, BottomCTA, Button } from '@siamo/ui'
 import { WizardHeader } from '@/components/listings/wizard-header'
 import { useListingDraftStore, type ListingKind } from '@/stores/listing-draft'
-import { cn } from '@agraia/ui'
+import { cn } from '@siamo/ui'
 import type { ComponentType } from 'react'
-import type { IconProps } from '@agraia/ui/icons'
+import type { IconProps } from '@siamo/ui/icons'
 
 type KindOption = {
   kind: ListingKind
