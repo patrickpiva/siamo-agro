@@ -1,7 +1,7 @@
 const FAQ_ITEMS = [
   {
     id: '1',
-    question: 'Como criar um anúncio no AgraIA?',
+    question: 'Como criar um anúncio no Siamo?',
     answer:
       'Toque no botão "+" na barra inferior e siga os 5 passos: tipo de anúncio, categoria, descrição, preço e fotos. Seu anúncio ficará ativo imediatamente após a publicação.',
     category: 'anuncios',
@@ -10,7 +10,7 @@ const FAQ_ITEMS = [
     id: '2',
     question: 'Como funciona o sistema de matchmaking?',
     answer:
-      'O AgraIA analisa sua localização, especialidade e histórico para encontrar anúncios compatíveis. A aba "Matches" no feed mostra as melhores oportunidades para você, ordenadas por pontuação.',
+      'O Siamo analisa sua localização, especialidade e histórico para encontrar anúncios compatíveis. A aba "Matches" no feed mostra as melhores oportunidades para você, ordenadas por pontuação.',
     category: 'matchmaking',
   },
   {
@@ -31,12 +31,12 @@ const FAQ_ITEMS = [
     id: '5',
     question: 'Como funciona o pagamento?',
     answer:
-      'O AgraIA facilita o acordo entre as partes, mas o pagamento é combinado diretamente entre produtor e prestador. Recomendamos formalizar o acordo por contrato escrito para segurança de ambos.',
+      'O Siamo facilita o acordo entre as partes, mas o pagamento é combinado diretamente entre produtor e prestador. Recomendamos formalizar o acordo por contrato escrito para segurança de ambos.',
     category: 'transacoes',
   },
   {
     id: '6',
-    question: 'Posso usar o AgraIA sem internet?',
+    question: 'Posso usar o Siamo sem internet?',
     answer:
       'O app funciona em modo offline para consultar anúncios e contatos já carregados. Para publicar anúncios, enviar propostas ou receber notificações, é necessária conexão com a internet.',
     category: 'geral',

@@ -7,7 +7,7 @@ import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
 import { ChevronRight } from '@siamo/ui/icons'
 
-export const metadata: Metadata = { title: 'Propostas recebidas — AgraIA' }
+export const metadata: Metadata = { title: 'Propostas recebidas — Siamo' }
 
 interface PageProps {
   params: Promise<{ id: string }>

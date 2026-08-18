@@ -22,7 +22,7 @@ import { addAutoCancelJob, addStaleProgressAlertJob } from '../../workers/transa
 import { addReputationRecomputeJob } from '../../workers/reputation/queue.js'
 
 const whatsapp = createWhatsAppAdapter()
-const APP_URL = process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://agraia.app'
+const APP_URL = process.env['NEXT_PUBLIC_APP_URL'] ?? 'https://app.siamoagro.com'
 
 const CANCELLABLE: TransactionStatus[] = ['PROPOSED', 'ACCEPTED', 'IN_PROGRESS']
 

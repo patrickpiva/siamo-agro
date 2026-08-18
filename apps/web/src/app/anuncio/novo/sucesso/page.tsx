@@ -106,7 +106,7 @@ async function SuccessContent({ id }: { id: string }) {
         </Link>
         <div className="grid grid-cols-2 gap-2">
           <ShareButton
-            title={listing?.title ?? 'Anúncio no AgraIA'}
+            title={listing?.title ?? 'Anúncio no Siamo'}
             url={`${appUrl}/anuncio/${id}`}
           />
           <Link

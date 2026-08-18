@@ -1,9 +1,9 @@
 /**
- * Sistema de ícones do AgraIA
+ * Sistema de ícones do Siamo
  *
  * Fonte única para todos os ícones do projeto. Combina:
  * - Lucide React (ícones genéricos UI)
- * - Ícones AgraIA custom (domínio agropecuário)
+ * - Ícones Siamo custom (domínio agropecuário)
  * - Ícones de tipo de anúncio (kinds)
  * - Logos sociais (WhatsApp, etc.)
  *
@@ -155,19 +155,19 @@ export {
 } from 'lucide-react'
 
 // ============================================================
-// AGROLINK CUSTOM — domínio agropecuário
+// SIAMO CUSTOM — domínio agropecuário
 // ============================================================
-export { CoffeeBean } from './agraia/coffee-bean'
-export { Soybean } from './agraia/soybean'
-export { Corn } from './agraia/corn'
-export { Cattle } from './agraia/cattle'
-export { Tractor } from './agraia/tractor'
-export { Agronomist } from './agraia/agronomist'
-export { Harvester } from './agraia/harvester'
-export { Irrigation } from './agraia/irrigation'
-export { Soil } from './agraia/soil'
-export { Farm } from './agraia/farm'
-export { Citrus } from './agraia/citrus'
+export { CoffeeBean } from './siamo/coffee-bean'
+export { Soybean } from './siamo/soybean'
+export { Corn } from './siamo/corn'
+export { Cattle } from './siamo/cattle'
+export { Tractor } from './siamo/tractor'
+export { Agronomist } from './siamo/agronomist'
+export { Harvester } from './siamo/harvester'
+export { Irrigation } from './siamo/irrigation'
+export { Soil } from './siamo/soil'
+export { Farm } from './siamo/farm'
+export { Citrus } from './siamo/citrus'
 
 // ============================================================
 // KINDS — tipos de anúncio
@@ -201,17 +201,17 @@ export type IconProps = {
  *   const Icon = CATEGORY_ICONS[listing.category] ?? Package;
  *   <Icon size={24} />
  */
-import { CoffeeBean } from './agraia/coffee-bean'
-import { Soybean } from './agraia/soybean'
-import { Corn } from './agraia/corn'
-import { Cattle } from './agraia/cattle'
-import { Tractor } from './agraia/tractor'
-import { Agronomist } from './agraia/agronomist'
-import { Harvester } from './agraia/harvester'
-import { Irrigation } from './agraia/irrigation'
-import { Soil } from './agraia/soil'
-import { Farm } from './agraia/farm'
-import { Citrus } from './agraia/citrus'
+import { CoffeeBean } from './siamo/coffee-bean'
+import { Soybean } from './siamo/soybean'
+import { Corn } from './siamo/corn'
+import { Cattle } from './siamo/cattle'
+import { Tractor } from './siamo/tractor'
+import { Agronomist } from './siamo/agronomist'
+import { Harvester } from './siamo/harvester'
+import { Irrigation } from './siamo/irrigation'
+import { Soil } from './siamo/soil'
+import { Farm } from './siamo/farm'
+import { Citrus } from './siamo/citrus'
 import { Wheat, Milk, LeafyGreen } from 'lucide-react'
 
 export const CATEGORY_ICONS = {

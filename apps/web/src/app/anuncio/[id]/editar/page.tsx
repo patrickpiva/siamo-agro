@@ -4,7 +4,7 @@ import { getServerSession } from '@/lib/server-auth'
 import { fetchListing } from '@/lib/api'
 import { EditListingForm } from '@/components/listings/edit-listing-form'
 
-export const metadata: Metadata = { title: 'Editar anúncio · AgraIA' }
+export const metadata: Metadata = { title: 'Editar anúncio · Siamo' }
 
 export default async function EditListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

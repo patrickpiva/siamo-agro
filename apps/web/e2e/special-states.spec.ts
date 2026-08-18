@@ -105,7 +105,7 @@ test('pwa-prompt-not-shown-on-first-visit', async ({ page }) => {
   await page.goto('/feed')
   await setVisitCount(page, 1)
   await page.reload()
-  await expect(page.getByRole('dialog', { name: 'AgraIA' })).toBeHidden()
+  await expect(page.getByRole('dialog', { name: 'Siamo' })).toBeHidden()
 })
 
 test('pwa-prompt-shown-on-third-visit', async ({ page }) => {

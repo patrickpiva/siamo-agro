@@ -8,7 +8,7 @@ import { FeedTabs, type FeedTab } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
 import { ListingCardSkeleton } from '@siamo/ui'
 
-export const metadata: Metadata = { title: 'Explorar — AgraIA' }
+export const metadata: Metadata = { title: 'Explorar — Siamo' }
 
 interface ExplorarPageProps {
   searchParams: Promise<{

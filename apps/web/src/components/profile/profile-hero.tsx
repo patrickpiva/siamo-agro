@@ -31,9 +31,9 @@ function formatJoinedAt(joinedAt: Date): string {
   const diffMs = now.getTime() - joinedAt.getTime()
   const diffMonths = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30.44))
   const years = Math.floor(diffMonths / 12)
-  if (years >= 1) return `no AgraIA há ${years} ${years === 1 ? 'ano' : 'anos'}`
-  if (diffMonths >= 1) return `no AgraIA há ${diffMonths} ${diffMonths === 1 ? 'mês' : 'meses'}`
-  return 'no AgraIA há menos de 1 mês'
+  if (years >= 1) return `no Siamo há ${years} ${years === 1 ? 'ano' : 'anos'}`
+  if (diffMonths >= 1) return `no Siamo há ${diffMonths} ${diffMonths === 1 ? 'mês' : 'meses'}`
+  return 'no Siamo há menos de 1 mês'
 }
 
 export function ProfileHero({

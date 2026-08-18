@@ -89,7 +89,7 @@ async function reverseGeocode(
     url.searchParams.set('lon', lng.toString())
     url.searchParams.set('format', 'json')
     const res = await fetch(url.toString(), {
-      headers: { 'User-Agent': 'AgraIA/1.0 (agraiabr@gmail.com)' },
+      headers: { 'User-Agent': 'Siamo/1.0 (suporte@siamoagro.com)' },
       signal: AbortSignal.timeout(5_000),
     })
     if (!res.ok) return null

@@ -48,7 +48,7 @@ export default function CadastroPerfilPage() {
 
       <div className="flex-1 px-5">
         <h1 className="mb-2 text-2xl font-medium leading-tight tracking-[-0.3px]">
-          Como você usa o AgraIA?
+          Como você usa o Siamo?
         </h1>
         <p className="text-fg-secondary mb-6 text-sm leading-relaxed">
           Você poderá ajustar isso depois nas configurações.

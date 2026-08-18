@@ -16,7 +16,7 @@ import { NonRetryableError } from './retry.js'
  *   para números que fizeram opt-in no sandbox.
  *
  * Modo produção (WhatsApp Business aprovado):
- *   TWILIO_CONTENT_SID_OTP — Content SID do template agraia_otp (HXxxx...)
+ *   TWILIO_CONTENT_SID_OTP — Content SID do template siamo_otp (HXxxx...)
  *   Sem este SID a mensagem será rejeitada pela API do WhatsApp fora do sandbox.
  *
  * Sem nenhuma das variáveis, opera em modo stub (loga no console, não envia).
@@ -71,7 +71,7 @@ export class TwilioAdapter extends BaseWhatsAppAdapter {
       formBody = new URLSearchParams({
         From: this.fromNumber,
         To: `whatsapp:${phone}`,
-        Body: `Seu código AgraIA: ${code}. Válido por 5 minutos. Não compartilhe com ninguém.`,
+        Body: `Seu código Siamo: ${code}. Válido por 5 minutos. Não compartilhe com ninguém.`,
       })
     }
 

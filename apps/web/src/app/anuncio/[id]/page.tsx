@@ -91,7 +91,7 @@ export async function generateMetadata({
   const listing = await fetchListing(id)
   if (!listing) return {}
   return {
-    title: `${listing.title} · AgraIA`,
+    title: `${listing.title} · Siamo`,
     description: listing.description.slice(0, 160),
     openGraph: {
       images: listing.photos[0] ? [{ url: listing.photos[0].url }] : [],
@@ -169,7 +169,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
   const photos = [...listing.photos].sort((a, b) => a.order - b.order).map((p) => ({ url: p.url }))
 
   const catLabel = CATEGORY_LABELS[listing.category] ?? listing.category
-  const waText = encodeURIComponent(`Olá, vi seu anúncio "${listing.title}" no AgraIA`)
+  const waText = encodeURIComponent(`Olá, vi seu anúncio "${listing.title}" no Siamo`)
   const waLink = `https://wa.me/?text=${waText}`
 
   return (

@@ -101,7 +101,7 @@ export function PWAInstallSheet({ onClose, onInstall, onDismiss }: PWAInstallShe
           <PWAAppIcon />
           <div>
             <p id="pwa-sheet-title" className="text-[22px] font-medium">
-              AgraIA
+              Siamo
             </p>
             <p className="text-muted-foreground text-[13px]">Adicionar à tela inicial</p>
           </div>

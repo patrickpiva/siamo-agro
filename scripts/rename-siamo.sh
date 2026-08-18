@@ -82,7 +82,16 @@ Plano: docs/plano-migracao-siamo.md"
     echo "→ PR 2: user-facing brand (AgraIA → Siamo, agra.ia.br → siamoagro.com)…"
     run_sed "$CODE_FILES" \
       -e 's|AgraIA|Siamo|g' \
-      -e 's|agra\.ia\.br|siamoagro.com|g'
+      -e 's|agra\.ia\.br|siamoagro.com|g' \
+      -e 's|agraia\.app|app.siamoagro.com|g' \
+      -e 's|@agraia\\/|@siamo\\/|g'   # regex escapado em tsup.config.ts — o sed do PR 1 não pega
+
+    # sed altera conteúdo, nunca nomes de diretório — o rename anterior
+    # (AgroLink → AgraIA) caiu nessa mesma armadilha.
+    if [ -d "packages/ui/src/icons/agraia" ]; then
+      echo "→ Renomeando packages/ui/src/icons/agraia → siamo…"
+      git mv packages/ui/src/icons/agraia packages/ui/src/icons/siamo
+    fi
 
     echo "→ Type-checking…";  pnpm typecheck
     echo "→ Testing…";        pnpm test
