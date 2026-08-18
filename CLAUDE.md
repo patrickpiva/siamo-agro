@@ -620,19 +620,19 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 
 **Plataformas e ambientes:**
 
-| Plataforma  | Ambiente   | Serviço / Domínio                     | Notas                                            |
-| ----------- | ---------- | ------------------------------------- | ------------------------------------------------ |
-| Railway     | production | `api` → `api.siamoagro.com`           | Start: `node apps/api/dist/index.js`; Pro plan   |
-| Railway     | production | `worker`                              | Start: `node apps/api/dist/worker.js`; sem porta |
-| Railway     | production | Redis plugin                          | Injeta `REDIS_URL`                               |
-| Railway     | staging    | `api` → `api-staging.siamoagro.com`   | Mesmo build, vars de staging                     |
-| Railway     | staging    | `worker`                              | Idem, sem porta                                  |
-| Railway     | staging    | Redis plugin                          | Redis isolado de produção                        |
-| Vercel      | production | `app.siamoagro.com`                   | Branch `main`; root dir `apps/web`               |
-| Vercel      | staging    | `staging.siamoagro.com`               | Branch `staging`; mesma config de build          |
-| Supabase    | production | projeto `siamo-agro-production`       | Migrations manuais; ver §4                       |
-| Supabase    | staging    | projeto `siamo-agro-staging`          | Cópia do schema; dados de teste                  |
-| registro.br | —          | DNS autoritativo para `siamoagro.com` | Ver registros abaixo; **sem** proxy Cloudflare   |
+| Plataforma | Ambiente   | Serviço / Domínio                     | Notas                                            |
+| ---------- | ---------- | ------------------------------------- | ------------------------------------------------ |
+| Railway    | production | `api` → `api.siamoagro.com`           | Start: `node apps/api/dist/index.js`; Pro plan   |
+| Railway    | production | `worker`                              | Start: `node apps/api/dist/worker.js`; sem porta |
+| Railway    | production | Redis plugin                          | Injeta `REDIS_URL`                               |
+| Railway    | staging    | `api` → `api-staging.siamoagro.com`   | Mesmo build, vars de staging                     |
+| Railway    | staging    | `worker`                              | Idem, sem porta                                  |
+| Railway    | staging    | Redis plugin                          | Redis isolado de produção                        |
+| Vercel     | production | `app.siamoagro.com`                   | Branch `main`; root dir `apps/web`               |
+| Vercel     | staging    | `staging.siamoagro.com`               | Branch `staging`; mesma config de build          |
+| Supabase   | production | projeto `siamo-agro-production`       | Migrations manuais; ver §4                       |
+| Supabase   | staging    | projeto `siamo-agro-staging`          | Cópia do schema; dados de teste                  |
+| Namecheap  | —          | DNS autoritativo para `siamoagro.com` | Ver registros abaixo; **sem** proxy Cloudflare   |
 
 **Região e cold starts (decisão de latência — 2026-06-04):**
 
@@ -640,16 +640,21 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - **Railway permanece em US-East** (sem região no Brasil) → mantido **fora do caminho de leitura quente** (ver ADR §9 "reads via Prisma direto"). Atende escritas, auth e worker.
 - **App Sleeping OFF**: `railway.toml` define `sleepApplication = false` + `numReplicas = 1` para a API. O **worker** é configurado no dashboard — confirmar App Sleeping OFF nos **dois serviços** e **ambos os ambientes**. Motivo: cold-starts de ~3,3 s no login e no primeiro carregamento de matches. Custo: serviços always-on cobram compute contínuo (aceitável em produção; trade-off em staging).
 
-**Registros DNS (registro.br):**
+**Registros DNS (Namecheap):**
 
-| Tipo  | Nome                                        | Destino                                                                           |
-| ----- | ------------------------------------------- | --------------------------------------------------------------------------------- |
-| CNAME | `app.siamoagro.com`                         | `8f75f4d91770dccf.vercel-dns-017.com`                                             |
-| CNAME | `staging.siamoagro.com`                     | `8f75f4d91770dccf.vercel-dns-017.com`                                             |
-| CNAME | `api.siamoagro.com`                         | `csyynwdg.up.railway.app`                                                         |
-| CNAME | `api-staging.siamoagro.com`                 | `qx1cmaqd.up.railway.app`                                                         |
-| TXT   | `_railway-verify.api.siamoagro.com`         | `railway-verify=f80b10bd5cf310d8764572e4cbe0cd28cd784cf52f0952a52db22f031e226730` |
-| TXT   | `_railway-verify.api-staging.siamoagro.com` | `railway-verify=5d1c706826d6167cef729148d9b8883f6735e8055c36181d1166b40466f7e37d` |
+| Tipo  | Nome                                        | Destino                                               |
+| ----- | ------------------------------------------- | ----------------------------------------------------- |
+| CNAME | `app.siamoagro.com`                         | alvo do projeto na Vercel (`*.vercel-dns-*.com`)      |
+| CNAME | `staging.siamoagro.com`                     | idem                                                  |
+| CNAME | `api.siamoagro.com`                         | alvo do serviço `api` no Railway (`*.up.railway.app`) |
+| CNAME | `api-staging.siamoagro.com`                 | idem (ambiente staging)                               |
+| TXT   | `_railway-verify.api.siamoagro.com`         | token de verificação do Railway                       |
+| TXT   | `_railway-verify.api-staging.siamoagro.com` | idem (ambiente staging)                               |
+
+> Os valores exatos de destino e os tokens `_railway-verify` são **por domínio** e
+> mudam a cada domínio adicionado — leia-os sempre no dashboard (Vercel → Settings →
+> Domains; Railway → serviço → Settings → Networking) em vez de copiar daqui.
+> Runbook completo do rebrand: `docs/plano-migracao-siamo.md` §3b.
 
 ---
 
@@ -897,15 +902,16 @@ Definir as variáveis no painel do Railway (API service) ou no `.env` local. Nun
 > Nos provedores: configurar em Railway (api + worker), Vercel (web — **incluindo o
 > ambiente Preview**, ver nota do `JWT_SECRET`) e CI conforme o processo.
 
-| Variável                                                            | Processo                 | Obrigatória                  | Notas                                                                                                                                                        |
-| ------------------------------------------------------------------- | ------------------------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL` / `DIRECT_URL`                                       | api, worker, web (SSR)   | sim                          | Pooler (PgBouncer) nas queries; direta só para tooling do Prisma                                                                                             |
-| `JWT_SECRET`                                                        | api, web                 | **sim em produção**          | Sem fallback: API falha no boot, web lança `CONFIG_MISSING_ENV`. Habilitar também no **Preview** da Vercel — build de preview roda com `NODE_ENV=production` |
-| `REDIS_URL`                                                         | worker (sim), api (não)  | só no worker                 | Sem ela a API loga warn e ignora jobs; o worker se recusa a subir                                                                                            |
-| `API_URL`                                                           | web (proxy + SSR fetch)  | não (default localhost:3001) | Railway em produção/staging                                                                                                                                  |
-| `NEXT_PUBLIC_API_URL`                                               | web (middleware refresh) | não (default localhost:3001) | ⚠ duplica `API_URL` — unificação está nos TODOs                                                                                                              |
-| `NEXT_PUBLIC_APP_URL`                                               | api, worker              | não                          | CORS da API + links nas notificações WhatsApp                                                                                                                |
-| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`                        | api                      | p/ uploads                   | Também usada na validação de propriedade de fotos (`photo-ownership.ts`)                                                                                     |
-| `DEMO_PHONES` / `DEMO_OTP`                                          | api                      | não                          | §13 — bypass de OTP para contas demo; vazio = desativado                                                                                                     |
-| `MATCH_WEIGHT_*` / `MATCH_MAX_DISTANCE_KM`                          | api, worker              | não                          | §12 — tuning do matchmaking sem deploy (requer restart do processo)                                                                                          |
-| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM` | api, worker              | não (modo stub)              | Sem elas o adapter loga e não envia mensagens reais                                                                                                          |
+| Variável                                                            | Processo                 | Obrigatória                  | Notas                                                                                                                                                                            |
+| ------------------------------------------------------------------- | ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` / `DIRECT_URL`                                       | api, worker, web (SSR)   | sim                          | Pooler (PgBouncer) nas queries; direta só para tooling do Prisma                                                                                                                 |
+| `JWT_SECRET`                                                        | api, web                 | **sim em produção**          | Sem fallback: API falha no boot, web lança `CONFIG_MISSING_ENV`. Habilitar também no **Preview** da Vercel — build de preview roda com `NODE_ENV=production`                     |
+| `REDIS_URL`                                                         | worker (sim), api (não)  | só no worker                 | Sem ela a API loga warn e ignora jobs; o worker se recusa a subir                                                                                                                |
+| `API_URL`                                                           | web (proxy + SSR fetch)  | não (default localhost:3001) | Railway em produção/staging                                                                                                                                                      |
+| `NEXT_PUBLIC_API_URL`                                               | web (middleware refresh) | não (default localhost:3001) | ⚠ duplica `API_URL` — unificação está nos TODOs                                                                                                                                  |
+| `NEXT_PUBLIC_APP_URL`                                               | api, worker              | não                          | CORS da API + links nas notificações WhatsApp                                                                                                                                    |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`                        | api                      | p/ uploads                   | Também usada na validação de propriedade de fotos (`photo-ownership.ts`)                                                                                                         |
+| `DEMO_PHONES` / `DEMO_OTP`                                          | api                      | não                          | §13 — bypass de OTP para contas demo; vazio = desativado                                                                                                                         |
+| `MATCH_WEIGHT_*` / `MATCH_MAX_DISTANCE_KM`                          | api, worker              | não                          | §12 — tuning do matchmaking sem deploy (requer restart do processo)                                                                                                              |
+| `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_WHATSAPP_FROM` | api, worker              | não (modo stub)              | Sem elas o adapter loga e não envia mensagens reais                                                                                                                              |
+| `TWILIO_CONTENT_SID_OTP`                                            | api                      | **sim em produção**          | Content SID (HX…) do template `siamo_otp` aprovado pela Meta. Vazio = Body livre, que só entrega no sandbox. Nome exato lido em `twilio.adapter.ts` — não é `TWILIO_CONTENT_SID` |
