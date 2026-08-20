@@ -661,7 +661,8 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 ### TODOs pendentes (não implementado ainda)
 
 - [x] Configurar serviços no Railway (API + Worker + Redis) e Vercel — concluído 2026-05-28
-- [ ] Gerar `public/icons/icon-192.png` e `icon-512.png` via `npx sharp-cli`
+- [x] Gerar `public/icons/icon-192.png` e `icon-512.png` — existem e servem 200 em produção
+- [ ] Substituir a arte dos ícones pelo logo Siamo — hoje é um globo lime genérico (placeholder neutro, sem marca antiga)
 - [ ] Gerar VAPID keys (`npx web-push generate-vapid-keys`) e adicionar ao `.env`
 - [ ] Implementar persistência de push subscriptions na API (tabela `push_subscriptions` + `web-push` npm)
 - [x] RLS: `migrations/manual/004_rls.sql` — RLS habilitado nas 14 tabelas públicas; aplicado em staging e produção (2026-06-02)
