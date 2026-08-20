@@ -349,42 +349,34 @@ describe('AuthService', () => {
       })
     })
 
-    describe('formato legado (hex sem id)', () => {
-      it('retorna novos tokens via scan limitado', async () => {
-        mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
-        mockUserDb.findUnique.mockResolvedValue(mockUser)
-        mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
-        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
+    describe('formato legado (hex sem ponto) — rejeitado desde 2026-08-20', () => {
+      it('rejeita sem tocar no banco (sem scan, sem bcrypt)', async () => {
+        await expect(
+          service.refreshAccessToken('mock-refresh-token-raw-hex'),
+        ).rejects.toBeInstanceOf(RefreshTokenInvalidError)
 
-        const result = await service.refreshAccessToken('mock-refresh-token-raw-hex')
-
-        expect(result.accessToken).toBe('mock.access.token')
-        expect(result.refreshToken).toBe('rt-2.mock-refresh-token-raw-hex')
+        // O scan O(n) com bcrypt por iteração era DoS não autenticado em
+        // /auth/refresh (endpoint público e sem rate limit por IP).
+        expect(mockRefreshTokenDb.findMany).not.toHaveBeenCalled()
+        expect(mockRefreshTokenDb.findUnique).not.toHaveBeenCalled()
+        expect(mockBcryptCompare).not.toHaveBeenCalled()
       })
 
-      it('lança RefreshTokenInvalidError quando token não encontrado', async () => {
-        mockRefreshTokenDb.findMany.mockResolvedValue([])
-
-        await expect(service.refreshAccessToken('invalid-token')).rejects.toBeInstanceOf(
+      it('rejeita string arbitrária sem ponto sem custo de CPU', async () => {
+        await expect(service.refreshAccessToken('x'.repeat(4096))).rejects.toBeInstanceOf(
           RefreshTokenInvalidError,
         )
+
+        expect(mockRefreshTokenDb.findMany).not.toHaveBeenCalled()
+        expect(mockBcryptCompare).not.toHaveBeenCalled()
       })
 
-      it('revoga o token antigo ao emitir novo (rotação)', async () => {
-        mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
-        mockUserDb.findUnique.mockResolvedValue(mockUser)
-        mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
-        mockRefreshTokenDb.create.mockResolvedValue({ ...mockRefreshToken, id: 'rt-2' })
-
-        await service.refreshAccessToken('mock-refresh-token-raw-hex')
-
-        expect(mockRefreshTokenDb.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            where: { id: 'rt-1' },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            data: expect.objectContaining({ revokedAt: expect.any(Date) }),
-          }),
+      it('rejeita token que começa com ponto (id vazio)', async () => {
+        await expect(service.refreshAccessToken('.segredo')).rejects.toBeInstanceOf(
+          RefreshTokenInvalidError,
         )
+
+        expect(mockRefreshTokenDb.findUnique).not.toHaveBeenCalled()
       })
     })
   })
@@ -440,10 +432,10 @@ describe('AuthService', () => {
 
   describe('logout', () => {
     it('revoga o refresh token do usuário', async () => {
-      mockRefreshTokenDb.findMany.mockResolvedValue([mockRefreshToken])
+      mockRefreshTokenDb.findUnique.mockResolvedValue(mockRefreshToken)
       mockRefreshTokenDb.update.mockResolvedValue({ ...mockRefreshToken, revokedAt: new Date() })
 
-      await service.logout('user-1', 'mock-refresh-token-raw-hex')
+      await service.logout('user-1', 'rt-1.mock-refresh-token-raw-hex')
 
       expect(mockRefreshTokenDb.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -455,9 +447,15 @@ describe('AuthService', () => {
     })
 
     it('não lança erro se refresh token não encontrado (logout idempotente)', async () => {
-      mockRefreshTokenDb.findMany.mockResolvedValue([])
+      mockRefreshTokenDb.findUnique.mockResolvedValue(null)
 
+      await expect(service.logout('user-1', 'rt-9.unknown')).resolves.not.toThrow()
+    })
+
+    it('não lança erro com token em formato legado (sem ponto)', async () => {
       await expect(service.logout('user-1', 'unknown-token')).resolves.not.toThrow()
+
+      expect(mockRefreshTokenDb.update).not.toHaveBeenCalled()
     })
   })
 })

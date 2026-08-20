@@ -5,7 +5,7 @@ import { CollectiveCard } from '@/components/collective/collective-card'
 import type { CollectiveCampaign } from '@/components/collective/collective-card'
 import { cn } from '@siamo/ui'
 
-export const metadata: Metadata = { title: 'Compras coletivas — Siamo' }
+export const metadata: Metadata = { title: 'Compras coletivas' }
 
 // Mock data matching the design spec
 const MOCK_CAMPAIGNS: CollectiveCampaign[] = [
