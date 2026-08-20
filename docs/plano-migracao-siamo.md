@@ -2,26 +2,30 @@
 
 > **Status (2026-08-20)**
 >
-> | Item                                                    | Estado                                           |
-> | ------------------------------------------------------- | ------------------------------------------------ |
-> | PR 0 — prep (plano, script, limpeza)                    | ✅ mergeado (#31)                                |
-> | PR 1 — rename interno `@agraia/*` → `@siamo/*`          | ✅ mergeado (#32 · 930c2ab)                      |
-> | PR 2 — marca user-facing + correções residuais          | ✅ mergeado (#33 · a25aaeb)                      |
-> | PR 3 — docs                                             | ✅ mergeado (#34 · 7cb32e9)                      |
-> | `staging` sincronizado com `main`                       | ✅ 099440c (estava 1 mês defasado)               |
-> | Domínio siamoagro.com (Namecheap) + DNS dos subdomínios | ✅ feito                                         |
-> | Vercel / Railway — domínios novos                       | ✅ `app.` e `api.` verificados servindo Siamo    |
-> | Repo GitHub → `patrickpiva/siamo-agro`                  | ✅ feito (antecipado da Fase 3)                  |
-> | Supabase — nome dos projetos                            | ✅ feito (antecipado da Fase 3)                  |
-> | **Apex `siamoagro.com` + `www`**                        | ❌ **sem registro DNS — não responde** (ver §3b) |
-> | Twilio/Meta — display name + template `siamo_otp`       | ⚠️ **caminho crítico — aguardando aprovação**    |
-> | Ícones Siamo (SVG + PNG 192/512)                        | ⬜ arte pendente (placeholder é neutro)          |
-> | Env vars apontando p/ siamoagro.com                     | ⬜ Fase B (staging) → Fase C (produção)          |
-> | Remover domínios/DNS de agra.ia.br                      | ⬜ último passo                                  |
+> | Item                                                    | Estado                                                                                                                                      |
+> | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+> | PR 0 — prep (plano, script, limpeza)                    | ✅ mergeado (#31)                                                                                                                           |
+> | PR 1 — rename interno `@agraia/*` → `@siamo/*`          | ✅ mergeado (#32 · 930c2ab)                                                                                                                 |
+> | PR 2 — marca user-facing + correções residuais          | ✅ mergeado (#33 · a25aaeb)                                                                                                                 |
+> | PR 3 — docs                                             | ✅ mergeado (#34 · 7cb32e9)                                                                                                                 |
+> | PRs pós-rebrand: #36 (limpeza) e #37 (fixes/DoS)        | ✅ mergeados; CI verde                                                                                                                      |
+> | Branch `staging` — trazer #36 e #37 de `main`           | ⬜ merge pendente (diff é puramente atrás)                                                                                                  |
+> | Domínio siamoagro.com (Namecheap) + DNS dos subdomínios | ✅ feito                                                                                                                                    |
+> | Vercel / Railway — domínios novos                       | ✅ `app.` e `api.` verificados servindo Siamo                                                                                               |
+> | Repo GitHub → `patrickpiva/siamo-agro`                  | ✅ feito (antecipado da Fase 3)                                                                                                             |
+> | Supabase — nome dos projetos                            | ✅ feito (antecipado da Fase 3)                                                                                                             |
+> | Apex `siamoagro.com` + `www`                            | ➖ fora do escopo — reservado p/ landing institucional                                                                                      |
+> | Twilio/Meta — template `siamo_otp`                      | ⏸️ pausado — OTP real não está em produção; ao ativar: `TWILIO_CONTENT_SID_OTP` no Railway (api, 2 ambientes) e apagar `TWILIO_CONTENT_SID` |
+> | Ícones Siamo (SVG + PNG 192/512)                        | ⬜ arte pendente (placeholder é neutro)                                                                                                     |
+> | **Fase B — staging cutover (env vars + validação)**     | ✅ **feito e validado E2E em 2026-08-20**                                                                                                   |
+> | Fase C — produção: flip de env vars                     | ⬜ desbloqueada (Twilio pausado não bloqueia)                                                                                               |
+> | Fase D — remover domínios/DNS de agra.ia.br             | ⬜ `api-staging.` já removido; resto após Fase C                                                                                            |
 >
-> **Estado atual**: marca Siamo já em produção, servida pelos domínios antigos
-> (`app.agra.ia.br` / `api.agra.ia.br`) — as env vars ainda apontam para lá.
-> Os domínios novos já servem corretamente em paralelo.
+> **Estado atual (2026-08-20)**: marca Siamo em produção. **Staging já cortou** para
+> siamoagro.com — env vars flipadas (Vercel + Railway), validado E2E (login demo,
+> refresh pós-#37, /me, proxy); `api-staging.agra.ia.br` já removido. **Produção**
+> ainda se identifica pelos domínios antigos; com o Twilio pausado, nada bloqueia
+> a Fase C — flip de `NEXT_PUBLIC_APP_URL`/`API_URL` quando decidir.
 
 > Criado em 2026-08-07. Decisões de branding aprovadas pelos stakeholders.
 > Auditoria feita por leitura dirigida dos arquivos-chave (o grep completo de
