@@ -9,7 +9,7 @@
 > | PR 2 — marca user-facing + correções residuais          | ✅ mergeado (#33 · a25aaeb)                                                                                                                 |
 > | PR 3 — docs                                             | ✅ mergeado (#34 · 7cb32e9)                                                                                                                 |
 > | PRs pós-rebrand: #36 (limpeza) e #37 (fixes/DoS)        | ✅ mergeados; CI verde                                                                                                                      |
-> | Branch `staging` — trazer #36 e #37 de `main`           | ⬜ merge pendente (diff é puramente atrás)                                                                                                  |
+> | Branch `staging` — trazer #36 e #37 de `main`           | ✅ sincronizado (sem commits exclusivos em `main`)                                                                                          |
 > | Domínio siamoagro.com (Namecheap) + DNS dos subdomínios | ✅ feito                                                                                                                                    |
 > | Vercel / Railway — domínios novos                       | ✅ `app.` e `api.` verificados servindo Siamo                                                                                               |
 > | Repo GitHub → `patrickpiva/siamo-agro`                  | ✅ feito (antecipado da Fase 3)                                                                                                             |
@@ -18,14 +18,26 @@
 > | Twilio/Meta — template `siamo_otp`                      | ⏸️ pausado — OTP real não está em produção; ao ativar: `TWILIO_CONTENT_SID_OTP` no Railway (api, 2 ambientes) e apagar `TWILIO_CONTENT_SID` |
 > | Ícones Siamo (SVG + PNG 192/512)                        | ⬜ arte pendente (placeholder é neutro)                                                                                                     |
 > | **Fase B — staging cutover (env vars + validação)**     | ✅ **feito e validado E2E em 2026-08-20**                                                                                                   |
-> | Fase C — produção: flip de env vars                     | ⬜ desbloqueada (Twilio pausado não bloqueia)                                                                                               |
-> | Fase D — remover domínios/DNS de agra.ia.br             | ⬜ `api-staging.` já removido; resto após Fase C                                                                                            |
+> | **Fase C — produção: flip de env vars**                 | ✅ **feito e validado E2E em 2026-08-20**                                                                                                   |
+> | **Fase D — remover domínios/DNS de agra.ia.br**         | ✅ **os 4 subdomínios não respondem mais**                                                                                                  |
 >
-> **Estado atual (2026-08-20)**: marca Siamo em produção. **Staging já cortou** para
-> siamoagro.com — env vars flipadas (Vercel + Railway), validado E2E (login demo,
-> refresh pós-#37, /me, proxy); `api-staging.agra.ia.br` já removido. **Produção**
-> ainda se identifica pelos domínios antigos; com o Twilio pausado, nada bloqueia
-> a Fase C — flip de `NEXT_PUBLIC_APP_URL`/`API_URL` quando decidir.
+> ## ✅ MIGRAÇÃO CONCLUÍDA em 2026-08-20
+>
+> Produção e staging rodam 100% em `siamoagro.com`. Validado ao vivo em produção:
+> CORS no par novo, proxy, `/listings` (200), login demo OTP → verify → refresh com
+> rotação, token dotless rejeitado em 156 ms (fix de DoS do #37 ativo), 404 genérico,
+> título sem marca duplicada, manifest "Siamo". Os 4 subdomínios de `agra.ia.br`
+> foram desligados.
+>
+> **Pendências fora da migração**: arte dos ícones (aguardando projeto de marca),
+> ativação do Twilio, renomear a pasta local → `siamo-agro` (+ copiar o diretório
+> de memória do Claude para o path novo).
+>
+> ⚠️ **Armadilha operacional**: o projeto Supabase de produção **auto-pausa por
+> inatividade** — foi o que derrubou tudo que tocava banco durante a Fase C
+> (endpoints sem banco respondiam 200; com banco, 500). `/health` **não** consulta
+> o banco, então o healthcheck do Railway não detecta. Enquanto produção não tiver
+> tráfego real, vai repetir. Considerar `SELECT 1` no `/health` ou ping periódico.
 
 > Criado em 2026-08-07. Decisões de branding aprovadas pelos stakeholders.
 > Auditoria feita por leitura dirigida dos arquivos-chave (o grep completo de
