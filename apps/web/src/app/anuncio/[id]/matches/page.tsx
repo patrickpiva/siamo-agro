@@ -4,7 +4,7 @@ import { ArrowLeft } from '@siamo/ui/icons'
 import { MatchItem } from '@/components/matches/match-item'
 import type { MatchItemData } from '@/components/matches/match-item'
 
-export const metadata: Metadata = { title: 'Matches do anúncio — Siamo' }
+export const metadata: Metadata = { title: 'Matches do anúncio' }
 
 // Mock data matching the design spec
 const MOCK_MATCHES: MatchItemData[] = [

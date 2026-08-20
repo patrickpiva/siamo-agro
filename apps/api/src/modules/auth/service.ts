@@ -323,36 +323,29 @@ export class AuthService {
     return `${record.id}.${secret}`
   }
 
-  /** Resolve um refresh token cru (novo formato ou legado) para o registro no banco. */
+  /**
+   * Resolve um refresh token cru (`<recordId>.<segredo>`) para o registro no banco:
+   * findUnique por PK + 1 bcrypt.compare.
+   *
+   * O fallback para o formato legado (hex sem `.`) foi removido em 2026-08-20 — ele
+   * fazia scan de até 1000 tokens com um bcrypt.compare por iteração. Como
+   * `/auth/refresh` é público e **sem rate limit por IP** (ver CLAUDE.md §5), qualquer
+   * string sem ponto custava dezenas de segundos de CPU: DoS não autenticado. Tokens
+   * legados tinham TTL de 30 dias e expiraram em 2026-07-10, então o caminho já não
+   * atendia tráfego legítimo.
+   */
   private async findRefreshToken(raw: string) {
     const dotIdx = raw.indexOf('.')
+    if (dotIdx <= 0) return null
 
-    if (dotIdx > 0) {
-      const id = raw.slice(0, dotIdx)
-      const secret = raw.slice(dotIdx + 1)
+    const id = raw.slice(0, dotIdx)
+    const secret = raw.slice(dotIdx + 1)
 
-      const record = await this.prisma.refreshToken.findUnique({ where: { id } })
-      if (!record || record.expiresAt <= new Date()) return null
+    const record = await this.prisma.refreshToken.findUnique({ where: { id } })
+    if (!record || record.expiresAt <= new Date()) return null
 
-      const matches = await bcrypt.compare(secret, record.tokenHash)
-      return matches ? record : null
-    }
-
-    // Formato legado (hex sem id, pré-redesign): scan limitado com compare por hash.
-    // Tokens legados expiram em 30 dias — remover este fallback depois de 2026-07-10.
-    const activeTokens = await this.prisma.refreshToken.findMany({
-      where: { revokedAt: null, expiresAt: { gt: new Date() } },
-      orderBy: { createdAt: 'desc' },
-      take: 1000,
-    })
-
-    for (const record of activeTokens) {
-      if (await bcrypt.compare(raw, record.tokenHash)) {
-        console.info('[auth] Refresh token em formato legado aceito — será rotacionado')
-        return record
-      }
-    }
-    return null
+    const matches = await bcrypt.compare(secret, record.tokenHash)
+    return matches ? record : null
   }
 
   /** Comparação em tempo constante — evita vazar o código demo por timing. */

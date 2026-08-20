@@ -1,5 +1,4 @@
 const QUEUE_KEY = 'siamo:offline-queue'
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001'
 
 export interface QueuedMessage {
   transactionId: string
@@ -39,11 +38,23 @@ export async function flushOfflineQueue(): Promise<void> {
 
   for (const msg of queue) {
     try {
-      const res = await fetch(`${API_URL}/api/v1/transactions/${msg.transactionId}/messages`, {
+      // Sempre via /api/proxy: mesma origem (sem CORS) e o proxy injeta o
+      // `Authorization: Bearer` a partir do cookie httpOnly. Chamar
+      // NEXT_PUBLIC_API_URL direto daqui mandava a requisição sem credencial
+      // nenhuma — o endpoint é autenticado, então toda mensagem enfileirada
+      // tomava 401 e era descartada em silêncio após 3 tentativas.
+      const res = await fetch(`/api/proxy/transactions/${msg.transactionId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: msg.content }),
       })
+
+      // 401/403: sessão expirada enquanto offline. Reenfileirar não resolve —
+      // mantém a mensagem para a próxima sessão em vez de queimar as retries.
+      if (res.status === 401 || res.status === 403) {
+        failed.push(msg)
+        continue
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
     } catch {
       if (msg.retries < 3) {

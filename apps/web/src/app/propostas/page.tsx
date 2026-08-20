@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { MessageSquare } from '@siamo/ui/icons'
 import { ScreenHeader } from '@/components/layout/screen-header'
 
-export const metadata: Metadata = { title: 'Minhas propostas — Siamo' }
+export const metadata: Metadata = { title: 'Minhas propostas' }
 
 interface Props {
   searchParams: Promise<{ role?: string }>

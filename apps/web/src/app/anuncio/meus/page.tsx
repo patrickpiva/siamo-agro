@@ -6,7 +6,7 @@ import { getServerSession } from '@/lib/server-auth'
 import { fetchMyListings } from '@/lib/api'
 import { MyListingsView } from '@/components/listings/my-listings-view'
 
-export const metadata: Metadata = { title: 'Meus anúncios · Siamo' }
+export const metadata: Metadata = { title: 'Meus anúncios' }
 
 const STATUS_MAP: Record<string, string | undefined> = {
   active: 'ACTIVE',
