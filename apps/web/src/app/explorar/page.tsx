@@ -8,7 +8,8 @@ import { FeedTabs, type FeedTab } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
 import { ListingCardSkeleton } from '@siamo/ui'
 
-export const metadata: Metadata = { title: 'Explorar — Siamo' }
+// Sem sufixo de marca: o template do layout raiz já aplica "%s | Siamo"
+export const metadata: Metadata = { title: 'Explorar' }
 
 interface ExplorarPageProps {
   searchParams: Promise<{

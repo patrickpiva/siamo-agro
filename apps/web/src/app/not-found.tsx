@@ -13,8 +13,8 @@ export default function NotFound() {
         code="ERRO 404"
         icon={<HelpCircle size={32} strokeWidth={1.5} />}
         iconVariant="red"
-        title="Anúncio não encontrado"
-        message="Este anúncio pode ter sido removido pelo vendedor ou está temporariamente indisponível."
+        title="Página não encontrada"
+        message="O endereço que você acessou não existe ou o conteúdo foi removido."
         actions={[
           {
             label: 'Voltar',
@@ -23,7 +23,7 @@ export default function NotFound() {
             onClick: () => router.back(),
           },
           {
-            label: 'Ver feed',
+            label: 'Ir para o início',
             variant: 'primary',
             href: '/',
           },

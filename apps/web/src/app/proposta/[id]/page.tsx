@@ -8,7 +8,7 @@ import { ProposerCard } from '@/components/transactions/proposer-card'
 import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProposalReviewActions } from '@/components/transactions/proposal-review-actions'
 
-export const metadata: Metadata = { title: 'Nova proposta — Siamo' }
+export const metadata: Metadata = { title: 'Nova proposta' }
 
 interface PageProps {
   params: Promise<{ id: string }>

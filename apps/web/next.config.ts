@@ -8,6 +8,9 @@ import withSerwistInit from '@serwist/next'
 
 const nextConfig: NextConfig = {
   typedRoutes: true,
+  // Esconde o indicador flutuante do Next.js Dev Tools (badge "N" + contador
+  // de issues) no canto da tela durante `next dev`.
+  devIndicators: false,
   transpilePackages: ['@siamo/ui', '@siamo/shared'],
   // Transform barrel imports into direct deep imports so unused exports are
   // never bundled — biggest win for the @siamo/ui/icons and lucide-react barrels.
