@@ -47,9 +47,17 @@ interface RawListingRow {
   profileBadge: string
 }
 
+/**
+ * How far the text search had to be relaxed (see `resolveSearchTier`).
+ * - `exact`   → every term matched (websearch_to_tsquery, AND)
+ * - `partial` → only some terms matched (same query converted to OR)
+ * - `fuzzy`   → nothing matched; fell back to trigram similarity (typo)
+ */
+export type SearchTier = 'exact' | 'partial' | 'fuzzy'
+
 export interface ListListingsResult {
   data: ListingWithProfile[]
-  meta: { nextCursor: string | null; limit: number }
+  meta: { nextCursor: string | null; limit: number; searchRelaxed?: SearchTier }
 }
 
 export interface ListMyListingsResult {
@@ -117,13 +125,31 @@ export class ListingsService {
     const { kind, category, minPrice, maxPrice, lat, lng, radiusKm, search, cursor, limit } = query
 
     const hasGeo = lat !== undefined && lng !== undefined && radiusKm !== undefined
-    const hasSearch = search !== undefined && search.length > 0
+
+    // Filters that depend on neither the text search nor the cursor. Kept
+    // separate because `resolveSearchTier` needs them — the tier answers "is
+    // there any result under these filters?" — but must not see the cursor:
+    // otherwise page 2 of a relaxed search would find 0 rows in the exact tier
+    // and relax again, landing on a different tier than page 1.
+    const baseConditions: Prisma.Sql[] = [Prisma.sql`lst.status = 'ACTIVE'`]
+
+    if (kind) baseConditions.push(Prisma.sql`lst.kind = ${kind}`)
+    if (category) baseConditions.push(Prisma.sql`lst.category = ${category}`)
+    if (minPrice !== undefined) baseConditions.push(Prisma.sql`lst.price >= ${minPrice}`)
+    if (maxPrice !== undefined) baseConditions.push(Prisma.sql`lst.price <= ${maxPrice}`)
+    if (hasGeo) {
+      baseConditions.push(
+        Prisma.sql`loc.geog IS NOT NULL AND ST_DWithin(loc.geog, ST_MakePoint(${lng}, ${lat})::geography, ${radiusKm * 1000})`,
+      )
+    }
+
+    // `search` is `string | undefined` (Zod enforces min(1) when present), so the
+    // truthiness check already narrows the type for the helpers below.
+    const tier = search ? await this.resolveSearchTier(search, baseConditions) : null
 
     // Expressões de ordenação reutilizadas no keyset do cursor — precisam ser
     // idênticas no ORDER BY e no WHERE para a paginação ser estável
-    const rankExpr = hasSearch
-      ? Prisma.sql`ts_rank(to_tsvector('portuguese', lst.title || ' ' || lst.description), plainto_tsquery('portuguese', ${search}))`
-      : null
+    const rankExpr = search && tier ? this.searchRankExpr(tier, search) : null
     const distExpr = hasGeo
       ? Prisma.sql`ST_Distance(loc.geog, ST_MakePoint(${lng}, ${lat})::geography)`
       : null
@@ -132,22 +158,9 @@ export class ListingsService {
       ? await this.buildCursorCondition(cursor, rankExpr, distExpr)
       : null
 
-    const conditions: Prisma.Sql[] = [Prisma.sql`lst.status = 'ACTIVE'`]
+    const conditions: Prisma.Sql[] = [...baseConditions]
 
-    if (kind) conditions.push(Prisma.sql`lst.kind = ${kind}`)
-    if (category) conditions.push(Prisma.sql`lst.category = ${category}`)
-    if (minPrice !== undefined) conditions.push(Prisma.sql`lst.price >= ${minPrice}`)
-    if (maxPrice !== undefined) conditions.push(Prisma.sql`lst.price <= ${maxPrice}`)
-    if (hasGeo) {
-      conditions.push(
-        Prisma.sql`loc.geog IS NOT NULL AND ST_DWithin(loc.geog, ST_MakePoint(${lng}, ${lat})::geography, ${radiusKm * 1000})`,
-      )
-    }
-    if (hasSearch) {
-      conditions.push(
-        Prisma.sql`to_tsvector('portuguese', lst.title || ' ' || lst.description) @@ plainto_tsquery('portuguese', ${search})`,
-      )
-    }
+    if (search && tier) conditions.push(this.searchMatchExpr(tier, search))
     if (cursorCondition) conditions.push(cursorCondition)
 
     const whereClause = Prisma.join(conditions, ' AND ')
@@ -219,6 +232,7 @@ export class ListingsService {
       meta: {
         nextCursor: hasMore ? (data.at(-1)?.id ?? null) : null,
         limit,
+        ...(tier && { searchRelaxed: tier }),
       },
     }
   }
@@ -366,7 +380,85 @@ export class ListingsService {
     })
   }
 
-  // ── Helpers privados ─────────────────────────────────────────────────────────
+  // ── Private helpers — text search ────────────────────────────────────────────
+
+  /**
+   * The tsquery for each tier. `websearch_to_tsquery` already parses user input
+   * safely (quotes, OR, -term), so we never concatenate raw text.
+   *
+   * The `partial` tier reuses that same parse and swaps `&` for `|` in the text
+   * of the already-built tsquery. That is how we get OR semantics without
+   * re-tokenising the user's string by hand — tokenising in JS would reopen the
+   * door to injection and would drift from the Postgres stemmer.
+   */
+  private searchQueryExpr(tier: 'exact' | 'partial', search: string): Prisma.Sql {
+    const exact = Prisma.sql`websearch_to_tsquery('portuguese', immutable_unaccent(${search}))`
+    return tier === 'exact' ? exact : Prisma.sql`replace(${exact}::text, '&', '|')::tsquery`
+  }
+
+  /**
+   * The WHERE predicate. Must use EXACTLY `listing_search_document(...)`
+   * (migration 006) — that is the expression the GIN index is built on; any
+   * variation makes the planner ignore the index and fall back to a seq scan.
+   */
+  private searchMatchExpr(tier: SearchTier, search: string): Prisma.Sql {
+    if (tier === 'fuzzy') {
+      // `<%` = word_similarity: compares the term against the BEST-matching word
+      // in the title. similarity() over the whole title would be far too low
+      // (long title vs short term) and would never clear the threshold.
+      //
+      // The cutoff is the `pg_trgm.word_similarity_threshold` GUC (default 0.6),
+      // not a literal here — using the GUC is what lets the query hit
+      // listings_title_trgm_idx. Tuning the cutoff means changing the GUC in
+      // Supabase, not this file.
+      return Prisma.sql`immutable_unaccent(${search}) <% immutable_unaccent(lst.title)`
+    }
+    return Prisma.sql`listing_search_document(lst.title, lst.description) @@ ${this.searchQueryExpr(tier, search)}`
+  }
+
+  /** Ranking expression for the tier — used in ORDER BY and in the cursor keyset. */
+  private searchRankExpr(tier: SearchTier, search: string): Prisma.Sql {
+    if (tier === 'fuzzy') {
+      return Prisma.sql`word_similarity(immutable_unaccent(${search}), immutable_unaccent(lst.title))`
+    }
+    return Prisma.sql`ts_rank(listing_search_document(lst.title, lst.description), ${this.searchQueryExpr(tier, search)})`
+  }
+
+  /**
+   * Relaxation ladder: strict AND → OR of terms → trigram similarity.
+   *
+   * Resolved with one `LIMIT 1` probe per tier, BEFORE the main query, rather
+   * than "run it, see it come back empty, try the next one". Reason: the main
+   * query carries the cursor condition, and an empty result there is ambiguous —
+   * it can mean "no match" or merely "end of the page". Deciding the tier
+   * without the cursor keeps the choice stable across pages of the same search,
+   * and keeps the exposed cursor a bare id (CLAUDE.md §5).
+   *
+   * Cost: one extra query on the happy path (the `exact` probe hits first try),
+   * and at most three when the search matches nothing anywhere.
+   */
+  private async resolveSearchTier(
+    search: string,
+    baseConditions: Prisma.Sql[],
+  ): Promise<SearchTier> {
+    for (const tier of ['exact', 'partial', 'fuzzy'] as const) {
+      const where = Prisma.join([...baseConditions, this.searchMatchExpr(tier, search)], ' AND ')
+      const rows = await this.prisma.$queryRaw<{ one: number }[]>`
+        SELECT 1 AS one
+        FROM listings lst
+        JOIN profiles p ON p.id = lst.profile_id
+        LEFT JOIN locations loc ON loc.profile_id = p.id
+        WHERE ${where}
+        LIMIT 1
+      `
+      if (rows.length > 0) return tier
+    }
+    // Nothing in any tier: fall back to exact so the response stays honest —
+    // "no results", rather than "showing approximate matches" of an empty list.
+    return 'exact'
+  }
+
+  // ── Private helpers ──────────────────────────────────────────────────────────
 
   /**
    * Keyset para ordenação mista (rank DESC, distância ASC, created_at DESC, id DESC).
