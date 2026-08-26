@@ -231,6 +231,28 @@ Nunca retorne a entidade diretamente na raiz. Sempre dentro de `data`.
   keyset reconstrói as chaves do cursor com as MESMAS expressões de ordenação
   (`ListingsService.buildCursorCondition`); o cursor exposto continua sendo só o id.
 
+### Busca textual (`GET /listings?search=`)
+
+Sem acento por padrão: a expressão indexada é `listing_search_document(title, description)`
+(migration `006_search_unaccent.sql`), que aplica `immutable_unaccent` antes do
+`to_tsvector('portuguese', …)`. **Use sempre essa função no WHERE e no `ts_rank`** —
+qualquer variação da expressão faz o planner ignorar o GIN e voltar a seq scan.
+
+A busca tem uma escada de relaxamento (`ListingsService.resolveSearchTier`):
+
+| Tier      | Query                                           | Quando               |
+| --------- | ----------------------------------------------- | -------------------- |
+| `exact`   | `websearch_to_tsquery` (AND de todos os termos) | padrão               |
+| `partial` | a mesma tsquery com `&` trocado por `\|` (OR)   | o AND não achou nada |
+| `fuzzy`   | `word_similarity` trigram sobre o título (`<%`) | nem o OR achou nada  |
+
+O tier é decidido por probes `LIMIT 1` **antes** da query principal e **sem** a
+condição de cursor — um resultado vazio na query paginada é ambíguo ("não há match"
+vs "acabou a página"), e decidir sem o cursor mantém o tier estável entre páginas.
+O tier escolhido volta em `meta.searchRelaxed`; a UI deve avisar que os resultados
+são aproximados quando ele não for `exact`. Quando nenhum tier acha nada, volta
+`exact` — para a tela dizer "sem resultados" em vez de "mostrando aproximados".
+
 ```typescript
 type PaginationMeta = {
   nextCursor: string | null
@@ -669,6 +691,7 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [x] PostGIS: `migrations/manual/001_postgis.sql` — setup canônico (extensão no schema `extensions`, coluna `geog`, trigger de sync, índice GiST). Produção já está nesse padrão.
 - [ ] Alinhar staging ao PostGIS de produção (schema `extensions`) — one-off em `migrations/manual/oneoff_staging_postgis_to_extensions.sql` (opcional; o app funciona com PostGIS em `public` também)
 - [x] Matchmaking: `migrations/manual/005_matchmaking_perf.sql` — UNIQUE de `match_scores`, índice GIN de busca FTS (português), índice keyset do feed, drop de índices redundantes; aplicada em staging e produção (2026-06-11)
+- [ ] Busca sem acento: `migrations/manual/006_search_unaccent.sql` — `unaccent` + `pg_trgm` no schema `extensions`, `immutable_unaccent()`, `listing_search_document()`, GIN sem acento (substitui o de 005) e GIN trigram do título. **Aplicada em staging (2026-08-25); falta produção.** ⚠️ Aplicar ANTES do deploy da API: o código novo chama essas funções, e o código antigo perde o índice que ela dropa
 - [ ] Remover o fallback de refresh token legado (`findRefreshToken` em `apps/api/src/modules/auth/service.ts`) após **2026-07-10** — o TTL de 30 dias esgota os tokens antigos
 - [ ] Job de expurgo físico 30 dias após `DELETE /me` (LGPD) — hoje só marca `status: DELETED`; anúncios do usuário continuam ativos no feed e não há purge implementado
 - [ ] Decidir o CTA de WhatsApp no detalhe do anúncio — `wa.me/?text=` sem telefone abre o share picker, não conversa com o vendedor

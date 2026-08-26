@@ -48,6 +48,12 @@ export interface Listing {
 export interface ListingMeta {
   nextCursor: string | null
   limit: number
+  /**
+   * Present only when the request carried `search`. Signals that the API had to
+   * relax the search to find anything — the UI should warn that results are
+   * approximate rather than showing them as exact matches. See CLAUDE.md §5.
+   */
+  searchRelaxed?: 'exact' | 'partial' | 'fuzzy'
 }
 
 export interface ListingsResponse {

@@ -107,12 +107,20 @@ export const ListListingsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 })
 
+/**
+ * How far the text search had to be relaxed. Present only when `search` was
+ * sent. The UI uses this to warn that results are approximate, instead of
+ * silently presenting them as exact matches.
+ */
+export const SearchTierSchema = z.enum(['exact', 'partial', 'fuzzy'])
+
 export const ListListingsResponseSchema = z.object({
   data: z.array(ListingWithProfileSchema),
   error: z.null(),
   meta: z.object({
     nextCursor: z.string().nullable(),
     limit: z.number(),
+    searchRelaxed: SearchTierSchema.optional(),
   }),
 })
 
