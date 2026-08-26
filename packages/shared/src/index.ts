@@ -1,5 +1,6 @@
 export * from './types/index'
 export * from './validators/index'
 export * from './validators/listing'
+export * from './validators/listing-filters'
 export * from './constants/index'
 export * from './errors/index'

@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { PrismaClient } from '@siamo/db'
 import { ListingsService } from './service.js'
-import { ListingNotFoundError, ListingForbiddenError } from './errors.js'
+import {
+  ListingNotFoundError,
+  ListingForbiddenError,
+  ListingLocationRequiredError,
+  ListingMatchFilterUnauthenticatedError,
+} from './errors.js'
 
 // ─── Mock external dependencies ───────────────────────────────────────────────
 
@@ -158,6 +163,9 @@ function makeRawListRow(overrides: Record<string, unknown> = {}) {
     profilePhoto: null,
     profileRating: 4.5,
     profileBadge: 'GOLD',
+    // Anonymous-path defaults; the authenticated path overrides these
+    matchScore: null,
+    matchDistanceKm: null,
     ...overrides,
   }
 }
@@ -238,7 +246,7 @@ describe('ListingsService.list — search relaxation', () => {
 
     const result = await service.list({ ...baseQuery })
 
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1) // the list query only
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2) // list + count, no probes
     expect(result.meta.searchRelaxed).toBeUndefined()
   })
 
@@ -248,7 +256,7 @@ describe('ListingsService.list — search relaxation', () => {
     const result = await service.list({ ...baseQuery, search: 'soja' })
 
     expect(result.meta.searchRelaxed).toBe('exact')
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2) // 1 probe + list
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(3) // 1 probe + list + count
   })
 
   it('relaxes to partial when the strict AND finds nothing', async () => {
@@ -257,7 +265,7 @@ describe('ListingsService.list — search relaxation', () => {
     const result = await service.list({ ...baseQuery, search: 'soja milho' })
 
     expect(result.meta.searchRelaxed).toBe('partial')
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(3) // 2 probes + list
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(4) // 2 probes + list + count
   })
 
   it('relaxes to fuzzy when even the OR finds nothing', async () => {
@@ -266,7 +274,7 @@ describe('ListingsService.list — search relaxation', () => {
     const result = await service.list({ ...baseQuery, search: 'colheitadera' })
 
     expect(result.meta.searchRelaxed).toBe('fuzzy')
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(4) // 3 probes + list
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(5) // 3 probes + list + count
   })
 
   it('falls back to exact when no tier matches, so empty stays honest', async () => {
@@ -330,6 +338,178 @@ describe('ListingsService.list — search relaxation', () => {
     // stable across pages
     expect(nthSql(0)).not.toContain('lst.id =')
     expect(nthSql(1)).not.toContain('lst.id =')
+  })
+})
+
+// ─── list: filters, viewer and total ─────────────────────────────────────────
+
+describe('ListingsService.list — filters and viewer', () => {
+  let prisma: ReturnType<typeof makePrisma>
+  let service: ListingsService
+
+  beforeEach(() => {
+    prisma = makePrisma()
+    service = new ListingsService(prisma as unknown as PrismaClient)
+  })
+
+  const baseQuery = { limit: 20 } as Parameters<ListingsService['list']>[0]
+
+  /** A viewer with a profile and a location on it. */
+  function givenViewerProfile(overrides: Record<string, unknown> = {}) {
+    prisma.profile.findUnique.mockResolvedValue({
+      id: 'profile-viewer',
+      location: { latitude: -19.9, longitude: -43.9 },
+      ...overrides,
+    })
+  }
+
+  function sqlOfCall(n: number): string {
+    const call: unknown = prisma.$queryRaw.mock.calls[n]
+    if (!Array.isArray(call)) throw new Error(`$queryRaw was never called ${n + 1} times`)
+    return sqlOf(call)
+  }
+
+  it('expands a single kind into a one-element IN list, keeping old URLs working', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery, kind: ['OFFER'] })
+
+    expect(sqlOfCall(0)).toContain('lst.kind::text IN (')
+  })
+
+  it('filters on several kinds and categories at once', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery, kind: ['OFFER', 'DEMAND'], category: ['COFFEE', 'SOY'] })
+
+    const sql = sqlOfCall(0)
+    expect(sql).toContain('lst.kind::text IN (')
+    expect(sql).toContain('lst.category IN (')
+  })
+
+  it('filters by seller badge', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery, badge: ['GOLD', 'SILVER'] })
+
+    expect(sqlOfCall(0)).toContain('p.badge::text IN (')
+  })
+
+  it('joins match_scores against the viewer profile when authenticated', async () => {
+    givenViewerProfile()
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery }, 'user-viewer')
+
+    expect(sqlOfCall(0)).toContain('LEFT JOIN match_scores ms')
+  })
+
+  it('does not join match_scores for anonymous requests', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery })
+
+    expect(sqlOfCall(0)).not.toContain('match_scores')
+  })
+
+  it('rejects minMatchScore without a viewer instead of ignoring it', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await expect(service.list({ ...baseQuery, minMatchScore: 0.7 })).rejects.toThrow(
+      ListingMatchFilterUnauthenticatedError,
+    )
+  })
+
+  it('applies minMatchScore in the probe query too, not just the main one', async () => {
+    givenViewerProfile()
+    mockSearchTierProbes(prisma, 'exact', [[makeRawListRow()]])
+
+    await service.list({ ...baseQuery, search: 'soja', minMatchScore: 0.7 }, 'user-viewer')
+
+    // Probe (call 0) must carry both the join and the score filter — otherwise
+    // it would report "results exist" for rows minMatchScore then removes
+    const probeSql = sqlOfCall(0)
+    expect(probeSql).toContain('LEFT JOIN match_scores ms')
+    expect(probeSql).toContain('ms.score >=')
+  })
+
+  it("falls back to the viewer's profile location when lat/lng are omitted", async () => {
+    givenViewerProfile()
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery, radiusKm: 50 }, 'user-viewer')
+
+    expect(sqlOfCall(0)).toContain('ST_DWithin')
+  })
+
+  it('rejects a distance filter when no origin can be resolved', async () => {
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await expect(service.list({ ...baseQuery, radiusKm: 50 })).rejects.toThrow(
+      ListingLocationRequiredError,
+    )
+  })
+
+  it('rejects a distance filter when the viewer has no location on file', async () => {
+    givenViewerProfile({ location: null })
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await expect(service.list({ ...baseQuery, radiusKm: 50 }, 'user-viewer')).rejects.toThrow(
+      ListingLocationRequiredError,
+    )
+  })
+
+  it('treats a logged-in user without a profile as anonymous', async () => {
+    prisma.profile.findUnique.mockResolvedValue(null)
+    prisma.$queryRaw.mockResolvedValue([])
+
+    await service.list({ ...baseQuery }, 'user-no-profile')
+
+    expect(sqlOfCall(0)).not.toContain('match_scores')
+  })
+
+  it('returns total on the first page', async () => {
+    prisma.$queryRaw
+      .mockResolvedValueOnce([makeRawListRow()])
+      .mockResolvedValueOnce([{ total: BigInt(7) }])
+
+    const result = await service.list({ ...baseQuery })
+
+    expect(result.meta.total).toBe(7)
+  })
+
+  it('skips the count once paginating, since the header never changes', async () => {
+    prisma.$queryRaw
+      .mockResolvedValueOnce([{ createdAt: new Date(), rank: null, distance: null }]) // cursor lookup
+      .mockResolvedValueOnce([makeRawListRow()])
+
+    const result = await service.list({ ...baseQuery, cursor: 'listing-99' })
+
+    expect(result.meta.total).toBeUndefined()
+    expect(prisma.$queryRaw).toHaveBeenCalledTimes(2) // cursor lookup + list, no count
+  })
+
+  it('omits matchScore rather than sending 0 when the pair has no score', async () => {
+    givenViewerProfile()
+    prisma.$queryRaw
+      .mockResolvedValueOnce([makeRawListRow({ matchScore: null, matchDistanceKm: null })])
+      .mockResolvedValueOnce([{ total: BigInt(1) }])
+
+    const result = await service.list({ ...baseQuery }, 'user-viewer')
+
+    expect(result.data[0]).not.toHaveProperty('matchScore')
+  })
+
+  it('surfaces matchScore and distanceKm when the pair is scored', async () => {
+    givenViewerProfile()
+    prisma.$queryRaw
+      .mockResolvedValueOnce([makeRawListRow({ matchScore: 0.82, matchDistanceKm: 14.2 })])
+      .mockResolvedValueOnce([{ total: BigInt(1) }])
+
+    const result = await service.list({ ...baseQuery }, 'user-viewer')
+
+    expect(result.data[0]?.matchScore).toBe(0.82)
+    expect(result.data[0]?.distanceKm).toBe(14.2)
   })
 })
 
