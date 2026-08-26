@@ -261,6 +261,36 @@ type PaginationMeta = {
 }
 ```
 
+### Filtros de `GET /listings`
+
+`kind`, `category` e `badge` são **multi-valor, separados por vírgula**
+(`?kind=OFFER,DEMAND`). Um valor único continua funcionando — vira lista de um
+elemento. Schemas compartilhados em `packages/shared/src/validators/listing-filters.ts`.
+
+A rota é **pública com auth opcional** (`optionalAuthenticate`): token ausente ou
+expirado **não** é erro, o request só segue anônimo. Com viewer identificado:
+
+- cada anúncio ganha `matchScore` (0–1) e `distanceKm` do par, via LEFT JOIN em
+  `match_scores` — ausentes (não `null`) quando o worker ainda não pontuou o par;
+- `minMatchScore` (escala **0–1**, igual à do banco — a UI divide os 70/80/90 dela) fica disponível;
+- `radiusKm` sem `lat`/`lng` usa a localização do próprio perfil.
+
+Dois casos viram erro em vez de filtro silenciosamente ignorado — um filtro que
+não filtra é pior que um erro, porque a UI segue dizendo "até 50 km":
+
+| Situação                            | Resposta                                   |
+| ----------------------------------- | ------------------------------------------ |
+| `minMatchScore` sem login           | 401 `LISTING_MATCH_FILTER_UNAUTHENTICATED` |
+| `radiusKm` sem lat/lng e sem perfil | 422 `LISTING_LOCATION_REQUIRED`            |
+
+`meta.total` só vem na **primeira página** (sem cursor): o contador do cabeçalho
+não muda durante o scroll, recalculá-lo por página seria desperdício.
+
+⚠️ O LEFT JOIN de `match_scores` e o filtro de score precisam existir nos **três**
+formatos de query — principal, probes de tier e COUNT. Se o probe não tiver o
+filtro, ele responde "existe resultado" para linhas que o `minMatchScore` remove
+depois, e o tier escolhido fica errado.
+
 ### Autenticação
 
 - OTP via WhatsApp → JWT **próprio** (`jsonwebtoken`), não Supabase Auth. Access token
@@ -525,56 +555,56 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ### API endpoints (`apps/api` — prefixo `/api/v1`)
 
-| Método | Rota                           | Auth | Status                                |
-| ------ | ------------------------------ | ---- | ------------------------------------- |
-| POST   | `/auth/otp/request`            | ❌   | ✅                                    |
-| POST   | `/auth/otp/verify`             | ❌   | ✅                                    |
-| POST   | `/auth/refresh`                | ❌   | ✅                                    |
-| POST   | `/auth/logout`                 | ✅   | ✅                                    |
-| POST   | `/profiles`                    | ✅   | ✅                                    |
-| GET    | `/profiles/:id`                | ❌   | ✅                                    |
-| PATCH  | `/profiles/:id`                | ✅   | ✅                                    |
-| POST   | `/privacy/consent`             | ✅   | ✅ idempotente                        |
-| POST   | `/listings`                    | ✅   | ✅                                    |
-| GET    | `/listings`                    | ❌   | ✅ cursor-based, PostGIS, FTS         |
-| GET    | `/listings/mine`               | ✅   | ✅ cursor-based                       |
-| GET    | `/listings/:id`                | ❌   | ✅                                    |
-| PATCH  | `/listings/:id`                | ✅   | ✅                                    |
-| DELETE | `/listings/:id`                | ✅   | ✅ soft delete                        |
-| POST   | `/listings/:id/pause`          | ✅   | ✅                                    |
-| POST   | `/listings/:id/resume`         | ✅   | ✅                                    |
-| GET    | `/listings/:id/matches`        | ✅   | ✅                                    |
-| POST   | `/uploads/presigned`           | ✅   | ✅                                    |
-| POST   | `/uploads/confirm`             | ✅   | ✅                                    |
-| GET    | `/notifications`               | ✅   | ✅ cursor-based                       |
-| PATCH  | `/notifications/:id/read`      | ✅   | ✅                                    |
-| POST   | `/notifications/read-all`      | ✅   | ✅                                    |
-| POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência            |
-| POST   | `/transactions`                | ✅   | ✅ cria proposta (201)                |
-| GET    | `/transactions`                | ✅   | ✅                                    |
-| GET    | `/transactions/:id`            | ✅   | ✅                                    |
-| POST   | `/transactions/:id/accept`     | ✅   | ✅                                    |
-| POST   | `/transactions/:id/counter`    | ✅   | ✅ contraproposta                     |
-| POST   | `/transactions/:id/start`      | ✅   | ✅ confirmação dual-party de início   |
-| POST   | `/transactions/:id/complete`   | ✅   | ✅ confirmação dual-party de fim      |
-| POST   | `/transactions/:id/cancel`     | ✅   | ✅ com motivo                         |
-| POST   | `/transactions/:id/messages`   | ✅   | ✅                                    |
-| POST   | `/transactions/:id/rating`     | ✅   | ✅ avaliação (módulo reputation)      |
-| GET    | `/profiles/:id/reputation`     | ❌   | ✅ média ao vivo de ratings           |
-| GET    | `/help/faq`                    | ❌   | ✅                                    |
-| GET    | `/help/faq/search`             | ❌   | ✅ `?q=`                              |
-| GET    | `/me`                          | ✅   | ✅                                    |
-| PATCH  | `/me`                          | ✅   | ✅                                    |
-| GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`  |
-| GET    | `/me/notification-preferences` | ✅   | ✅                                    |
-| PATCH  | `/me/notification-preferences` | ✅   | ✅                                    |
-| GET    | `/me/consents`                 | ✅   | ✅                                    |
-| PATCH  | `/me/consents`                 | ✅   | ✅                                    |
-| POST   | `/me/data-export`              | ✅   | ✅ LGPD — audit trail via notificação |
-| DELETE | `/me`                          | ✅   | ✅ soft delete; remoção física em 30d |
-| POST   | `/saved-listings/:listingId`   | ✅   | ✅ toggle — salva ou desalva          |
-| GET    | `/saved-listings/:listingId`   | ✅   | ✅ status de salvamento do anúncio    |
-| GET    | `/saved-listings`              | ✅   | ✅ cursor-based                       |
+| Método | Rota                           | Auth | Status                                 |
+| ------ | ------------------------------ | ---- | -------------------------------------- |
+| POST   | `/auth/otp/request`            | ❌   | ✅                                     |
+| POST   | `/auth/otp/verify`             | ❌   | ✅                                     |
+| POST   | `/auth/refresh`                | ❌   | ✅                                     |
+| POST   | `/auth/logout`                 | ✅   | ✅                                     |
+| POST   | `/profiles`                    | ✅   | ✅                                     |
+| GET    | `/profiles/:id`                | ❌   | ✅                                     |
+| PATCH  | `/profiles/:id`                | ✅   | ✅                                     |
+| POST   | `/privacy/consent`             | ✅   | ✅ idempotente                         |
+| POST   | `/listings`                    | ✅   | ✅                                     |
+| GET    | `/listings`                    | 🔓   | ✅ cursor-based, PostGIS, FTS, filtros |
+| GET    | `/listings/mine`               | ✅   | ✅ cursor-based                        |
+| GET    | `/listings/:id`                | ❌   | ✅                                     |
+| PATCH  | `/listings/:id`                | ✅   | ✅                                     |
+| DELETE | `/listings/:id`                | ✅   | ✅ soft delete                         |
+| POST   | `/listings/:id/pause`          | ✅   | ✅                                     |
+| POST   | `/listings/:id/resume`         | ✅   | ✅                                     |
+| GET    | `/listings/:id/matches`        | ✅   | ✅                                     |
+| POST   | `/uploads/presigned`           | ✅   | ✅                                     |
+| POST   | `/uploads/confirm`             | ✅   | ✅                                     |
+| GET    | `/notifications`               | ✅   | ✅ cursor-based                        |
+| PATCH  | `/notifications/:id/read`      | ✅   | ✅                                     |
+| POST   | `/notifications/read-all`      | ✅   | ✅                                     |
+| POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência             |
+| POST   | `/transactions`                | ✅   | ✅ cria proposta (201)                 |
+| GET    | `/transactions`                | ✅   | ✅                                     |
+| GET    | `/transactions/:id`            | ✅   | ✅                                     |
+| POST   | `/transactions/:id/accept`     | ✅   | ✅                                     |
+| POST   | `/transactions/:id/counter`    | ✅   | ✅ contraproposta                      |
+| POST   | `/transactions/:id/start`      | ✅   | ✅ confirmação dual-party de início    |
+| POST   | `/transactions/:id/complete`   | ✅   | ✅ confirmação dual-party de fim       |
+| POST   | `/transactions/:id/cancel`     | ✅   | ✅ com motivo                          |
+| POST   | `/transactions/:id/messages`   | ✅   | ✅                                     |
+| POST   | `/transactions/:id/rating`     | ✅   | ✅ avaliação (módulo reputation)       |
+| GET    | `/profiles/:id/reputation`     | ❌   | ✅ média ao vivo de ratings            |
+| GET    | `/help/faq`                    | ❌   | ✅                                     |
+| GET    | `/help/faq/search`             | ❌   | ✅ `?q=`                               |
+| GET    | `/me`                          | ✅   | ✅                                     |
+| PATCH  | `/me`                          | ✅   | ✅                                     |
+| GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`   |
+| GET    | `/me/notification-preferences` | ✅   | ✅                                     |
+| PATCH  | `/me/notification-preferences` | ✅   | ✅                                     |
+| GET    | `/me/consents`                 | ✅   | ✅                                     |
+| PATCH  | `/me/consents`                 | ✅   | ✅                                     |
+| POST   | `/me/data-export`              | ✅   | ✅ LGPD — audit trail via notificação  |
+| DELETE | `/me`                          | ✅   | ✅ soft delete; remoção física em 30d  |
+| POST   | `/saved-listings/:listingId`   | ✅   | ✅ toggle — salva ou desalva           |
+| GET    | `/saved-listings/:listingId`   | ✅   | ✅ status de salvamento do anúncio     |
+| GET    | `/saved-listings`              | ✅   | ✅ cursor-based                        |
 
 Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Authorization: Bearer` a partir do cookie `access_token`.
 

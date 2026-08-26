@@ -393,23 +393,28 @@ describe('ListingsService', () => {
 
       await service.list({ limit: 20, lat: -15.78, lng: -47.93, radiusKm: 50 })
 
-      expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(1)
+      // 2 chamadas: a listagem e o COUNT de meta.total (só na 1ª página)
+      expect(mockPrisma.$queryRaw).toHaveBeenCalledTimes(2)
       // $queryRaw recebe tagged template: args[0]=TemplateStringsArray, args[1..N]=values interpolados
       // ST_DWithin está dentro do whereClause (value interpolado), então serializar todos os args
       const sqlStr = JSON.stringify(mockPrisma.$queryRaw.mock.calls[0])
       expect(sqlStr).toContain('ST_DWithin')
     })
 
-    it('busca textual inclui to_tsvector chamando $queryRaw', async () => {
+    it('busca textual usa a expressão sem acento indexada pela migration 006', async () => {
       mockPrisma.listing.findUnique.mockResolvedValue(null)
       mockPrisma.$queryRaw.mockResolvedValue([])
 
       await service.list({ limit: 20, search: 'milho' })
 
-      // to_tsvector está dentro do whereClause (value interpolado), então serializar todos os args
+      // A 1ª chamada agora é o probe de tier (resolveSearchTier), que roda antes
+      // da query principal — ver CLAUDE.md §5 "Busca textual".
       const sqlStr = JSON.stringify(mockPrisma.$queryRaw.mock.calls[0])
-      expect(sqlStr).toContain('to_tsvector')
-      expect(sqlStr).toContain('plainto_tsquery')
+      expect(sqlStr).toContain('listing_search_document')
+      expect(sqlStr).toContain('immutable_unaccent')
+      expect(sqlStr).toContain('websearch_to_tsquery')
+      // plainto_tsquery era acento-sensível: 'agronomica' não achava 'agronômica'
+      expect(sqlStr).not.toContain('plainto_tsquery')
     })
 
     it('paginação cursor busca as chaves de ordenação via $queryRaw antes da query principal', async () => {
