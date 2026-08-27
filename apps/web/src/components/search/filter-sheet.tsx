@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { RefreshCw } from '@siamo/ui/icons'
 import { RangeSlider, FilterChipGroup } from '@siamo/ui'
 import { cn } from '@siamo/ui'
+import { DEFAULT_FILTERS } from '@/lib/listing-filters'
 
 export interface FilterValues {
   kinds: string[]
@@ -15,15 +16,16 @@ export interface FilterValues {
   minMatchScore: string
 }
 
-const DEFAULT_FILTERS: FilterValues = {
-  kinds: [],
-  categories: [],
-  maxDistKm: 200,
-  minPrice: 0,
-  maxPrice: 10000,
-  reputation: [],
-  minMatchScore: '',
-}
+/**
+ * Upper bound of the price slider. Agro lots trade in the hundreds of thousands
+ * — the previous R$ 10.000 ceiling excluded essentially every real listing, so
+ * the filter could only ever return nothing.
+ */
+const MAX_PRICE = 500_000
+const PRICE_STEP = 5_000
+
+/** Distance ceiling — matches the matchmaking MATCH_MAX_DISTANCE_KM default. */
+const MAX_DIST_KM = 200
 
 interface FilterSheetProps {
   open: boolean
@@ -133,26 +135,29 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
           <Section label="DISTÂNCIA MÁXIMA">
             <RangeSlider
               min={0}
-              max={200}
+              max={MAX_DIST_KM}
               value={[0, filters.maxDistKm]}
               onChange={([, hi]) => update('maxDistKm', hi)}
               step={5}
-              format={(v) => `${v} km`}
+              format={(v) => (v === 0 ? 'Qualquer' : `${v} km`)}
               single
             />
+            <p className="text-muted-foreground mt-2 text-[11px]">
+              Usa a localização do seu perfil como ponto de partida.
+            </p>
           </Section>
 
           <Section label="FAIXA DE PREÇO">
             <RangeSlider
               min={0}
-              max={10000}
+              max={MAX_PRICE}
               value={[filters.minPrice, filters.maxPrice]}
               onChange={([lo, hi]) => {
                 update('minPrice', lo)
                 update('maxPrice', hi)
               }}
-              step={100}
-              format={(v) => `R$ ${v}`}
+              step={PRICE_STEP}
+              format={formatPriceLabel}
             />
           </Section>
 
@@ -190,6 +195,13 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
       </div>
     </>
   )
+}
+
+/** Compact BRL for slider ends — "R$ 500.000,00" does not fit at 375px. */
+function formatPriceLabel(value: number): string {
+  if (value === 0) return 'Qualquer'
+  if (value >= 1_000) return `R$ ${Math.round(value / 1_000)} mil`
+  return `R$ ${value}`
 }
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
