@@ -729,6 +729,9 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [ ] Unificar `API_URL` vs `NEXT_PUBLIC_API_URL` (mesmo backend, dois nomes — proxy/SSR usa um, middleware usa o outro)
 - [ ] Cron de limpeza de `otp_codes` e `refresh_tokens` expirados (crescimento de tabela sem bound)
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
+- [ ] **Tailwind `@source` quebrado**: `apps/web/src/app/globals.css` linha 2 tem `@source "../../packages/ui/src"`, que resolve para `apps/web/packages/ui/src` — pasta inexistente. O correto é `../../../../packages/ui/src`. Consequência: toda classe usada **só** em `packages/ui` e não em `apps/web` é silenciosamente descartada. Verificado em 2026-08-25: `.opacity-0`, `.mx-[11px]` e `.-translate-x-1/2` não existem no CSS de produção (84 KB). É também o motivo do bloco de ~750 linhas de utilities manuais neste mesmo arquivo. ⚠️ Corrigir em PR próprio: ativa de uma vez muitas classes hoje mortas, então exige passada visual em todo o app (onboarding, transações, perfil), não só na busca
+- [ ] Auditar o resto dos componentes de `packages/ui` afetados pelo `@source` acima — quais estão degradados hoje e quais das utilities manuais viram redundantes depois do fix
+- [ ] `apps/web/scripts/capture-journey.mjs` não passa no ESLint (`process`, `console`, `window`, `URL` sem env declarado). Arquivo untracked, então o CI não vê — mas trava o pre-commit de quem tentar commitá-lo
 
 ---
 

@@ -12,12 +12,23 @@ export interface RangeSliderProps {
   /** single=true: only the upper thumb (distance filter) */
   single?: boolean
   className?: string
+  /** Accessible name; falls back to generic min/max labels. */
+  label?: string
 }
 
 function pct(value: number, min: number, max: number) {
   return ((value - min) / (max - min)) * 100
 }
 
+/**
+ * Dual (or single) range slider built on real `<input type="range">` thumbs.
+ *
+ * Geometry uses inline styles and the `.range-slider-input` class from the app's
+ * globals.css rather than Tailwind utilities, because `packages/ui` classes are
+ * not reliably compiled — see CLAUDE.md §11. Relying on utilities here is what
+ * broke the previous version: `opacity-0` never existed, so the native control
+ * rendered fully opaque over the design.
+ */
 export function RangeSlider({
   min,
   max,
@@ -27,81 +38,76 @@ export function RangeSlider({
   format = (v) => String(v),
   single = false,
   className,
+  label,
 }: RangeSliderProps) {
   const [lo, hi] = value
   const loPct = pct(lo, min, max)
   const hiPct = pct(hi, min, max)
 
-  const trackStyle = single
+  const fillStyle = single
     ? { left: '0%', width: `${hiPct}%` }
-    : { left: `${loPct}%`, width: `${hiPct - loPct}%` }
+    : { left: `${loPct}%`, width: `${Math.max(0, hiPct - loPct)}%` }
 
   return (
     <div className={cn('py-2', className)}>
-      {/* Track */}
-      <div className="relative mx-[11px]">
-        <div className="bg-border relative h-1 rounded-full">
+      {/*
+        Row height matches the 48px tap target (WCAG 2.5.5) while the visible
+        track stays 4px — the thumb is what the finger has to hit, and it fills
+        this row.
+      */}
+      <div className="relative" style={{ height: 48 }}>
+        {/* Track */}
+        <div
+          className="bg-border absolute rounded-full"
+          style={{ left: 11, right: 11, top: '50%', height: 4, transform: 'translateY(-50%)' }}
+        >
           <div
-            className="bg-accent dark:bg-primary absolute h-full rounded-full"
-            style={trackStyle}
+            className="bg-accent dark:bg-primary absolute rounded-full"
+            style={{ ...fillStyle, height: '100%' }}
           />
         </div>
 
-        {/* Lower thumb (hidden in single mode) */}
-        {!single && (
+        {/*
+          Both inputs span the row and overlap. Only their thumbs receive pointer
+          events (see .range-slider-input), so the one you grab is whichever
+          thumb is under the finger rather than whichever input is on top.
+        */}
+        <div className="absolute" style={{ left: 11, right: 11, top: 0, bottom: 0 }}>
+          {!single && (
+            <input
+              type="range"
+              className="range-slider-input"
+              min={min}
+              max={max}
+              step={step}
+              value={lo}
+              aria-label={label ? `${label} — mínimo` : 'Valor mínimo'}
+              onChange={(e) => {
+                const next = Number(e.target.value)
+                // Clamp instead of ignoring: dragging past the other thumb should
+                // pin to it, not freeze the control.
+                onChange([Math.min(next, hi), hi])
+              }}
+            />
+          )}
           <input
             type="range"
+            className="range-slider-input"
             min={min}
             max={max}
             step={step}
-            value={lo}
-            aria-label="Valor mínimo"
-            aria-valuemin={min}
-            aria-valuemax={hi}
-            aria-valuenow={lo}
+            value={hi}
+            aria-label={label ? `${label} — máximo` : 'Valor máximo'}
             onChange={(e) => {
               const next = Number(e.target.value)
-              if (next < hi) onChange([next, hi])
+              onChange(single ? [lo, next] : [lo, Math.max(next, lo)])
             }}
-            className="range-thumb-input pointer-events-none absolute inset-0 h-full w-full opacity-0"
-            style={{ zIndex: lo > max - (max - min) * 0.1 ? 5 : 3 }}
           />
-        )}
-
-        {/* Upper thumb */}
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={hi}
-          aria-label={single ? 'Valor máximo' : 'Valor máximo'}
-          aria-valuemin={single ? min : lo}
-          aria-valuemax={max}
-          aria-valuenow={hi}
-          onChange={(e) => {
-            const next = Number(e.target.value)
-            if (single || next > lo) onChange([lo, next])
-          }}
-          className="range-thumb-input absolute inset-0 h-full w-full opacity-0"
-          style={{ zIndex: 4 }}
-        />
-
-        {/* Visual thumbs */}
-        {!single && (
-          <div
-            className="bg-foreground border-background pointer-events-none absolute top-1/2 size-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] shadow-sm"
-            style={{ left: `${loPct}%` }}
-          />
-        )}
-        <div
-          className="bg-foreground border-background pointer-events-none absolute top-1/2 size-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] shadow-sm"
-          style={{ left: `${hiPct}%` }}
-        />
+        </div>
       </div>
 
       {/* Labels */}
-      <div className="text-muted-foreground mt-3 flex justify-between font-mono text-[11px]">
+      <div className="text-muted-foreground mt-1 flex justify-between font-mono text-[11px]">
         {single ? (
           <>
             <span>{format(min)}</span>
