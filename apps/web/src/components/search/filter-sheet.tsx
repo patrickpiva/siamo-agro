@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RefreshCw } from '@siamo/ui/icons'
 import { RangeSlider, FilterChipGroup } from '@siamo/ui'
 import { cn } from '@siamo/ui'
@@ -67,10 +67,67 @@ const SCORE_OPTIONS = [
 
 export function FilterSheet({ open, onClose, initial, onApply, resultCount }: FilterSheetProps) {
   const [filters, setFilters] = useState<FilterValues>({ ...DEFAULT_FILTERS, ...initial })
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (open) setFilters({ ...DEFAULT_FILTERS, ...initial })
   }, [open, initial])
+
+  // Escape on `document`: the previous onKeyDown lived on a non-focusable div,
+  // so it only fired if focus happened to be inside — i.e. almost never.
+  useEffect(() => {
+    if (!open) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, onClose])
+
+  // Stops the feed behind the sheet from scrolling under the user's finger
+  useEffect(() => {
+    if (!open) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [open])
+
+  // Focus trap — a modal that lets Tab wander into the page behind it is a
+  // keyboard and screen-reader dead end.
+  useEffect(() => {
+    if (!open) return
+    const sheet = sheetRef.current
+    if (!sheet) return
+
+    const focusables = () =>
+      Array.from(
+        sheet.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute('disabled'))
+
+    focusables()[0]?.focus()
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const items = focusables()
+      const first = items[0]
+      const last = items.at(-1)
+      if (!first || !last) return
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    sheet.addEventListener('keydown', onKeyDown)
+    return () => sheet.removeEventListener('keydown', onKeyDown)
+  }, [open])
 
   function update<K extends keyof FilterValues>(key: K, value: FilterValues[K]) {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -85,6 +142,7 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
 
       {/* Sheet */}
       <div
+        ref={sheetRef}
         className={cn(
           'bg-background fixed bottom-0 left-0 right-0 z-50 flex flex-col rounded-t-[20px]',
           'max-h-[90dvh]',
@@ -92,7 +150,6 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
         role="dialog"
         aria-modal
         aria-label="Filtros avançados"
-        onKeyDown={(e) => e.key === 'Escape' && onClose()}
       >
         {/* Handle */}
         <div className="flex justify-center pb-3 pt-3">
@@ -100,12 +157,14 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-5 pb-3">
+        <div className="flex items-center justify-between border-b px-5 pb-1">
           <span className="text-[15px] font-medium">Filtros</span>
+          {/* min-h-0 removed: this opted out of the 48px tap target from
+              @layer base, leaving a ~16px hit area on a primary action. */}
           <button
             type="button"
             onClick={() => setFilters(DEFAULT_FILTERS)}
-            className="text-accent dark:text-primary flex min-h-0 min-w-0 items-center gap-1 font-mono text-[12px] font-medium"
+            className="text-accent dark:text-primary -mr-2 flex items-center gap-1 px-2 font-mono text-[12px] font-medium"
           >
             <RefreshCw size={12} strokeWidth={2.5} />
             LIMPAR
@@ -134,6 +193,7 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
 
           <Section label="DISTÂNCIA MÁXIMA">
             <RangeSlider
+              label="Distância máxima"
               min={0}
               max={MAX_DIST_KM}
               value={[0, filters.maxDistKm]}
@@ -149,6 +209,7 @@ export function FilterSheet({ open, onClose, initial, onApply, resultCount }: Fi
 
           <Section label="FAIXA DE PREÇO">
             <RangeSlider
+              label="Faixa de preço"
               min={0}
               max={MAX_PRICE}
               value={[filters.minPrice, filters.maxPrice]}

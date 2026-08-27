@@ -955,6 +955,69 @@
     background: rgba(255, 255, 255, 0.04);
   }
 
+  /* ---- RangeSlider — native thumb, styled ----
+     Defined here rather than as Tailwind utilities on the component because
+     `packages/ui` classes are not reliably compiled (the @source path in this
+     file does not resolve — see the TODO in CLAUDE.md §11). The previous
+     implementation hid the native input with `opacity-0` and drew a fake thumb
+     with `-translate-x-1/2`; neither class was ever generated, so the raw blue
+     native slider rendered on top of the design.
+
+     Styling the REAL thumb also means keyboard and screen-reader support come
+     for free, instead of being faked by a div. */
+  .range-slider-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* Beats `input { min-height: var(--tap-target) }` from @layer base, which
+       otherwise stretches this to 48px, overflowing the row and swallowing taps
+       on the value labels underneath. The 48px target is preserved by the
+       wrapper's height, not by the input. */
+    min-height: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    /* The track must not capture drags meant for the other thumb in a dual
+       range; only the thumbs are interactive. */
+    pointer-events: none;
+  }
+  .range-slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: hsl(var(--foreground));
+    border: 3px solid hsl(var(--background));
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    cursor: pointer;
+  }
+  .range-slider-input::-moz-range-thumb {
+    pointer-events: auto;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: hsl(var(--foreground));
+    border: 3px solid hsl(var(--background));
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+    cursor: pointer;
+  }
+  .range-slider-input:focus-visible {
+    outline: none;
+  }
+  .range-slider-input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .range-slider-input:focus-visible::-moz-range-thumb {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
   /* ---- Lote 7 — Home pending anchor pulse (âmbar) ---- */
   @keyframes home-anchor-pulse {
     0%,
