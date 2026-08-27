@@ -517,39 +517,40 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ### Rotas web implementadas (`apps/web/src/app/`)
 
-| Rota                              | Status | Observação                                            |
-| --------------------------------- | ------ | ----------------------------------------------------- |
-| `/`                               | ✅     | Landing page                                          |
-| `/entrar`                         | ✅     | Auth — input WhatsApp                                 |
-| `/entrar/codigo`                  | ✅     | Auth — OTP                                            |
-| `/cadastro/perfil`                | ✅     | Onboarding — tipo (produtor/prestador)                |
-| `/cadastro/dados`                 | ✅     | Onboarding — nome/propriedade/bio                     |
-| `/cadastro/localizacao`           | ✅     | Onboarding — GPS + Nominatim/ViaCEP                   |
-| `/cadastro/foto`                  | ✅     | Onboarding — upload avatar presigned                  |
-| `/cadastro/consentimento`         | ✅     | Onboarding — LGPD consent + cria perfil               |
-| `/cadastro/pronto`                | ✅     | Onboarding — success                                  |
-| `/feed`                           | ✅     | Feed com filter tabs (matches/recentes/região/salvos) |
-| `/busca`                          | ✅     | Busca com FilterSheet + ResultItem + EmptyState       |
-| `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)   |
-| `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                 |
-| `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                     |
-| `/anuncio/[id]/proposta`          | ✅     | Fazer proposta (Client → POST /transactions)          |
-| `/anuncio/[id]/propostas`         | ✅     | Propostas recebidas do anúncio (dono)                 |
-| `/proposta/[id]`                  | ✅     | Detalhe da proposta                                   |
-| `/proposta/[id]/enviada`          | ✅     | Confirmação pós-envio da proposta                     |
-| `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia        |
-| `/transacoes`                     | ✅     | Transações com EmptyState                             |
-| `/transacoes/[id]`                | ✅     | Detalhe da transação + chat                           |
-| `/transacoes/[id]/concluir`       | ✅     | Confirmação de conclusão (dual-party)                 |
-| `/transacoes/[id]/avaliar`        | ✅     | Avaliação pós-transação                               |
-| `/perfil`                         | ✅     | Perfil próprio                                        |
-| `/perfil/[id]`                    | ✅     | Perfil público                                        |
-| `/negocios`                       | ✅     | Negócios                                              |
-| `/configuracoes`                  | ✅     | Configurações                                         |
-| `/ajuda`                          | ✅     | Ajuda                                                 |
-| `/termos` `/privacidade` `/sobre` | ✅     | Stubs legais                                          |
-| `error.tsx`                       | ✅     | Erro 500 (ErrorScreen amber)                          |
-| `not-found.tsx`                   | ✅     | 404 (ErrorScreen red)                                 |
+| Rota                              | Status | Observação                                           |
+| --------------------------------- | ------ | ---------------------------------------------------- |
+| `/`                               | ✅     | Landing page                                         |
+| `/entrar`                         | ✅     | Auth — input WhatsApp                                |
+| `/entrar/codigo`                  | ✅     | Auth — OTP                                           |
+| `/cadastro/perfil`                | ✅     | Onboarding — tipo (produtor/prestador)               |
+| `/cadastro/dados`                 | ✅     | Onboarding — nome/propriedade/bio                    |
+| `/cadastro/localizacao`           | ✅     | Onboarding — GPS + Nominatim/ViaCEP                  |
+| `/cadastro/foto`                  | ✅     | Onboarding — upload avatar presigned                 |
+| `/cadastro/consentimento`         | ✅     | Onboarding — LGPD consent + cria perfil              |
+| `/cadastro/pronto`                | ✅     | Onboarding — success                                 |
+| `/feed`                           | ↪️     | Redirect 308 → `/explorar` (bookmarks antigos)       |
+| `/explorar`                       | ✅     | Feed + busca (overlay) + FilterSheet; filtros na URL |
+| `/busca`                          | ↪️     | Redirect 308 → `/explorar`; `?q=` vira `?search=`    |
+| `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)  |
+| `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                |
+| `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                    |
+| `/anuncio/[id]/proposta`          | ✅     | Fazer proposta (Client → POST /transactions)         |
+| `/anuncio/[id]/propostas`         | ✅     | Propostas recebidas do anúncio (dono)                |
+| `/proposta/[id]`                  | ✅     | Detalhe da proposta                                  |
+| `/proposta/[id]/enviada`          | ✅     | Confirmação pós-envio da proposta                    |
+| `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia       |
+| `/transacoes`                     | ✅     | Transações com EmptyState                            |
+| `/transacoes/[id]`                | ✅     | Detalhe da transação + chat                          |
+| `/transacoes/[id]/concluir`       | ✅     | Confirmação de conclusão (dual-party)                |
+| `/transacoes/[id]/avaliar`        | ✅     | Avaliação pós-transação                              |
+| `/perfil`                         | ✅     | Perfil próprio                                       |
+| `/perfil/[id]`                    | ✅     | Perfil público                                       |
+| `/negocios`                       | ✅     | Negócios                                             |
+| `/configuracoes`                  | ✅     | Configurações                                        |
+| `/ajuda`                          | ✅     | Ajuda                                                |
+| `/termos` `/privacidade` `/sobre` | ✅     | Stubs legais                                         |
+| `error.tsx`                       | ✅     | Erro 500 (ErrorScreen amber)                         |
+| `not-found.tsx`                   | ✅     | 404 (ErrorScreen red)                                |
 
 ---
 
