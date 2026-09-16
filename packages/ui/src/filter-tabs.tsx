@@ -24,7 +24,7 @@ export function FilterTabs<T extends string>({
   return (
     <div
       role="tablist"
-      className={cn('flex gap-2 overflow-x-auto px-5 pb-4', className)}
+      className={cn('flex gap-2 overflow-x-auto px-4 pb-2 pt-3', className)}
       style={{ scrollbarWidth: 'none' }}
     >
       {tabs.map((tab) => (
@@ -35,10 +35,14 @@ export function FilterTabs<T extends string>({
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
           className={cn(
-            'flex-shrink-0 rounded-full px-[14px] py-[7px] text-[12px] transition-colors',
+            // min-h-0/min-w-0 opt out of the global `min-height: var(--tap-target)`
+            // that globals.css applies to every button. Without them these pills
+            // render ~48px tall, visibly larger than the identical pills on
+            // /explorar, which do opt out. See CLAUDE.md §11 (Padrões de UI).
+            'min-h-0 min-w-0 shrink-0 whitespace-nowrap rounded-full px-[14px] py-[7px] text-[12px] transition-colors',
             value === tab.value
               ? 'bg-cta-bg text-cta-fg font-medium'
-              : 'bg-muted text-fg-secondary',
+              : 'bg-muted text-fg-secondary hover:text-foreground',
           )}
         >
           {tab.label}
