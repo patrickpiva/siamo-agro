@@ -1,18 +1,9 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import {
-  ArrowLeft,
-  User,
-  Phone,
-  MapPin,
-  Bell,
-  Moon,
-  Shield,
-  HelpCircle,
-  Info,
-} from '@siamo/ui/icons'
+import { User, Phone, MapPin, Bell, Moon, Shield, HelpCircle, Info } from '@siamo/ui/icons'
 import { SettingsRow, SettingsGroup, ReputationSeal, getInitials } from '@siamo/ui'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { getServerSession } from '@/lib/server-auth'
 import { prisma } from '@siamo/db'
 import { LogoutButton } from './logout-button'
@@ -38,17 +29,7 @@ export default async function ConfiguracoesPage() {
   return (
     <div className="bg-background min-h-screen pb-[80px]">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Configurações</p>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader backHref="/meu-perfil" title="Configurações" />
 
       {/* Profile strip */}
       <Link href="/perfil" className="mx-4 mb-4 block">
@@ -141,8 +122,9 @@ export default async function ConfiguracoesPage() {
         />
       </SettingsGroup>
 
-      {/* Logout */}
-      <div className="mx-4 mt-2">
+      {/* Logout — extra bottom room so the button clears the tab bar, which is
+          64 px plus the home-indicator safe area on iOS. */}
+      <div className="mx-4 mb-[env(safe-area-inset-bottom,0px)] mt-2 pb-6">
         <LogoutButton />
       </div>
     </div>

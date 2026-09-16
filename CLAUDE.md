@@ -653,10 +653,33 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | ------------------- | ------------------------------------------------------------------ |
 | Pills/tabs ativo    | `feed-tab-active font-medium min-h-0 min-w-0`                      |
 | Pills/tabs inativo  | `bg-muted text-fg-secondary hover:text-foreground min-h-0 min-w-0` |
+| Header de página    | `ScreenHeader` (ver abaixo) — **nunca** montar `<header>` à mão    |
 | Botão voltar        | `bg-muted flex size-12 items-center justify-center rounded-full`   |
 | Ação primária (CTA) | `bg-cta-bg text-cta-fg`                                            |
 | Seção label         | `font-mono text-[10px] tracking-[0.4px]` uppercase                 |
 | Card de anúncio     | `ListingCard` de `@siamo/ui`                                       |
+
+#### Header de página — `ScreenHeader`
+
+Fonte única: `apps/web/src/components/layout/screen-header.tsx`. Fica em `apps/web`
+(**não** em `packages/ui`) porque o `@source` quebrado descartaria suas classes.
+
+Layout `grid-cols-[1fr_auto_1fr]`, não `justify-between`: as duas colunas laterais
+são iguais por definição, então o título fica centrado **independente** de quantos
+controles existam de cada lado. O padrão antigo (`justify-between` + spacer `w-12`
+casado na mão com o botão) só centrava quando os dois lados tinham a mesma largura —
+`/meu-perfil` (2 ícones) saía 28 px à esquerda e `/notificacoes` (botão de texto)
+deslocava conforme o rótulo. **Não reintroduza spacers manuais.**
+
+- `backHref` / `onBack` → renderiza o botão voltar padrão; `left` sobrepõe ambos.
+- Sem `backHref`/`onBack`/`left` → sem botão voltar (destinos de tab: `/explorar`,
+  `/transacoes`, `/meu-perfil`).
+- `right` aceita **N** controles; título longo trunca em vez de colidir.
+- `sticky` → fixa no topo com backdrop blur (hoje: `/meu-perfil`, `/perfil/[id]`).
+- O padding superior já inclui `env(safe-area-inset-top)`: o app roda com
+  `viewportFit: 'cover'` + status bar translúcida, então sem isso o header fica
+  por baixo da status bar do iOS no PWA instalado.
+- `WizardHeader` é um wrapper fino sobre ele — não duplique a marcação.
 
 ---
 

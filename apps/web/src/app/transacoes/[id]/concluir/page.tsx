@@ -3,6 +3,7 @@ import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
 import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { ListingContextStrip } from '@siamo/ui'
 import { Clock } from '@siamo/ui/icons'
 import { TransactionActionButton } from '@/components/transactions/transaction-actions'
@@ -137,11 +138,10 @@ export default async function ConcluirPage({ params }: PageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={route(`/transacoes/${id}`)} />
-        <span className="text-[15px] font-medium">Concluir transação</span>
-        <div className="w-9" />
-      </header>
+      <ScreenHeader
+        left={<BackButton fallbackHref={route(`/transacoes/${id}`)} />}
+        title="Concluir transação"
+      />
 
       <div className="flex flex-1 flex-col gap-5 px-4 pb-44 pt-6">
         {/* Hero */}

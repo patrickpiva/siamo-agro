@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { prisma } from '@siamo/db'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProfileEditForm } from '@/components/profile/profile-edit-form'
 
 export const metadata: Metadata = { title: 'Editar Perfil' }
@@ -22,17 +21,7 @@ export default async function EditarPerfilPage() {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/meu-perfil"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Editar perfil</p>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader backHref="/meu-perfil" title="Editar perfil" />
 
       <ProfileEditForm
         initialValues={{

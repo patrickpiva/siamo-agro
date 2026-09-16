@@ -1,3 +1,5 @@
+import { ScreenHeader } from '@/components/layout/screen-header'
+
 function Bone({ className }: { className?: string }) {
   return <div className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} />
 }
@@ -6,11 +8,11 @@ export default function EditListingLoading() {
   return (
     <div className="bg-background min-h-screen pb-24">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <Bone className="size-12 rounded-full" />
-        <Bone className="h-5 w-32" />
-        <div className="w-12" />
-      </header>
+      <ScreenHeader
+        left={<Bone className="size-12 rounded-full" />}
+        title={<Bone className="mx-auto h-5 w-32" />}
+        right={<Bone className="size-12 rounded-full" />}
+      />
 
       <div className="space-y-5 px-5 pt-2">
         {/* Photo grid */}

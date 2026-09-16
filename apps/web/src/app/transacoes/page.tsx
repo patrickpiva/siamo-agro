@@ -4,6 +4,7 @@ import { prisma } from '@siamo/db'
 import { getServerSession } from '@/lib/server-auth'
 import { redirect } from 'next/navigation'
 import { TransactionCard } from '@/components/transactions/transaction-card'
+import { ScreenHeader } from '@/components/layout/screen-header'
 
 type StatusFilter = 'all' | 'PROPOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
 
@@ -45,9 +46,7 @@ export default async function TransacoesPage({ searchParams }: TransacoesPagePro
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <header className="flex items-center justify-center px-4 py-3">
-        <p className="text-[15px] font-medium">Negócios</p>
-      </header>
+      <ScreenHeader title="Negócios" />
 
       {/* Filter pills */}
       <div className="flex gap-2 overflow-x-auto px-4 pb-2 pt-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Search } from '@siamo/ui/icons'
+import { Search } from '@siamo/ui/icons'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { FaqList } from '@/components/help/faq-item'
 import { WhatsAppSupportCard } from '@/components/help/whatsapp-support-card'
 
@@ -52,17 +52,7 @@ export default function AjudaPage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/configuracoes"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Ajuda</p>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader backHref="/configuracoes" title="Ajuda" />
 
       {/* Search */}
       <div className="mx-4 mb-4">

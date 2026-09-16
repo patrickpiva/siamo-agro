@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { ListingMiniCard } from '@siamo/ui'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { prisma } from '@siamo/db'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
@@ -124,11 +125,7 @@ async function ProfileContent({ id }: { id: string }) {
   return (
     <div className="bg-background flex flex-col pb-36">
       {/* Header — always back button + centered title */}
-      <header className="bg-background/80 sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm">
-        <BackButton fallbackHref="/" />
-        <span className="text-[15px] font-medium">Perfil</span>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader sticky left={<BackButton fallbackHref="/" />} title="Perfil" />
 
       <ProfileHero
         name={profile.name}

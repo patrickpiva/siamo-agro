@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ArrowLeft, CheckCircle } from '@siamo/ui/icons'
+import { CheckCircle } from '@siamo/ui/icons'
 import { cn, EmptyState } from '@siamo/ui'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import {
   NotificationItem,
   type NotificationData,
@@ -122,28 +122,24 @@ function NotificationsContent() {
   return (
     <>
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Notificações</p>
-        <button
-          type="button"
-          onClick={() => void handleMarkAllRead()}
-          disabled={isMarkingAll || unreadCount === 0}
-          aria-label="Marcar todas como lidas"
-          aria-live="polite"
-          className={cn(
-            'text-primary font-mono text-[11px] font-medium tracking-[0.3px] disabled:opacity-40',
-          )}
-        >
-          {isMarkingAll ? 'MARCANDO…' : 'MARCAR LIDAS'}
-        </button>
-      </header>
+      <ScreenHeader
+        backHref="/explorar"
+        title="Notificações"
+        right={
+          <button
+            type="button"
+            onClick={() => void handleMarkAllRead()}
+            disabled={isMarkingAll || unreadCount === 0}
+            aria-label="Marcar todas como lidas"
+            aria-live="polite"
+            className={cn(
+              'text-primary whitespace-nowrap font-mono text-[11px] font-medium tracking-[0.3px] disabled:opacity-40',
+            )}
+          >
+            {isMarkingAll ? 'MARCANDO…' : 'MARCAR LIDAS'}
+          </button>
+        }
+      />
 
       {/* Filter tabs */}
       <NotificationFilterTabs />

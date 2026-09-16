@@ -104,10 +104,13 @@ export default function WizardStep5() {
       const json = (await res.json()) as { data: { id: string } }
       reset()
 
+      // replace, not push: the draft store was just reset, so a back navigation
+      // into the wizard would land on an empty step and look like lost work.
       if (isEditMode) {
-        router.push(route(`/anuncio/${json.data.id}`))
+        router.replace(route(`/anuncio/${json.data.id}`))
+        router.refresh()
       } else {
-        router.push(`/anuncio/novo/sucesso?id=${json.data.id}`)
+        router.replace(`/anuncio/novo/sucesso?id=${json.data.id}`)
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro inesperado. Tente novamente.')

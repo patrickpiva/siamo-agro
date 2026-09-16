@@ -96,10 +96,7 @@ export default async function PropostaReviewPage({ params }: PageProps) {
       <StateBanner variant="proposed">PROPOSTA PENDENTE</StateBanner>
 
       {/* Header */}
-      <ScreenHeader
-        backHref={route(`/anuncio/${tx.listing.id}`)}
-        title={<span className="text-[15px] font-medium">Nova proposta</span>}
-      />
+      <ScreenHeader backHref={route(`/anuncio/${tx.listing.id}`)} title="Nova proposta" />
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 pb-6 pt-3">

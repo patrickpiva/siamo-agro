@@ -1,3 +1,5 @@
+import { ScreenHeader } from '@/components/layout/screen-header'
+
 function Bone({ className }: { className?: string }) {
   return <div className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} />
 }
@@ -6,13 +8,15 @@ export default function ListingLoading() {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <Bone className="size-[44px] rounded-full" />
-        <div className="flex gap-2">
-          <Bone className="size-[44px] rounded-full" />
-          <Bone className="size-[44px] rounded-full" />
-        </div>
-      </div>
+      <ScreenHeader
+        left={<Bone className="size-12 rounded-full" />}
+        right={
+          <>
+            <Bone className="size-12 rounded-full" />
+            <Bone className="size-12 rounded-full" />
+          </>
+        }
+      />
 
       {/* Hero */}
       <Bone className="mx-4 h-[220px] rounded-[14px]" />
