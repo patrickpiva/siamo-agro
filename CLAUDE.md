@@ -231,6 +231,28 @@ Nunca retorne a entidade diretamente na raiz. Sempre dentro de `data`.
   keyset reconstrói as chaves do cursor com as MESMAS expressões de ordenação
   (`ListingsService.buildCursorCondition`); o cursor exposto continua sendo só o id.
 
+### Busca textual (`GET /listings?search=`)
+
+Sem acento por padrão: a expressão indexada é `listing_search_document(title, description)`
+(migration `006_search_unaccent.sql`), que aplica `immutable_unaccent` antes do
+`to_tsvector('portuguese', …)`. **Use sempre essa função no WHERE e no `ts_rank`** —
+qualquer variação da expressão faz o planner ignorar o GIN e voltar a seq scan.
+
+A busca tem uma escada de relaxamento (`ListingsService.resolveSearchTier`):
+
+| Tier      | Query                                           | Quando               |
+| --------- | ----------------------------------------------- | -------------------- |
+| `exact`   | `websearch_to_tsquery` (AND de todos os termos) | padrão               |
+| `partial` | a mesma tsquery com `&` trocado por `\|` (OR)   | o AND não achou nada |
+| `fuzzy`   | `word_similarity` trigram sobre o título (`<%`) | nem o OR achou nada  |
+
+O tier é decidido por probes `LIMIT 1` **antes** da query principal e **sem** a
+condição de cursor — um resultado vazio na query paginada é ambíguo ("não há match"
+vs "acabou a página"), e decidir sem o cursor mantém o tier estável entre páginas.
+O tier escolhido volta em `meta.searchRelaxed`; a UI deve avisar que os resultados
+são aproximados quando ele não for `exact`. Quando nenhum tier acha nada, volta
+`exact` — para a tela dizer "sem resultados" em vez de "mostrando aproximados".
+
 ```typescript
 type PaginationMeta = {
   nextCursor: string | null
@@ -238,6 +260,36 @@ type PaginationMeta = {
   total?: number // apenas quando barato de calcular
 }
 ```
+
+### Filtros de `GET /listings`
+
+`kind`, `category` e `badge` são **multi-valor, separados por vírgula**
+(`?kind=OFFER,DEMAND`). Um valor único continua funcionando — vira lista de um
+elemento. Schemas compartilhados em `packages/shared/src/validators/listing-filters.ts`.
+
+A rota é **pública com auth opcional** (`optionalAuthenticate`): token ausente ou
+expirado **não** é erro, o request só segue anônimo. Com viewer identificado:
+
+- cada anúncio ganha `matchScore` (0–1) e `distanceKm` do par, via LEFT JOIN em
+  `match_scores` — ausentes (não `null`) quando o worker ainda não pontuou o par;
+- `minMatchScore` (escala **0–1**, igual à do banco — a UI divide os 70/80/90 dela) fica disponível;
+- `radiusKm` sem `lat`/`lng` usa a localização do próprio perfil.
+
+Dois casos viram erro em vez de filtro silenciosamente ignorado — um filtro que
+não filtra é pior que um erro, porque a UI segue dizendo "até 50 km":
+
+| Situação                            | Resposta                                   |
+| ----------------------------------- | ------------------------------------------ |
+| `minMatchScore` sem login           | 401 `LISTING_MATCH_FILTER_UNAUTHENTICATED` |
+| `radiusKm` sem lat/lng e sem perfil | 422 `LISTING_LOCATION_REQUIRED`            |
+
+`meta.total` só vem na **primeira página** (sem cursor): o contador do cabeçalho
+não muda durante o scroll, recalculá-lo por página seria desperdício.
+
+⚠️ O LEFT JOIN de `match_scores` e o filtro de score precisam existir nos **três**
+formatos de query — principal, probes de tier e COUNT. Se o probe não tiver o
+filtro, ele responde "existe resultado" para linhas que o `minMatchScore` remove
+depois, e o tier escolhido fica errado.
 
 ### Autenticação
 
@@ -465,94 +517,95 @@ pnpm ui:add <comp>    # Adiciona componente shadcn ao packages/ui
 
 ### Rotas web implementadas (`apps/web/src/app/`)
 
-| Rota                              | Status | Observação                                            |
-| --------------------------------- | ------ | ----------------------------------------------------- |
-| `/`                               | ✅     | Landing page                                          |
-| `/entrar`                         | ✅     | Auth — input WhatsApp                                 |
-| `/entrar/codigo`                  | ✅     | Auth — OTP                                            |
-| `/cadastro/perfil`                | ✅     | Onboarding — tipo (produtor/prestador)                |
-| `/cadastro/dados`                 | ✅     | Onboarding — nome/propriedade/bio                     |
-| `/cadastro/localizacao`           | ✅     | Onboarding — GPS + Nominatim/ViaCEP                   |
-| `/cadastro/foto`                  | ✅     | Onboarding — upload avatar presigned                  |
-| `/cadastro/consentimento`         | ✅     | Onboarding — LGPD consent + cria perfil               |
-| `/cadastro/pronto`                | ✅     | Onboarding — success                                  |
-| `/feed`                           | ✅     | Feed com filter tabs (matches/recentes/região/salvos) |
-| `/busca`                          | ✅     | Busca com FilterSheet + ResultItem + EmptyState       |
-| `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)   |
-| `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                 |
-| `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                     |
-| `/anuncio/[id]/proposta`          | ✅     | Fazer proposta (Client → POST /transactions)          |
-| `/anuncio/[id]/propostas`         | ✅     | Propostas recebidas do anúncio (dono)                 |
-| `/proposta/[id]`                  | ✅     | Detalhe da proposta                                   |
-| `/proposta/[id]/enviada`          | ✅     | Confirmação pós-envio da proposta                     |
-| `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia        |
-| `/transacoes`                     | ✅     | Transações com EmptyState                             |
-| `/transacoes/[id]`                | ✅     | Detalhe da transação + chat                           |
-| `/transacoes/[id]/concluir`       | ✅     | Confirmação de conclusão (dual-party)                 |
-| `/transacoes/[id]/avaliar`        | ✅     | Avaliação pós-transação                               |
-| `/perfil`                         | ✅     | Perfil próprio                                        |
-| `/perfil/[id]`                    | ✅     | Perfil público                                        |
-| `/negocios`                       | ✅     | Negócios                                              |
-| `/configuracoes`                  | ✅     | Configurações                                         |
-| `/ajuda`                          | ✅     | Ajuda                                                 |
-| `/termos` `/privacidade` `/sobre` | ✅     | Stubs legais                                          |
-| `error.tsx`                       | ✅     | Erro 500 (ErrorScreen amber)                          |
-| `not-found.tsx`                   | ✅     | 404 (ErrorScreen red)                                 |
+| Rota                              | Status | Observação                                           |
+| --------------------------------- | ------ | ---------------------------------------------------- |
+| `/`                               | ✅     | Landing page                                         |
+| `/entrar`                         | ✅     | Auth — input WhatsApp                                |
+| `/entrar/codigo`                  | ✅     | Auth — OTP                                           |
+| `/cadastro/perfil`                | ✅     | Onboarding — tipo (produtor/prestador)               |
+| `/cadastro/dados`                 | ✅     | Onboarding — nome/propriedade/bio                    |
+| `/cadastro/localizacao`           | ✅     | Onboarding — GPS + Nominatim/ViaCEP                  |
+| `/cadastro/foto`                  | ✅     | Onboarding — upload avatar presigned                 |
+| `/cadastro/consentimento`         | ✅     | Onboarding — LGPD consent + cria perfil              |
+| `/cadastro/pronto`                | ✅     | Onboarding — success                                 |
+| `/feed`                           | ↪️     | Redirect 308 → `/explorar` (bookmarks antigos)       |
+| `/explorar`                       | ✅     | Feed + busca (overlay) + FilterSheet; filtros na URL |
+| `/busca`                          | ↪️     | Redirect 308 → `/explorar`; `?q=` vira `?search=`    |
+| `/anuncio/novo`                   | ✅     | Wizard 4 passos (kind → detalhes → mídia → revisão)  |
+| `/anuncio/[id]`                   | ✅     | Detalhe do anúncio (Server Component)                |
+| `/anuncio/[id]/editar`            | ✅     | Edição de anúncio                                    |
+| `/anuncio/[id]/proposta`          | ✅     | Fazer proposta (Client → POST /transactions)         |
+| `/anuncio/[id]/propostas`         | ✅     | Propostas recebidas do anúncio (dono)                |
+| `/proposta/[id]`                  | ✅     | Detalhe da proposta                                  |
+| `/proposta/[id]/enviada`          | ✅     | Confirmação pós-envio da proposta                    |
+| `/notificacoes`                   | ✅     | Notificações com filter pills + grupos por dia       |
+| `/transacoes`                     | ✅     | Transações com EmptyState                            |
+| `/transacoes/[id]`                | ✅     | Detalhe da transação + chat                          |
+| `/transacoes/[id]/concluir`       | ✅     | Confirmação de conclusão (dual-party)                |
+| `/transacoes/[id]/avaliar`        | ✅     | Avaliação pós-transação                              |
+| `/perfil`                         | ✅     | Perfil próprio                                       |
+| `/perfil/[id]`                    | ✅     | Perfil público                                       |
+| `/negocios`                       | ✅     | Negócios                                             |
+| `/configuracoes`                  | ✅     | Configurações                                        |
+| `/ajuda`                          | ✅     | Ajuda                                                |
+| `/termos` `/privacidade` `/sobre` | ✅     | Stubs legais                                         |
+| `error.tsx`                       | ✅     | Erro 500 (ErrorScreen amber)                         |
+| `not-found.tsx`                   | ✅     | 404 (ErrorScreen red)                                |
 
 ---
 
 ### API endpoints (`apps/api` — prefixo `/api/v1`)
 
-| Método | Rota                           | Auth | Status                                |
-| ------ | ------------------------------ | ---- | ------------------------------------- |
-| POST   | `/auth/otp/request`            | ❌   | ✅                                    |
-| POST   | `/auth/otp/verify`             | ❌   | ✅                                    |
-| POST   | `/auth/refresh`                | ❌   | ✅                                    |
-| POST   | `/auth/logout`                 | ✅   | ✅                                    |
-| POST   | `/profiles`                    | ✅   | ✅                                    |
-| GET    | `/profiles/:id`                | ❌   | ✅                                    |
-| PATCH  | `/profiles/:id`                | ✅   | ✅                                    |
-| POST   | `/privacy/consent`             | ✅   | ✅ idempotente                        |
-| POST   | `/listings`                    | ✅   | ✅                                    |
-| GET    | `/listings`                    | ❌   | ✅ cursor-based, PostGIS, FTS         |
-| GET    | `/listings/mine`               | ✅   | ✅ cursor-based                       |
-| GET    | `/listings/:id`                | ❌   | ✅                                    |
-| PATCH  | `/listings/:id`                | ✅   | ✅                                    |
-| DELETE | `/listings/:id`                | ✅   | ✅ soft delete                        |
-| POST   | `/listings/:id/pause`          | ✅   | ✅                                    |
-| POST   | `/listings/:id/resume`         | ✅   | ✅                                    |
-| GET    | `/listings/:id/matches`        | ✅   | ✅                                    |
-| POST   | `/uploads/presigned`           | ✅   | ✅                                    |
-| POST   | `/uploads/confirm`             | ✅   | ✅                                    |
-| GET    | `/notifications`               | ✅   | ✅ cursor-based                       |
-| PATCH  | `/notifications/:id/read`      | ✅   | ✅                                    |
-| POST   | `/notifications/read-all`      | ✅   | ✅                                    |
-| POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência            |
-| POST   | `/transactions`                | ✅   | ✅ cria proposta (201)                |
-| GET    | `/transactions`                | ✅   | ✅                                    |
-| GET    | `/transactions/:id`            | ✅   | ✅                                    |
-| POST   | `/transactions/:id/accept`     | ✅   | ✅                                    |
-| POST   | `/transactions/:id/counter`    | ✅   | ✅ contraproposta                     |
-| POST   | `/transactions/:id/start`      | ✅   | ✅ confirmação dual-party de início   |
-| POST   | `/transactions/:id/complete`   | ✅   | ✅ confirmação dual-party de fim      |
-| POST   | `/transactions/:id/cancel`     | ✅   | ✅ com motivo                         |
-| POST   | `/transactions/:id/messages`   | ✅   | ✅                                    |
-| POST   | `/transactions/:id/rating`     | ✅   | ✅ avaliação (módulo reputation)      |
-| GET    | `/profiles/:id/reputation`     | ❌   | ✅ média ao vivo de ratings           |
-| GET    | `/help/faq`                    | ❌   | ✅                                    |
-| GET    | `/help/faq/search`             | ❌   | ✅ `?q=`                              |
-| GET    | `/me`                          | ✅   | ✅                                    |
-| PATCH  | `/me`                          | ✅   | ✅                                    |
-| GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`  |
-| GET    | `/me/notification-preferences` | ✅   | ✅                                    |
-| PATCH  | `/me/notification-preferences` | ✅   | ✅                                    |
-| GET    | `/me/consents`                 | ✅   | ✅                                    |
-| PATCH  | `/me/consents`                 | ✅   | ✅                                    |
-| POST   | `/me/data-export`              | ✅   | ✅ LGPD — audit trail via notificação |
-| DELETE | `/me`                          | ✅   | ✅ soft delete; remoção física em 30d |
-| POST   | `/saved-listings/:listingId`   | ✅   | ✅ toggle — salva ou desalva          |
-| GET    | `/saved-listings/:listingId`   | ✅   | ✅ status de salvamento do anúncio    |
-| GET    | `/saved-listings`              | ✅   | ✅ cursor-based                       |
+| Método | Rota                           | Auth | Status                                 |
+| ------ | ------------------------------ | ---- | -------------------------------------- |
+| POST   | `/auth/otp/request`            | ❌   | ✅                                     |
+| POST   | `/auth/otp/verify`             | ❌   | ✅                                     |
+| POST   | `/auth/refresh`                | ❌   | ✅                                     |
+| POST   | `/auth/logout`                 | ✅   | ✅                                     |
+| POST   | `/profiles`                    | ✅   | ✅                                     |
+| GET    | `/profiles/:id`                | ❌   | ✅                                     |
+| PATCH  | `/profiles/:id`                | ✅   | ✅                                     |
+| POST   | `/privacy/consent`             | ✅   | ✅ idempotente                         |
+| POST   | `/listings`                    | ✅   | ✅                                     |
+| GET    | `/listings`                    | 🔓   | ✅ cursor-based, PostGIS, FTS, filtros |
+| GET    | `/listings/mine`               | ✅   | ✅ cursor-based                        |
+| GET    | `/listings/:id`                | ❌   | ✅                                     |
+| PATCH  | `/listings/:id`                | ✅   | ✅                                     |
+| DELETE | `/listings/:id`                | ✅   | ✅ soft delete                         |
+| POST   | `/listings/:id/pause`          | ✅   | ✅                                     |
+| POST   | `/listings/:id/resume`         | ✅   | ✅                                     |
+| GET    | `/listings/:id/matches`        | ✅   | ✅                                     |
+| POST   | `/uploads/presigned`           | ✅   | ✅                                     |
+| POST   | `/uploads/confirm`             | ✅   | ✅                                     |
+| GET    | `/notifications`               | ✅   | ✅ cursor-based                        |
+| PATCH  | `/notifications/:id/read`      | ✅   | ✅                                     |
+| POST   | `/notifications/read-all`      | ✅   | ✅                                     |
+| POST   | `/notifications/push`          | ✅   | ⚠️ stub — sem persistência             |
+| POST   | `/transactions`                | ✅   | ✅ cria proposta (201)                 |
+| GET    | `/transactions`                | ✅   | ✅                                     |
+| GET    | `/transactions/:id`            | ✅   | ✅                                     |
+| POST   | `/transactions/:id/accept`     | ✅   | ✅                                     |
+| POST   | `/transactions/:id/counter`    | ✅   | ✅ contraproposta                      |
+| POST   | `/transactions/:id/start`      | ✅   | ✅ confirmação dual-party de início    |
+| POST   | `/transactions/:id/complete`   | ✅   | ✅ confirmação dual-party de fim       |
+| POST   | `/transactions/:id/cancel`     | ✅   | ✅ com motivo                          |
+| POST   | `/transactions/:id/messages`   | ✅   | ✅                                     |
+| POST   | `/transactions/:id/rating`     | ✅   | ✅ avaliação (módulo reputation)       |
+| GET    | `/profiles/:id/reputation`     | ❌   | ✅ média ao vivo de ratings            |
+| GET    | `/help/faq`                    | ❌   | ✅                                     |
+| GET    | `/help/faq/search`             | ❌   | ✅ `?q=`                               |
+| GET    | `/me`                          | ✅   | ✅                                     |
+| PATCH  | `/me`                          | ✅   | ✅                                     |
+| GET    | `/me/feed/matches`             | ✅   | ✅ cursor-based; retorna `computing`   |
+| GET    | `/me/notification-preferences` | ✅   | ✅                                     |
+| PATCH  | `/me/notification-preferences` | ✅   | ✅                                     |
+| GET    | `/me/consents`                 | ✅   | ✅                                     |
+| PATCH  | `/me/consents`                 | ✅   | ✅                                     |
+| POST   | `/me/data-export`              | ✅   | ✅ LGPD — audit trail via notificação  |
+| DELETE | `/me`                          | ✅   | ✅ soft delete; remoção física em 30d  |
+| POST   | `/saved-listings/:listingId`   | ✅   | ✅ toggle — salva ou desalva           |
+| GET    | `/saved-listings/:listingId`   | ✅   | ✅ status de salvamento do anúncio     |
+| GET    | `/saved-listings`              | ✅   | ✅ cursor-based                        |
 
 Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Authorization: Bearer` a partir do cookie `access_token`.
 
@@ -600,10 +653,33 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 | ------------------- | ------------------------------------------------------------------ |
 | Pills/tabs ativo    | `feed-tab-active font-medium min-h-0 min-w-0`                      |
 | Pills/tabs inativo  | `bg-muted text-fg-secondary hover:text-foreground min-h-0 min-w-0` |
+| Header de página    | `ScreenHeader` (ver abaixo) — **nunca** montar `<header>` à mão    |
 | Botão voltar        | `bg-muted flex size-12 items-center justify-center rounded-full`   |
 | Ação primária (CTA) | `bg-cta-bg text-cta-fg`                                            |
 | Seção label         | `font-mono text-[10px] tracking-[0.4px]` uppercase                 |
 | Card de anúncio     | `ListingCard` de `@siamo/ui`                                       |
+
+#### Header de página — `ScreenHeader`
+
+Fonte única: `apps/web/src/components/layout/screen-header.tsx`. Fica em `apps/web`
+(**não** em `packages/ui`) porque o `@source` quebrado descartaria suas classes.
+
+Layout `grid-cols-[1fr_auto_1fr]`, não `justify-between`: as duas colunas laterais
+são iguais por definição, então o título fica centrado **independente** de quantos
+controles existam de cada lado. O padrão antigo (`justify-between` + spacer `w-12`
+casado na mão com o botão) só centrava quando os dois lados tinham a mesma largura —
+`/meu-perfil` (2 ícones) saía 28 px à esquerda e `/notificacoes` (botão de texto)
+deslocava conforme o rótulo. **Não reintroduza spacers manuais.**
+
+- `backHref` / `onBack` → renderiza o botão voltar padrão; `left` sobrepõe ambos.
+- Sem `backHref`/`onBack`/`left` → sem botão voltar (destinos de tab: `/explorar`,
+  `/transacoes`, `/meu-perfil`).
+- `right` aceita **N** controles; título longo trunca em vez de colidir.
+- `sticky` → fixa no topo com backdrop blur (hoje: `/meu-perfil`, `/perfil/[id]`).
+- O padding superior já inclui `env(safe-area-inset-top)`: o app roda com
+  `viewportFit: 'cover'` + status bar translúcida, então sem isso o header fica
+  por baixo da status bar do iOS no PWA instalado.
+- `WizardHeader` é um wrapper fino sobre ele — não duplique a marcação.
 
 ---
 
@@ -669,12 +745,16 @@ Todos os endpoints têm proxy em `apps/web/src/app/api/proxy/*` que injeta `Auth
 - [x] PostGIS: `migrations/manual/001_postgis.sql` — setup canônico (extensão no schema `extensions`, coluna `geog`, trigger de sync, índice GiST). Produção já está nesse padrão.
 - [ ] Alinhar staging ao PostGIS de produção (schema `extensions`) — one-off em `migrations/manual/oneoff_staging_postgis_to_extensions.sql` (opcional; o app funciona com PostGIS em `public` também)
 - [x] Matchmaking: `migrations/manual/005_matchmaking_perf.sql` — UNIQUE de `match_scores`, índice GIN de busca FTS (português), índice keyset do feed, drop de índices redundantes; aplicada em staging e produção (2026-06-11)
+- [ ] Busca sem acento: `migrations/manual/006_search_unaccent.sql` — `unaccent` + `pg_trgm` no schema `extensions`, `immutable_unaccent()`, `listing_search_document()`, GIN sem acento (substitui o de 005) e GIN trigram do título. **Aplicada em staging (2026-08-25); falta produção.** ⚠️ Aplicar ANTES do deploy da API: o código novo chama essas funções, e o código antigo perde o índice que ela dropa
 - [ ] Remover o fallback de refresh token legado (`findRefreshToken` em `apps/api/src/modules/auth/service.ts`) após **2026-07-10** — o TTL de 30 dias esgota os tokens antigos
 - [ ] Job de expurgo físico 30 dias após `DELETE /me` (LGPD) — hoje só marca `status: DELETED`; anúncios do usuário continuam ativos no feed e não há purge implementado
 - [ ] Decidir o CTA de WhatsApp no detalhe do anúncio — `wa.me/?text=` sem telefone abre o share picker, não conversa com o vendedor
 - [ ] Unificar `API_URL` vs `NEXT_PUBLIC_API_URL` (mesmo backend, dois nomes — proxy/SSR usa um, middleware usa o outro)
 - [ ] Cron de limpeza de `otp_codes` e `refresh_tokens` expirados (crescimento de tabela sem bound)
 - [ ] Testes E2E (`apps/web/e2e/special-states.spec.ts`) — criados, não rodados em CI ainda
+- [ ] **Tailwind `@source` quebrado**: `apps/web/src/app/globals.css` linha 2 tem `@source "../../packages/ui/src"`, que resolve para `apps/web/packages/ui/src` — pasta inexistente. O correto é `../../../../packages/ui/src`. Consequência: toda classe usada **só** em `packages/ui` e não em `apps/web` é silenciosamente descartada. Verificado em 2026-08-25: `.opacity-0`, `.mx-[11px]` e `.-translate-x-1/2` não existem no CSS de produção (84 KB). É também o motivo do bloco de ~750 linhas de utilities manuais neste mesmo arquivo. ⚠️ Corrigir em PR próprio: ativa de uma vez muitas classes hoje mortas, então exige passada visual em todo o app (onboarding, transações, perfil), não só na busca
+- [ ] Auditar o resto dos componentes de `packages/ui` afetados pelo `@source` acima — quais estão degradados hoje e quais das utilities manuais viram redundantes depois do fix
+- [ ] `apps/web/scripts/capture-journey.mjs` não passa no ESLint (`process`, `console`, `window`, `URL` sem env declarado). Arquivo untracked, então o CI não vê — mas trava o pre-commit de quem tentar commitá-lo
 
 ---
 

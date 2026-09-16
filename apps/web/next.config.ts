@@ -36,7 +36,20 @@ const nextConfig: NextConfig = {
   },
   // Lote 7: o feed virou /explorar; URLs/bookmarks antigos de /feed seguem válidos.
   async redirects() {
-    return [{ source: '/feed', destination: '/explorar', permanent: true }]
+    return [
+      { source: '/feed', destination: '/explorar', permanent: true },
+      // /busca foi absorvida pelo /explorar (a busca virou overlay + params na
+      // URL). O link antigo usava ?q=; o novo usa ?search=, então esta primeira
+      // regra traduz o termo em vez de descartá-lo — um link de busca
+      // compartilhado continua abrindo a mesma busca.
+      {
+        source: '/busca',
+        has: [{ type: 'query', key: 'q', value: '(?<term>.*)' }],
+        destination: '/explorar?tab=recent&search=:term',
+        permanent: true,
+      },
+      { source: '/busca', destination: '/explorar', permanent: true },
+    ]
   },
 }
 

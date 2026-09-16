@@ -1,5 +1,12 @@
 import { z } from 'zod'
-import { CATEGORIES, isCategoryValidForKind } from '@siamo/shared'
+import {
+  CATEGORIES,
+  isCategoryValidForKind,
+  listingKindsFilter,
+  listingCategoriesFilter,
+  listingBadgesFilter,
+  listingMinMatchScoreFilter,
+} from '@siamo/shared'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,6 +56,14 @@ export const ListingSchema = z.object({
 export const ListingWithProfileSchema = ListingSchema.extend({
   profile: ListingProfileSchema,
   photos: z.array(ListingPhotoSchema),
+  /**
+   * Match of this listing against the REQUESTING user's profile, 0–1. Present
+   * only on authenticated requests, and only for pairs the worker has scored —
+   * absent for anonymous callers.
+   */
+  matchScore: z.number().optional(),
+  /** Distance recorded alongside the match score, in km. */
+  distanceKm: z.number().nullable().optional(),
 })
 
 export const ListingDetailSchema = ListingSchema.extend({
@@ -95,17 +110,30 @@ export const CreateListingResponseSchema = z.object({
 // ─── GET /listings ────────────────────────────────────────────────────────────
 
 export const ListListingsQuerySchema = z.object({
-  kind: z.enum(LISTING_KINDS).optional(),
-  category: z.string().optional(),
+  // Multi-valued, comma-separated (see @siamo/shared). A single value still
+  // parses to a one-element array, so pre-existing single-value URLs keep working.
+  kind: listingKindsFilter,
+  category: listingCategoriesFilter,
+  badge: listingBadgesFilter,
   minPrice: z.coerce.number().positive().optional(),
   maxPrice: z.coerce.number().positive().optional(),
+  // lat/lng stay optional even alongside radiusKm: an authenticated request
+  // falls back to the viewer's own profile location. See `resolveViewer`.
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
   radiusKm: z.coerce.number().positive().optional(),
+  minMatchScore: listingMinMatchScoreFilter,
   search: z.string().min(1).max(200).optional(),
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(50).default(20),
 })
+
+/**
+ * How far the text search had to be relaxed. Present only when `search` was
+ * sent. The UI uses this to warn that results are approximate, instead of
+ * silently presenting them as exact matches.
+ */
+export const SearchTierSchema = z.enum(['exact', 'partial', 'fuzzy'])
 
 export const ListListingsResponseSchema = z.object({
   data: z.array(ListingWithProfileSchema),
@@ -113,6 +141,13 @@ export const ListListingsResponseSchema = z.object({
   meta: z.object({
     nextCursor: z.string().nullable(),
     limit: z.number(),
+    searchRelaxed: SearchTierSchema.optional(),
+    /**
+     * Total matching the filters, ignoring pagination. Computed only on the
+     * first page (no cursor) — §5 allows `total` when it is cheap to compute,
+     * and one COUNT per search is; one per infinite-scroll page would not be.
+     */
+    total: z.number().optional(),
   }),
 })
 

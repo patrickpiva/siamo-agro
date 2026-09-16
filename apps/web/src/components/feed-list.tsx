@@ -12,7 +12,14 @@ import type { FetchListingsQuery, Listing } from '@/lib/api'
 
 interface FeedListResponse {
   data: Listing[]
-  meta: { nextCursor: string | null; limit: number }
+  meta: {
+    nextCursor: string | null
+    limit: number
+    /** First page only — see CLAUDE.md §5. */
+    total?: number
+    /** Present when the request carried `search`; not 'exact' means approximate. */
+    searchRelaxed?: 'exact' | 'partial' | 'fuzzy'
+  }
   error: null
   /** Marcador local (não vem da API): 401 nas abas autenticadas → CTA de login */
   unauthenticated?: boolean
@@ -24,6 +31,22 @@ interface MatchesFeedResponse extends FeedListResponse {
 
 // ─── Fetchers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Error carrying the API's typed code, so the UI can explain WHICH filter is the
+ * problem. `radiusKm` without a location and `minMatchScore` while logged out
+ * are deliberate errors on the API side (CLAUDE.md §5) — rendering them as a
+ * generic "erro ao carregar" would hide an entirely actionable message.
+ */
+class ListingsRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string | null,
+  ) {
+    super(message)
+    this.name = 'ListingsRequestError'
+  }
+}
+
 async function fetchListingsPage(
   query: FetchListingsQuery & { cursor?: string },
 ): Promise<FeedListResponse> {
@@ -32,8 +55,22 @@ async function fetchListingsPage(
     if (v !== undefined && v !== '') params.set(k, String(v))
   }
   const res = await fetch(`/api/proxy/listings?${params.toString()}`)
-  if (!res.ok) throw new Error('Erro ao buscar anúncios')
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => null)
+    const code =
+      typeof body === 'object' && body !== null && 'error' in body
+        ? ((body as { error?: { code?: string } }).error?.code ?? null)
+        : null
+    throw new ListingsRequestError('Erro ao buscar anúncios', code)
+  }
   return res.json() as Promise<FeedListResponse>
+}
+
+/** Actionable copy for the filter errors the API raises on purpose. */
+const FILTER_ERROR_MESSAGES: Record<string, string> = {
+  LISTING_LOCATION_REQUIRED:
+    'Para filtrar por distância, cadastre sua localização no perfil ou remova o filtro.',
+  LISTING_MATCH_FILTER_UNAUTHENTICATED: 'Entre na sua conta para filtrar por score de match.',
 }
 
 async function fetchMatchesPage(cursor?: string): Promise<MatchesFeedResponse> {
@@ -93,6 +130,52 @@ function toFeedCardData(listing: Listing): FeedCardListing {
   }
 }
 
+// ─── Results header ───────────────────────────────────────────────────────────
+
+/**
+ * Result count plus, when the API had to relax the search, an explicit warning
+ * that the matches are approximate.
+ *
+ * The warning is the point: `partial` and `fuzzy` results are NOT what the user
+ * typed, and presenting them silently as if they were is how a search loses
+ * trust. `exact` renders no banner.
+ */
+function ResultsHeader({
+  total,
+  loaded,
+  searchRelaxed,
+  query,
+}: {
+  total?: number
+  loaded: number
+  searchRelaxed?: 'exact' | 'partial' | 'fuzzy'
+  query?: string
+}) {
+  const showCount = total !== undefined
+  const relaxed = searchRelaxed && searchRelaxed !== 'exact'
+  if (!showCount && !relaxed) return null
+
+  return (
+    <div className="px-4 pb-2">
+      {showCount && (
+        <p className="text-muted-foreground font-mono text-[11px]">
+          {total === 1 ? '1 resultado' : `${total} resultados`}
+        </p>
+      )}
+      {relaxed && (
+        <p className="error-retry-amber mt-2 rounded-[8px] px-[10px] py-2 text-[12px] leading-[1.4]">
+          {searchRelaxed === 'partial'
+            ? `Nenhum anúncio tem todos os termos de "${query}". Mostrando os que têm parte deles.`
+            : `Nenhum anúncio corresponde a "${query}". Mostrando resultados parecidos.`}
+        </p>
+      )}
+      {/* Loaded-vs-total is intentionally not shown: total comes from the first
+          page only, so it would read "20 de 47" and never advance on scroll. */}
+      <span className="sr-only">{loaded} carregados</span>
+    </div>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 interface FeedListProps {
@@ -109,7 +192,7 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
   // deve pollar para sempre
   const computingPolls = useRef(0)
 
-  const { data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+  const { data, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: isMatches ? ['feed-matches'] : isSaved ? ['saved-listings'] : ['listings', filters],
       queryFn: ({ pageParam }) => {
@@ -173,6 +256,23 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
   }
 
   if (status === 'error') {
+    const code = error instanceof ListingsRequestError ? error.code : null
+    const filterMessage = code ? FILTER_ERROR_MESSAGES[code] : undefined
+
+    if (filterMessage) {
+      return (
+        <EmptyState
+          icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+          iconVariant="muted"
+          title="Não dá para aplicar esse filtro"
+          description={filterMessage}
+          {...(code === 'LISTING_MATCH_FILTER_UNAUTHENTICATED' && {
+            actions: [{ label: 'Entrar', variant: 'primary' as const, href: '/entrar' }],
+          })}
+        />
+      )
+    }
+
     return (
       <p className="text-muted-foreground py-12 text-center">
         Erro ao carregar anúncios. Tente novamente.
@@ -238,6 +338,21 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
       )
     }
 
+    // An active search or filter returning nothing is not an empty feed — telling
+    // the user to publish an ad when they just searched for "trator" is a non
+    // sequitur. The API already tried its relaxation tiers before answering.
+    const hasQuery = Boolean(filters.search) || Boolean(filters.kind) || Boolean(filters.category)
+    if (hasQuery) {
+      return (
+        <EmptyState
+          icon={<CoffeeBean size={40} strokeWidth={1.2} />}
+          iconVariant="muted"
+          title={filters.search ? `Sem resultados para "${filters.search}"` : 'Sem resultados'}
+          description="Tente outras palavras, remova alguns filtros ou aumente a distância máxima."
+        />
+      )
+    }
+
     return (
       <EmptyState
         icon={<CoffeeBean size={40} strokeWidth={1.2} />}
@@ -252,8 +367,17 @@ export function FeedList({ filters, activeTab }: FeedListProps) {
     )
   }
 
+  const firstPage = data.pages[0]
+
   return (
     <>
+      <ResultsHeader
+        total={firstPage?.meta.total}
+        loaded={listings.length}
+        searchRelaxed={firstPage?.meta.searchRelaxed}
+        query={filters.search}
+      />
+
       <div className="flex flex-col">
         {listings.map((listing) => (
           <FeedCard key={listing.id} listing={toFeedCardData(listing)} />

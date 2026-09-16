@@ -6,6 +6,7 @@ import { ListingMiniCard } from '@siamo/ui'
 import { Share2, Settings } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { prisma } from '@siamo/db'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProfileHero } from '@/components/profile/profile-hero'
 import { ReputationBreakdown } from '@/components/profile/reputation-breakdown'
 import { ReviewItem } from '@/components/profile/review-item'
@@ -85,26 +86,28 @@ async function OwnProfileContent({ userId }: { userId: string }) {
   return (
     <div className="bg-background flex flex-col pb-48">
       {/* Header — no back button; main-nav destination */}
-      <header className="bg-background/80 sticky top-0 z-10 flex items-center justify-between px-4 py-3 backdrop-blur-sm">
-        <div className="w-12" />
-        <span className="text-[15px] font-medium">Meu Perfil</span>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            aria-label="Compartilhar perfil"
-            className="bg-muted flex size-12 items-center justify-center rounded-full"
-          >
-            <Share2 size={18} strokeWidth={1.8} />
-          </button>
-          <Link
-            href="/configuracoes"
-            aria-label="Configurações"
-            className="bg-muted flex size-12 items-center justify-center rounded-full"
-          >
-            <Settings size={18} strokeWidth={1.8} />
-          </Link>
-        </div>
-      </header>
+      <ScreenHeader
+        sticky
+        title="Meu Perfil"
+        right={
+          <>
+            <button
+              type="button"
+              aria-label="Compartilhar perfil"
+              className="bg-muted flex size-12 items-center justify-center rounded-full"
+            >
+              <Share2 size={18} strokeWidth={1.8} />
+            </button>
+            <Link
+              href="/configuracoes"
+              aria-label="Configurações"
+              className="bg-muted flex size-12 items-center justify-center rounded-full"
+            >
+              <Settings size={18} strokeWidth={1.8} />
+            </Link>
+          </>
+        }
+      />
 
       <ProfileHero
         name={profile.name}
@@ -206,14 +209,15 @@ async function OwnProfileContent({ userId }: { userId: string }) {
 function OwnProfileSkeleton() {
   return (
     <div className="bg-background flex min-h-screen flex-col">
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="w-12" />
-        <div className="bg-muted h-4 w-24 animate-pulse rounded" />
-        <div className="flex gap-2">
-          <div className="bg-muted size-12 animate-pulse rounded-full" />
-          <div className="bg-muted size-12 animate-pulse rounded-full" />
-        </div>
-      </div>
+      <ScreenHeader
+        title={<div className="bg-muted mx-auto h-4 w-24 animate-pulse rounded" />}
+        right={
+          <>
+            <div className="bg-muted size-12 animate-pulse rounded-full" />
+            <div className="bg-muted size-12 animate-pulse rounded-full" />
+          </>
+        }
+      />
       <div className="flex flex-col items-center px-6 pb-5 pt-6">
         <div className="bg-muted mb-3 size-[88px] animate-pulse rounded-full" />
         <div className="bg-muted mb-2 h-10 w-24 animate-pulse rounded" />

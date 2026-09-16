@@ -99,10 +99,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
   if (!listing) {
     return (
       <div className="bg-background flex min-h-screen flex-col">
-        <ScreenHeader
-          onBack={() => router.back()}
-          title={<span className="text-[15px] font-medium">Fazer proposta</span>}
-        />
+        <ScreenHeader onBack={() => router.back()} title="Fazer proposta" />
         <div className="flex flex-1 items-center justify-center">
           <span className="text-muted-foreground text-sm">Carregando...</span>
         </div>
@@ -112,10 +109,7 @@ export default function PropostaPage({ params }: PropostaPageProps) {
 
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
-      <ScreenHeader
-        onBack={() => router.back()}
-        title={<span className="text-[15px] font-medium">Fazer proposta</span>}
-      />
+      <ScreenHeader onBack={() => router.back()} title="Fazer proposta" />
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 pt-3">

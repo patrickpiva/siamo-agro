@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut } from '@siamo/ui/icons'
 import * as Dialog from '@radix-ui/react-dialog'
+import { logoutAction } from '@/actions/auth'
 
 export function LogoutButton() {
   const router = useRouter()
@@ -12,22 +13,20 @@ export function LogoutButton() {
 
   async function handleLogout() {
     setIsPending(true)
+    // Session cookies are httpOnly: only the server can drop them, so this goes
+    // through the server action (which also revokes the refresh token in the API).
+    // The previous client-side document.cookie sweep was a no-op — the user stayed
+    // logged in and the refresh token was never revoked.
     try {
-      await fetch('/api/proxy/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: '' }),
-      })
+      await logoutAction()
     } catch {
-      // Best-effort logout
+      // The action clears the cookies even on API failure; a transport error here
+      // must not leave the sheet stuck on "Saindo…".
     }
-    // Clear all client state and redirect
-    document.cookie.split(';').forEach((c) => {
-      const key = c.split('=')[0]?.trim()
-      if (key) document.cookie = `${key}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
-    })
-    router.push('/')
+    setOpen(false)
+    router.replace('/')
+    // Drops the RSC cache so nothing rendered for the old session survives.
+    router.refresh()
   }
 
   return (

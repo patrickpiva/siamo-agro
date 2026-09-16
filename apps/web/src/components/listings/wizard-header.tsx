@@ -2,8 +2,8 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, X } from '@siamo/ui/icons'
-import { cn } from '@siamo/ui'
+import { X } from '@siamo/ui/icons'
+import { ScreenHeader } from '@/components/layout/screen-header'
 
 interface WizardHeaderProps {
   title: string
@@ -13,41 +13,31 @@ interface WizardHeaderProps {
   className?: string
 }
 
+/**
+ * The listing wizard's header: back on the left, a close (or custom) control on
+ * the right. A thin wrapper over ScreenHeader so the wizard stays aligned with
+ * every other screen and inherits the status-bar safe-area padding.
+ */
 export function WizardHeader({ title, onBack, onClose, rightSlot, className }: WizardHeaderProps) {
   const router = useRouter()
 
-  function handleBack() {
-    if (onBack) onBack()
-    else router.back()
-  }
-
-  function handleClose() {
-    if (onClose) onClose()
-  }
-
   return (
-    <div className={cn('flex flex-shrink-0 items-center justify-between px-4 py-3', className)}>
-      <button
-        type="button"
-        onClick={handleBack}
-        aria-label="Voltar"
-        className="bg-muted flex size-[48px] items-center justify-center rounded-full"
-      >
-        <ArrowLeft size={18} strokeWidth={1.8} />
-      </button>
-
-      <span className="flex-1 text-center text-[15px] font-medium">{title}</span>
-
-      {rightSlot ?? (
-        <button
-          type="button"
-          onClick={handleClose}
-          aria-label="Fechar"
-          className="bg-muted flex size-[48px] items-center justify-center rounded-full"
-        >
-          <X size={18} strokeWidth={1.8} />
-        </button>
-      )}
-    </div>
+    <ScreenHeader
+      onBack={onBack ?? (() => router.back())}
+      title={title}
+      right={
+        rightSlot ?? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar"
+            className="bg-muted flex size-[48px] items-center justify-center rounded-full"
+          >
+            <X size={18} strokeWidth={1.8} />
+          </button>
+        )
+      }
+      {...(className ? { className } : {})}
+    />
   )
 }

@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@siamo/ui/icons'
 import { BookmarkButton } from '@/components/listings/bookmark-button'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { PriceBlock } from '@siamo/ui'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchListing } from '@/lib/api'
@@ -173,13 +174,15 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
   const waLink = `https://wa.me/?text=${waText}`
 
   return (
-    <div className="bg-background flex min-h-screen flex-col pb-24">
-      {/* ── Header ──────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref="/" />
-
-        <div className="flex gap-2">
-          {isOwner ? (
+    /* No bottom padding on this root: the layout forces `pb-20` on every page root
+       ([&>*]:pb-20) and would win over it. Clearance for the fixed CTA bar plus the
+       tab bar lives on the inner content wrapper instead. */
+    <div className="bg-background flex min-h-screen flex-col">
+      {/* ── Header — no title: the listing title is the page's h1 below ─── */}
+      <ScreenHeader
+        left={<BackButton fallbackHref="/" />}
+        right={
+          isOwner ? (
             <>
               <Link
                 href={`/anuncio/${id}/editar`}
@@ -211,9 +214,9 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
                 <Share2 size={17} strokeWidth={1.8} />
               </button>
             </>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {/* ── Owner banner + stats ────────────────────────────────── */}
       {isOwner && <OwnerBanner status={listing.status} />}
@@ -230,7 +233,8 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       />
 
       {/* ── Content ─────────────────────────────────────────────── */}
-      <div className="px-5 pt-4">
+      {/* pb clears the fixed CTA bar (~76 px) stacked on the tab bar (64 px) */}
+      <div className="px-5 pb-[150px] pt-4">
         {/* Category chip */}
         <div className="mb-2">
           <span className="bg-primary-subtle border-primary text-accent rounded-[4px] border px-2 py-[3px] text-[10px] font-medium tracking-[0.3px]">
@@ -295,7 +299,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* ── Fixed CTA bar ───────────────────────────────────────── */}
-      <div className="border-border bg-card fixed bottom-0 left-0 right-0 border-t px-5 pb-6 pt-4">
+      <div className="border-border bg-card fixed bottom-16 left-0 right-0 border-t px-5 pb-4 pt-4">
         {isOwner ? (
           <OwnerActions listingId={id} status={listing.status} />
         ) : (

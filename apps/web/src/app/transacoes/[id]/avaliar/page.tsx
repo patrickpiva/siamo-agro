@@ -4,6 +4,7 @@ import { route } from '@/lib/route'
 import { prisma } from '@siamo/db'
 import { formatBRL } from '@siamo/ui'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { AvaliarForm } from './avaliar-form'
 
 interface PageProps {
@@ -60,11 +61,10 @@ export default async function AvaliarPage({ params }: PageProps) {
       </div>
 
       {/* Page header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={route(`/transacoes/${id}`)} />
-        <span className="text-[15px] font-medium">Avaliar negociação</span>
-        <div className="w-9" />
-      </header>
+      <ScreenHeader
+        left={<BackButton fallbackHref={route(`/transacoes/${id}`)} />}
+        title="Avaliar negociação"
+      />
 
       {/* Avatar + heading */}
       <div className="flex flex-col items-center px-6 pb-4 pt-4 text-center">

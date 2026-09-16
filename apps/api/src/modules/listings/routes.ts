@@ -2,6 +2,7 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import type { FastifyError } from 'fastify'
 import { prisma } from '@siamo/db'
 import { AppError } from '@siamo/shared'
+import { optionalAuthenticate, optionalUserId } from '../../middlewares/optional-auth.js'
 import { ListingsService } from './service.js'
 import {
   CreateListingBodySchema,
@@ -40,16 +41,21 @@ export const listingsRoutes: FastifyPluginAsyncZod = async (app) => {
   })
 
   // ── GET /api/v1/listings ───────────────────────────────────────────────────
+  // Public, but reads the token when one is present: an identified viewer gets
+  // their own match scores attached and can filter by minMatchScore. A missing
+  // or expired token is NOT an error here — the request just stays anonymous.
   app.get('/', {
     schema: {
       querystring: ListListingsQuerySchema,
       response: {
         200: ListListingsResponseSchema,
+        401: ErrorResponseSchema,
         422: ErrorResponseSchema,
       },
     },
+    onRequest: [optionalAuthenticate],
     handler: async (request, reply) => {
-      const result = await service.list(request.query)
+      const result = await service.list(request.query, optionalUserId(request))
       return reply.send({ ...result, error: null })
     },
   })

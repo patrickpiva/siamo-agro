@@ -48,6 +48,14 @@ export interface Listing {
 export interface ListingMeta {
   nextCursor: string | null
   limit: number
+  /** Total matching the filters. First page only — absent once paginating. */
+  total?: number
+  /**
+   * Present only when the request carried `search`. Signals that the API had to
+   * relax the search to find anything — the UI should warn that results are
+   * approximate rather than showing them as exact matches. See CLAUDE.md §5.
+   */
+  searchRelaxed?: 'exact' | 'partial' | 'fuzzy'
 }
 
 export interface ListingsResponse {
@@ -123,11 +131,23 @@ export const fetchListing = cache(async (id: string): Promise<Listing | null> =>
   }
 })
 
+/**
+ * Multi-value filters travel comma-separated (`kind=OFFER,DEMAND`) — see
+ * `packages/shared/src/validators/listing-filters.ts` for the parsing contract.
+ */
 export interface FetchListingsQuery {
   kind?: string
   category?: string
+  /** Seller reputation seal, e.g. `GOLD,SILVER`. */
+  badge?: string
   minPrice?: string
   maxPrice?: string
+  /** Distance filter; falls back to the logged-in user's profile location. */
+  radiusKm?: string
+  lat?: string
+  lng?: string
+  /** 0–1, not 0–100. Requires an authenticated request. */
+  minMatchScore?: string
   search?: string
   cursor?: string
   limit?: number

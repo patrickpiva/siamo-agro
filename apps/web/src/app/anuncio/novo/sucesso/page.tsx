@@ -44,7 +44,7 @@ async function SuccessContent({ id }: { id: string }) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       {/* ── Scrollable body ──────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto pb-[136px]">
+      <div className="flex-1 overflow-y-auto pb-[200px]">
         {/* Hero */}
         <div className="flex flex-col items-center px-6 pb-6 pt-[44px] text-center">
           <div className="bg-primary-subtle border-accent text-accent mb-5 flex size-[88px] items-center justify-center rounded-full border-2">
@@ -96,8 +96,8 @@ async function SuccessContent({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* ── Fixed CTA bar ────────────────────────────────────────────────── */}
-      <div className="border-border bg-card fixed bottom-0 left-0 right-0 flex flex-col gap-2 border-t px-5 pb-6 pt-4">
+      {/* ── Fixed CTA bar — sits above the BottomTabBar (~64 px) ─────────── */}
+      <div className="border-border bg-card fixed bottom-16 left-0 right-0 flex flex-col gap-2 border-t px-5 pb-4 pt-4">
         <Link
           href={`/anuncio/${id}`}
           className="bg-cta-bg text-cta-fg flex w-full items-center justify-center rounded-[12px] py-[15px] text-[15px] font-medium"
@@ -110,7 +110,7 @@ async function SuccessContent({ id }: { id: string }) {
             url={`${appUrl}/anuncio/${id}`}
           />
           <Link
-            href="/"
+            href="/explorar"
             className="bg-card border-border flex items-center justify-center rounded-[12px] border py-3 text-[13px] font-medium"
           >
             Voltar ao feed

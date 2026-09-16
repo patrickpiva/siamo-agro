@@ -50,8 +50,11 @@ export default function WizardStep4() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
+  // An empty draft goes straight back to step 1 in a single hop — chaining through
+  // /categoria made a back navigation out of the flow bounce across screens.
   useEffect(() => {
-    if (!kind || !category) router.replace('/anuncio/novo/categoria')
+    if (!kind) router.replace('/anuncio/novo')
+    else if (!category) router.replace('/anuncio/novo/categoria')
   }, [kind, category, router])
 
   const readyPhotos = photos.filter((p) => p.remoteKey)

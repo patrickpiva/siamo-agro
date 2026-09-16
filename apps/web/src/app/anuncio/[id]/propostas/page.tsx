@@ -5,6 +5,7 @@ import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
 import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { ChevronRight } from '@siamo/ui/icons'
 
 export const metadata: Metadata = { title: 'Propostas recebidas' }
@@ -63,11 +64,10 @@ export default async function PropostasListPage({ params }: PageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref={route(`/anuncio/${listingId}`)} />
-        <span className="text-[15px] font-medium">Propostas recebidas</span>
-        <div className="w-9" />
-      </header>
+      <ScreenHeader
+        left={<BackButton fallbackHref={route(`/anuncio/${listingId}`)} />}
+        title="Propostas recebidas"
+      />
 
       {/* Listing context */}
       <div className="border-border border-b px-5 pb-3">

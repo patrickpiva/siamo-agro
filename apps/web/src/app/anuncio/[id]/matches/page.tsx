@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@siamo/ui/icons'
+import { route } from '@/lib/route'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { MatchItem } from '@/components/matches/match-item'
 import type { MatchItemData } from '@/components/matches/match-item'
 
@@ -65,17 +65,7 @@ export default async function ListingMatchesPage({ params }: MatchesPageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <Link
-          href={`/anuncio/${id}`}
-          className="bg-muted flex size-9 items-center justify-center rounded-full"
-          aria-label="Voltar"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <span className="text-[15px] font-medium">Matches</span>
-        <div className="w-9" />
-      </div>
+      <ScreenHeader backHref={route(`/anuncio/${id}`)} title="Matches" />
 
       {/* Listing context strip */}
       <div className="mx-4 mb-3">

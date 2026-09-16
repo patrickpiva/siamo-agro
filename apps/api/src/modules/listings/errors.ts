@@ -37,3 +37,31 @@ export class ListingPhotoOwnershipError extends AppError {
     super('Uma ou mais fotos não pertencem ao usuário autenticado', 'LISTING_PHOTO_FORBIDDEN', 403)
   }
 }
+
+/**
+ * `radiusKm` was sent but no origin point could be resolved — neither explicit
+ * lat/lng nor a location on the requesting user's profile.
+ *
+ * Deliberately an error rather than silently dropping the filter: a distance
+ * filter that quietly does nothing shows the user far-away listings while their
+ * UI still reads "within 50 km".
+ */
+export class ListingLocationRequiredError extends AppError {
+  constructor() {
+    super(
+      'Filtro de distância exige uma localização. Envie lat/lng ou cadastre sua localização no perfil.',
+      'LISTING_LOCATION_REQUIRED',
+      422,
+    )
+  }
+}
+
+/**
+ * `minMatchScore` was sent on an anonymous request. A match score only exists
+ * relative to a specific viewer's profile, so there is nothing to filter on.
+ */
+export class ListingMatchFilterUnauthenticatedError extends AppError {
+  constructor() {
+    super('Filtro por score de match exige login.', 'LISTING_MATCH_FILTER_UNAUTHENTICATED', 401)
+  }
+}
