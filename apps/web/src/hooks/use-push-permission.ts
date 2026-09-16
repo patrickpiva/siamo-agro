@@ -14,8 +14,24 @@ function recordSession(): number {
   return count
 }
 
-function shouldShow(): boolean {
+/**
+ * iOS Safari does not implement the Web Notifications API outside an installed
+ * PWA. `Notification` is then an *undeclared* identifier, so reading it throws
+ * ReferenceError rather than yielding undefined — a `typeof window` guard does
+ * not help. This hook runs from `Providers`, which wraps the root layout, so
+ * that throw escaped `app/error.tsx` and took the whole app down with Next's
+ * global "Application error" screen from the third page view onward.
+ *
+ * PushManager is checked too: permission without it buys the user nothing, so
+ * there is no point prompting.
+ */
+function isPushSupported(): boolean {
   if (typeof window === 'undefined') return false
+  return 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window
+}
+
+function shouldShow(): boolean {
+  if (!isPushSupported()) return false
   if (Notification.permission === 'granted') return false
   if (Notification.permission === 'denied') return false
 
@@ -50,6 +66,12 @@ export function usePushPermission() {
   }
 
   async function requestPermission(): Promise<NotificationPermission> {
+    // Reachable from the settings page, not just the modal — guard it as well.
+    if (!isPushSupported()) {
+      setShouldShowModal(false)
+      return 'denied'
+    }
+
     const permission = await Notification.requestPermission()
 
     if (permission === 'granted') {
