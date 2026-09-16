@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Bell } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { prisma } from '@siamo/db'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { FeedTabs, type FeedTab } from '@/components/feed/feed-tabs'
 import { FeedList } from '@/components/feed-list'
 import { SearchControls } from '@/components/explorar/search-controls'
@@ -25,10 +26,6 @@ interface ExplorarPageProps {
     search?: string
     intent?: string
   }>
-}
-
-function formatDate(): string {
-  return new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase()
 }
 
 export default async function ExplorarPage({ searchParams }: ExplorarPageProps) {
@@ -71,14 +68,9 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
 
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
-      <header className="px-5 pb-0 pt-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-muted-foreground font-mono text-[11px]">
-              [EXPLORAR · {formatDate()}]
-            </p>
-            <p className="text-[22px] font-medium">Oportunidades perto</p>
-          </div>
+      <ScreenHeader
+        title="Explorar"
+        right={
           <Link
             href="/notificacoes"
             aria-label="Notificações"
@@ -89,8 +81,8 @@ export default async function ExplorarPage({ searchParams }: ExplorarPageProps) 
               <span className="border-background absolute right-[9px] top-[9px] size-2 rounded-full border-2 bg-red-500" />
             )}
           </Link>
-        </div>
-      </header>
+        }
+      />
 
       {/* Search moved inline from /busca: results render in the same FeedList
           below instead of on a separate route. */}

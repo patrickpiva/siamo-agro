@@ -1,3 +1,5 @@
+import { ScreenHeader } from '@/components/layout/screen-header'
+
 function Bone({ className }: { className?: string }) {
   return <div className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} />
 }
@@ -6,14 +8,15 @@ export default function MeuPerfilLoading() {
   return (
     <div className="bg-background min-h-screen pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="w-12" />
-        <Bone className="h-5 w-24" />
-        <div className="flex gap-2">
-          <Bone className="size-11 rounded-full" />
-          <Bone className="size-11 rounded-full" />
-        </div>
-      </div>
+      <ScreenHeader
+        title={<Bone className="mx-auto h-5 w-24" />}
+        right={
+          <>
+            <Bone className="size-12 rounded-full" />
+            <Bone className="size-12 rounded-full" />
+          </>
+        }
+      />
 
       {/* Profile hero */}
       <div className="flex flex-col items-center px-5 pb-5 pt-2">

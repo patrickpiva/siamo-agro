@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Download, Eye, Trash2 } from '@siamo/ui/icons'
+import { Download, Eye, Trash2 } from '@siamo/ui/icons'
 import { SettingsGroup, ConsentRow, PrivacyActionCard } from '@siamo/ui'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import * as Dialog from '@radix-ui/react-dialog'
 
 interface Consents {
@@ -62,17 +62,7 @@ export default function PrivacidadePage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/configuracoes"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Privacidade e LGPD</p>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader backHref="/configuracoes" title="Privacidade e LGPD" />
 
       {/* Consents */}
       <SettingsGroup label="CONSENTIMENTOS ATIVOS">

@@ -184,7 +184,11 @@ export function EditListingForm({ listing }: EditListingFormProps) {
         throw new Error(json.error?.message ?? 'Erro ao salvar.')
       }
 
-      router.push(route(`/anuncio/${listing.id}`))
+      // replace, not push: the form must leave the history stack so the back
+      // arrow on the detail page cannot walk back into a submitted draft.
+      // refresh() re-renders the Server Component so the saved values show up.
+      router.replace(route(`/anuncio/${listing.id}`))
+      router.refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro inesperado. Tente novamente.')
       setSubmitting(false)

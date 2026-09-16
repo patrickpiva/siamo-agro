@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { ArrowLeft, Bell } from '@siamo/ui/icons'
+import { Bell } from '@siamo/ui/icons'
 import { WhatsAppLogo } from '@siamo/ui/icons'
 import { SettingsGroup, SettingsRow } from '@siamo/ui'
+import { ScreenHeader } from '@/components/layout/screen-header'
 
 interface NotifPrefs {
   whatsapp: boolean
@@ -61,16 +61,7 @@ export default function NotificacoesPrefsPage() {
   if (isLoading) {
     return (
       <div className="bg-background flex min-h-screen flex-col">
-        <header className="flex items-center justify-between px-4 py-3">
-          <Link
-            href="/configuracoes"
-            className="bg-muted flex size-12 items-center justify-center rounded-full"
-          >
-            <ArrowLeft size={18} strokeWidth={1.8} />
-          </Link>
-          <p className="text-[15px] font-medium">Notificações</p>
-          <div className="w-12" />
-        </header>
+        <ScreenHeader backHref="/configuracoes" title="Notificações" />
         <div className="space-y-2 px-4 pt-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-muted h-[56px] animate-pulse rounded-[12px]" />
@@ -82,17 +73,7 @@ export default function NotificacoesPrefsPage() {
 
   return (
     <div className="bg-background min-h-screen pb-[80px]">
-      <header className="flex items-center justify-between px-4 py-3">
-        <Link
-          href="/configuracoes"
-          aria-label="Voltar"
-          className="bg-muted flex size-12 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <p className="text-[15px] font-medium">Notificações</p>
-        <div className="w-12" />
-      </header>
+      <ScreenHeader backHref="/configuracoes" title="Notificações" />
 
       {/* Canais */}
       <SettingsGroup label="CANAIS">

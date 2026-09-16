@@ -13,6 +13,12 @@ const TABS = [
   { href: '/meu-perfil', label: 'PERFIL', Icon: User },
 ] as const
 
+// Data-entry steps of the listing flow are modal: the nav would compete with the
+// step CTA. Terminal screens (sucesso) and read screens (listing detail) keep the
+// nav — without it there is no way back to the app after publishing or saving.
+const LISTING_WIZARD_STEP = /^\/anuncio\/novo(\/(categoria|detalhes|fotos|revisao))?$/
+const LISTING_EDIT = /^\/anuncio\/[^/]+\/editar$/
+
 export function BottomTabBar({ authenticated = false }: { authenticated?: boolean }) {
   const pathname = usePathname()
 
@@ -21,7 +27,8 @@ export function BottomTabBar({ authenticated = false }: { authenticated?: boolea
     (pathname === '/' && !authenticated) ||
     pathname.startsWith('/entrar') ||
     pathname.startsWith('/cadastro') ||
-    pathname.startsWith('/anuncio/') ||
+    LISTING_WIZARD_STEP.test(pathname) ||
+    LISTING_EDIT.test(pathname) ||
     pathname.includes('/proposta') ||
     pathname.startsWith('/transacao') ||
     // Public profile pages — own profile lives at /meu-perfil; /perfil/[id] is a focused view

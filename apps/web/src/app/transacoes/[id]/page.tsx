@@ -4,6 +4,7 @@ import { requireSession } from '@/lib/server-auth'
 import { route } from '@/lib/route'
 import { prisma } from '@siamo/db'
 import { BackButton } from '@/components/layout/back-button'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { ProposalBlock, StateBanner, ListingContextStrip, formatBRL } from '@siamo/ui'
 import { MoreVertical } from '@siamo/ui/icons'
 import { LazyChatView as ChatView } from '@/components/transactions/lazy-chat-view'
@@ -203,11 +204,7 @@ export default async function TransacaoDetailPage({ params }: PageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col">
       {/* ── Header ─────────────────────────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <BackButton fallbackHref="/transacoes" />
-        <span className="text-[15px] font-medium">Negociação</span>
-        <div className="w-9" />
-      </header>
+      <ScreenHeader left={<BackButton fallbackHref="/transacoes" />} title="Negociação" />
 
       {/* ── Status banner ───────────────────────────────────────────────────────── */}
       {tx.status !== 'CANCELLED' ? (

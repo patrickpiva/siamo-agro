@@ -41,9 +41,12 @@ describe('BottomTabBar — oculta nas rotas internas', () => {
     '/cadastro/perfil',
     '/cadastro/foto',
     '/anuncio/novo',
+    '/anuncio/novo/categoria',
+    '/anuncio/novo/detalhes',
+    '/anuncio/novo/fotos',
+    '/anuncio/novo/revisao',
     '/anuncio/cm123abc/proposta',
     '/anuncio/cm123abc/editar',
-    '/anuncio/cm123abc', // detalhe do anúncio
     '/perfil/cm456def', // perfil público
     '/proposta/mock-1/enviada',
     '/transacao/cm789/avaliar',
@@ -74,6 +77,11 @@ describe('BottomTabBar — visível nas rotas de tab', () => {
     '/transacoes',
     '/meu-perfil',
     '/meu-perfil/editar',
+    // Terminal and read screens of the listing flow: without the nav there is no
+    // way out of the app after publishing or saving.
+    '/anuncio/novo/sucesso',
+    '/anuncio/cm123abc', // detalhe do anúncio
+    '/anuncio/cm123abc/matches',
   ]
 
   visibleRoutes.forEach((path) => {

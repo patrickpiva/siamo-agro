@@ -1,3 +1,5 @@
+import { ScreenHeader } from '@/components/layout/screen-header'
+
 function Bone({ className }: { className?: string }) {
   return <div className={`bg-muted animate-pulse rounded-md ${className ?? ''}`} />
 }
@@ -6,11 +8,10 @@ export default function EditarPerfilLoading() {
   return (
     <div className="bg-background flex min-h-screen flex-col pb-[80px]">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3">
-        <Bone className="size-12 rounded-full" />
-        <Bone className="h-5 w-28" />
-        <div className="w-12" />
-      </header>
+      <ScreenHeader
+        left={<Bone className="size-12 rounded-full" />}
+        title={<Bone className="mx-auto h-5 w-28" />}
+      />
 
       {/* Avatar section */}
       <div className="flex flex-col items-center px-5 pb-5 pt-6">
