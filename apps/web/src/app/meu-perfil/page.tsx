@@ -135,9 +135,16 @@ async function OwnProfileContent({ userId }: { userId: string }) {
       )}
 
       <div className="pb-4">
-        <p className="text-muted-foreground px-5 pb-3 pt-2 font-mono text-[11px] tracking-[0.4px]">
-          [MEUS ANÚNCIOS ATIVOS]
-        </p>
+        {/* This section only lists ACTIVE listings (max 10) — the link is the
+            only entry point to paused and closed ones. */}
+        <div className="flex items-baseline justify-between px-5 pb-3 pt-2">
+          <p className="text-muted-foreground font-mono text-[11px] tracking-[0.4px]">
+            [MEUS ANÚNCIOS ATIVOS]
+          </p>
+          <Link href="/anuncio/meus" className="text-accent dark:text-primary text-[12px]">
+            Ver todos
+          </Link>
+        </div>
         {profile.listings.length === 0 ? (
           <p className="text-muted-foreground px-5 text-[13px]">Nenhum anúncio ativo ainda.</p>
         ) : (

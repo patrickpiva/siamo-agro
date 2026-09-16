@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Share2, Pencil, MoreVertical, MapPin, MessageCircle } from '@siamo/ui/icons'
+import { Share2, Pencil, MapPin, MessageCircle } from '@siamo/ui/icons'
 import { BookmarkButton } from '@/components/listings/bookmark-button'
 import { BackButton } from '@/components/layout/back-button'
 import { ScreenHeader } from '@/components/layout/screen-header'
@@ -14,6 +14,7 @@ import { SellerCard } from '@/components/listings/seller-card'
 import { OwnerBanner } from '@/components/listings/owner-banner'
 import { OwnerStats } from '@/components/listings/owner-stats'
 import { OwnerActions } from '@/components/listings/owner-actions'
+import { ListingOwnerMenu } from '@/components/listings/listing-owner-menu'
 import { ProposalsList } from '@/components/listings/proposals-list'
 
 interface SellerReputation {
@@ -191,13 +192,7 @@ export default async function AnuncioPage({ params }: { params: Promise<{ id: st
               >
                 <Pencil size={17} strokeWidth={1.8} />
               </Link>
-              <button
-                type="button"
-                aria-label="Mais opções"
-                className="bg-muted flex size-[48px] items-center justify-center rounded-full"
-              >
-                <MoreVertical size={17} strokeWidth={1.8} />
-              </button>
+              <ListingOwnerMenu listingId={id} status={listing.status} />
             </>
           ) : (
             <>
