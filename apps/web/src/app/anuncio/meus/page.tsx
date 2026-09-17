@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft } from '@siamo/ui/icons'
 import { getServerSession } from '@/lib/server-auth'
 import { fetchMyListings } from '@/lib/api'
+import { ScreenHeader } from '@/components/layout/screen-header'
 import { MyListingsView } from '@/components/listings/my-listings-view'
 
 export const metadata: Metadata = { title: 'Meus anúncios' }
@@ -31,19 +30,10 @@ export default async function MyListingsPage({
   return (
     <div className="bg-background flex min-h-screen flex-col pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        <Link
-          href="/"
-          aria-label="Voltar"
-          className="bg-muted flex size-9 flex-shrink-0 items-center justify-center rounded-full"
-        >
-          <ArrowLeft size={18} strokeWidth={1.8} />
-        </Link>
-        <h1 className="text-[18px] font-medium">Meus anúncios</h1>
-      </div>
+      <ScreenHeader backHref="/meu-perfil" title="Meus anúncios" />
 
       {/* Count summary */}
-      <p className="text-fg-secondary px-5 pb-3 text-[12px]">
+      <p className="text-fg-secondary px-4 pb-1 text-[12px]">
         {listings.length === 0
           ? 'Nenhum anúncio'
           : `${listings.length} anúncio${listings.length === 1 ? '' : 's'}`}

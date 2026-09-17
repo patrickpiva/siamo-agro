@@ -1,13 +1,14 @@
-import { MoreVertical, Eye, MessageCircle, Star } from '@siamo/ui/icons'
+import { Trash2, Eye, MessageCircle, Star } from '@siamo/ui/icons'
 import { KindBadge, StatusBadge } from '@siamo/ui'
 import type { Listing } from '@/lib/api'
 
 interface MyListingCardProps {
   listing: Listing
-  onMore: (e: React.MouseEvent) => void
+  /** Opens the "encerrar anúncio" confirmation. */
+  onCloseListing: (e: React.MouseEvent) => void
 }
 
-export function MyListingCard({ listing, onMore }: MyListingCardProps) {
+export function MyListingCard({ listing, onCloseListing }: MyListingCardProps) {
   const thumb = listing.photos[0]?.url
   const isPaused = listing.status === 'PAUSED'
 
@@ -53,14 +54,14 @@ export function MyListingCard({ listing, onMore }: MyListingCardProps) {
         </div>
       </div>
 
-      {/* More button */}
+      {/* Encerrar — trash rather than a kebab, since it is the only action here */}
       <button
         type="button"
-        onClick={onMore}
-        aria-label="Mais opções"
-        className="text-muted-foreground flex-shrink-0 self-start p-1"
+        onClick={onCloseListing}
+        aria-label={`Encerrar anúncio ${listing.title}`}
+        className="text-muted-foreground min-h-0 min-w-0 flex-shrink-0 self-start p-1"
       >
-        <MoreVertical size={18} strokeWidth={1.8} />
+        <Trash2 size={18} strokeWidth={1.8} />
       </button>
     </div>
   )
