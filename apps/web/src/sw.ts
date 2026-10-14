@@ -1,6 +1,6 @@
 import { defaultCache } from '@serwist/next/worker'
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist'
-import { Serwist, StaleWhileRevalidate, NetworkFirst, NetworkOnly, ExpirationPlugin } from 'serwist'
+import { Serwist } from 'serwist'
 
 declare global {
   interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
@@ -10,69 +10,24 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope
 
+// Runtime caching is Serwist's defaultCache alone: network first for pages, RSC
+// payloads and same-origin /api/* (including /api/proxy/*), with the cached copy
+// served only when the network fails. Responses are kept up to 24h.
+//
+// Rules are matched in order and defaultCache ends with catch-alls, so any rule
+// appended after it never runs. Custom rules must go BEFORE the spread. The
+// per-route rules that used to sit after it were dead code; the caching redesign
+// belongs to the offline phase of the native-apps roadmap.
+//
+// Cached responses include one user's private data (transactions, profile,
+// notifications). They are wiped when the session ends or changes hands — see
+// lib/device-data.ts.
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
-  runtimeCaching: [
-    // Static assets — cache-first via defaultCache (JS, CSS, images, fonts)
-    ...defaultCache,
-
-    // Feed + listings — serve cache instantly, refresh in background
-    {
-      matcher: ({ url }) =>
-        url.pathname.startsWith('/api/v1/listings') ||
-        url.pathname.startsWith('/api/proxy/listings'),
-      handler: new StaleWhileRevalidate({
-        cacheName: 'siamo-api-listings',
-        plugins: [new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 6 * 3600 })],
-      }),
-    },
-
-    // User profiles — serve cache, refresh in background
-    {
-      matcher: ({ url }) =>
-        url.pathname.startsWith('/api/v1/profiles') ||
-        url.pathname.startsWith('/api/proxy/profiles'),
-      handler: new StaleWhileRevalidate({
-        cacheName: 'siamo-api-profiles',
-        plugins: [new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 6 * 3600 })],
-      }),
-    },
-
-    // Notifications — network first, fall back to cache if offline
-    {
-      matcher: ({ url }) =>
-        url.pathname.startsWith('/api/v1/notifications') ||
-        url.pathname.startsWith('/api/proxy/notifications'),
-      handler: new NetworkFirst({
-        cacheName: 'siamo-api-notifications',
-        plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 3600 })],
-        networkTimeoutSeconds: 5,
-      }),
-    },
-
-    // Transactions + proposals — never serve stale financial data
-    {
-      matcher: ({ url }) =>
-        url.pathname.startsWith('/api/v1/transactions') ||
-        url.pathname.startsWith('/api/v1/proposals') ||
-        url.pathname.startsWith('/api/proxy/transactions') ||
-        url.pathname.startsWith('/api/proxy/proposals'),
-      handler: new NetworkOnly(),
-    },
-
-    // App pages — network first, fall back to cache (offline navigation)
-    {
-      matcher: ({ request }) => request.mode === 'navigate',
-      handler: new NetworkFirst({
-        cacheName: 'siamo-pages',
-        plugins: [new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 24 * 3600 })],
-        networkTimeoutSeconds: 5,
-      }),
-    },
-  ],
+  runtimeCaching: defaultCache,
 })
 
 serwist.addEventListeners()
