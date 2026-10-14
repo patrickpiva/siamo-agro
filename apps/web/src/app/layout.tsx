@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { getServerSession } from '@/lib/server-auth'
 import { BottomTabBar } from '@/components/bottom-tab-bar'
 import { OfflineBanner } from '@/components/offline-banner'
+import { SessionOwnerSync } from '@/components/session-owner-sync'
 import { SplashScreen } from '@/components/splash-screen'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
@@ -78,6 +79,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         />
         <SplashScreen />
         <Providers>
+          {/* Wipes the previous user's cached data when the session changes hands */}
+          <SessionOwnerSync userId={session?.userId ?? null} />
           {/* Offline banner sits above all page content, below status bar */}
           <OfflineBanner />
           {/* Bottom padding on mobile so content clears the fixed tab bar */}

@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { LogOut } from '@siamo/ui/icons'
 import * as Dialog from '@radix-ui/react-dialog'
+import { useQueryClient } from '@tanstack/react-query'
 import { logoutAction } from '@/actions/auth'
+import { clearUserDeviceData } from '@/lib/device-data'
 
 export function LogoutButton() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [isPending, setIsPending] = useState(false)
 
@@ -23,6 +26,10 @@ export function LogoutButton() {
       // The action clears the cookies even on API failure; a transport error here
       // must not leave the sheet stuck on "Saindo…".
     }
+    // Cookies only end the session on the server. The pages, API responses and
+    // queued messages this user left on a possibly shared phone go here.
+    await clearUserDeviceData()
+    queryClient.clear()
     setOpen(false)
     router.replace('/')
     // Drops the RSC cache so nothing rendered for the old session survives.
